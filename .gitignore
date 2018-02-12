@@ -1,6 +1,6 @@
 # log files
 
-*.o14*
+jobs/*.o14*
 
 # Sentinel data
 
