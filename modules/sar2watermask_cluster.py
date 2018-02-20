@@ -22,8 +22,8 @@ from snappy import Rectangle
 ### APPEND "_testmode" to the
 ### following library name if
 ### you intend to work on test
-### mode and not change 
-### anything on the 
+### mode and not change
+### anything on the
 ### production line
 ###############################
 ###############################
@@ -65,7 +65,7 @@ for f in flist:
     status=status+1
 
     print("SCENE " + str(status) + " of " + str(len(flist)) + "\n\n")
-    
+
     print("3 begin reading product\n")
 
     product = ProductIO.readProduct(sarIn+"/"+f)
@@ -82,7 +82,7 @@ for f in flist:
 
     # Initiate processing
     print("4 initiate processing\n")
-    
+
     GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
 
     # Subset into 4 pieces
@@ -95,7 +95,7 @@ for f in flist:
     p_lr = Point(size.width/2,size.height/2)
 
     subsetDim = Dimension(size.width/2-1000,size.height/2)
-    
+
     r_ul = Rectangle(p_ul,subsetDim)
     r_ur = Rectangle(p_ur,subsetDim)
     r_ll = Rectangle(p_ll,subsetDim)
@@ -104,7 +104,7 @@ for f in flist:
     rect=[r_ul,r_ur,r_ll,r_lr]
 
 
-    
+
     for r in rect:
         ##### process upper left only as an example
         #params = HashMap()
@@ -121,28 +121,27 @@ for f in flist:
 
 
         ## Calibration
-        
+
         params = HashMap()
 
         root = xml.etree.ElementTree.parse(proj+"/parameters/"+'calibration.xml').getroot()
         for child in root:
             params.put(child.tag,child.text)
-        
+
         Cal = GPF.createProduct('Calibration',params,product_subset)
-            
+
         ## Speckle filtering
 
         params = HashMap()
         root = xml.etree.ElementTree.parse(proj+"/parameters/"+'speckle_filtering.xml').getroot()
         for child in root:
             params.put(child.tag,child.text)
-        
+
         CalSf = GPF.createProduct('Speckle-Filter',params,Cal)
 
         ## Band Arithmetics 1
 
         expression = open(proj+"/parameters/"+'band_maths1.txt',"r").read()
-        
 
         targetBand1 = BandDescriptor()
         targetBand1.name = 'watermask'
@@ -151,11 +150,15 @@ for f in flist:
 
         targetBands = jpy.array('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor', 1)
         targetBands[0] = targetBand1
-        
+
         parameters = HashMap()
         parameters.put('targetBands', targetBands)
-        
+
         CalSfWater = GPF.createProduct('BandMaths', parameters, CalSf)
+
+        current_bands = CalSfWater.getBandNames()
+        print("Current Bands after Band Arithmetics 2:   %s \n" % (list(current_band)))
+
 
         ## Geometric correction
 
@@ -163,8 +166,11 @@ for f in flist:
         root = xml.etree.ElementTree.parse(proj+"/parameters/"+'terrain_correction.xml').getroot()
         for child in root:
             params.put(child.tag,child.text)
-    
+
         CalSfWaterCorr1 = GPF.createProduct('Terrain-Correction',params,CalSfWater)
+
+        current_bands = CalSfWaterCorr1.getBandNames()
+        print("Current Bands after Terrain Correction:   %s \n" % (list(current_band)))
 
         ## Band Arithmetics 2
 
@@ -172,7 +178,7 @@ for f in flist:
         #band_names = CalSfWaterCorr1.getBandNames()
         #print("Bands:   %s" % (list(band_names)))
 
-        
+
         targetBand1 = BandDescriptor()
         targetBand1.name = 'watermask_corr'
         targetBand1.type = 'int8'
@@ -186,6 +192,10 @@ for f in flist:
 
         CalSfWaterCorr2 = GPF.createProduct('BandMaths', parameters, CalSfWaterCorr1)
 
+        current_bands = CalSfWaterCorr2.getBandNames()
+        print("Current Bands after Band Arithmetics 2:   %s \n" % (list(current_band)))
+
+
         ### write output
         ProductIO.writeProduct(CalSfWaterCorr2,sarOut+"/"+product.getName() + "_" + labelSubset + "_watermask",outForm)
 
@@ -194,10 +204,10 @@ for f in flist:
         CalSf.dispose()
         CalSfWater.dispose()
         CalSfWaterCorr1.dispose()
-        CalSfWaterCorr2.dispose()        
+        CalSfWaterCorr2.dispose()
     product.dispose()
     System.gc()
-    
+
     ### remove scene from folder
     print("\n REMOVING " + f + "\n")
 
