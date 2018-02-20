@@ -23,7 +23,7 @@ MAILTO="jmigueldelgado@gmail.com"
 0 23 * * 7 /users/stud09/martinsd/local/miniconda2/envs/mongodb/bin/python2 /users/stud09/martinsd/proj/sar2watermask/modules/insertPolygons.py
 
 ### clean up
-52 15 * * 5 /users/stud09/martinsd/local/miniconda2/envs/mongodb/bin/python2 /users/stud09/martinsd/proj/sar2watermask/modules/cleanup.py
+#52 15 * * 5 /users/stud09/martinsd/local/miniconda2/envs/mongodb/bin/python2 /users/stud09/martinsd/proj/sar2watermask/modules/cleanup.py
 
 
 # download scenes every saturday at 6 am
@@ -31,4 +31,3 @@ MAILTO="jmigueldelgado@gmail.com"
 # polygonize every sunday at 6 am
 # simplify in R and save as geojson
 # insert json documents into mongodb in webserver
-
