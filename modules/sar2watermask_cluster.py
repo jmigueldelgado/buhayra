@@ -157,7 +157,7 @@ for f in flist:
         CalSfWater = GPF.createProduct('BandMaths', parameters, CalSf)
 
         current_bands = CalSfWater.getBandNames()
-        print("Current Bands after Band Arithmetics 2:   %s \n" % (list(current_band)))
+        print("Current Bands after Band Arithmetics 2:   %s \n" % (list(current_bands)))
 
 
         ## Geometric correction
@@ -170,7 +170,7 @@ for f in flist:
         CalSfWaterCorr1 = GPF.createProduct('Terrain-Correction',params,CalSfWater)
 
         current_bands = CalSfWaterCorr1.getBandNames()
-        print("Current Bands after Terrain Correction:   %s \n" % (list(current_band)))
+        print("Current Bands after Terrain Correction:   %s \n" % (list(current_bands)))
 
         ## Band Arithmetics 2
 
@@ -193,7 +193,7 @@ for f in flist:
         CalSfWaterCorr2 = GPF.createProduct('BandMaths', parameters, CalSfWaterCorr1)
 
         current_bands = CalSfWaterCorr2.getBandNames()
-        print("Current Bands after Band Arithmetics 2:   %s \n" % (list(current_band)))
+        print("Current Bands after Band Arithmetics 2:   %s \n" % (list(current_bands)))
 
 
         ### write output
