@@ -1,1 +1,1 @@
-if watermask_corr > 0 then 255 else 0
+if watermask_VH > 0 then 255 else 0
