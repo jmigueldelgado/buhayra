@@ -17,16 +17,6 @@ from snappy import jpy
 from snappy import HashMap
 from snappy import Rectangle
 
-###############################
-##############################
-### APPEND "_testmode" to the
-### following library name if
-### you intend to work on test
-### mode and not change
-### anything on the
-### production line
-###############################
-###############################
 
 from getPaths import *
 
