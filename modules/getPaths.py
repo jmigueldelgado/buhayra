@@ -9,7 +9,7 @@ home = {
 
 if expanduser("~")=='/home/delgado':
     home['scratch'] = expanduser("~") + '/scratch'
-     = expanduser("~") + '/proj/buhayra/sar2watermask',
+    home['proj'] = expanduser("~") + '/proj/buhayra/sar2watermask',
 else:
     home['scratch'] = '/mnt/scratch/martinsd'
     home['proj'] = expanduser("~") + '/proj/sar2watermask',
