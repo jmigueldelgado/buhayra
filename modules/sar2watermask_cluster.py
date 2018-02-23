@@ -18,7 +18,8 @@ from snappy import HashMap
 from snappy import Rectangle
 
 
-from getPaths import *
+from modules.getPaths import *
+
 
 #############################
 
@@ -50,6 +51,7 @@ flist=listdir(sarIn)
 
 status=0
 # Read products
+f=flist[0]
 
 for f in flist:
     status=status+1
@@ -92,9 +94,7 @@ for f in flist:
     r_lr = Rectangle(p_lr,subsetDim)
 
     rect=[r_ul,r_ur,r_ll,r_lr]
-
-
-
+    r=r_ul
     for r in rect:
         ##### process upper left only as an example
         #params = HashMap()
