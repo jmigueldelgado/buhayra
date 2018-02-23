@@ -1,5 +1,5 @@
 from os.path import expanduser
-import sys 
+import sys
 
 home = {
     'home' : expanduser("~"),
@@ -31,4 +31,3 @@ MONGO_PORT = 27017
 
 sys.path.insert(0, home['parameters'])
 from credentials import *
-
