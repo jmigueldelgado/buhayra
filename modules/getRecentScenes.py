@@ -1,9 +1,9 @@
 # connect to the API
 from sentinelsat import SentinelAPI, read_geojson, geojson_to_wkt
 from datetime import date, datetime, timedelta
-import sys 
+import sys
 import os
-from getPaths import *
+from modules.getPaths import *
 
 api = SentinelAPI(username, password, 'https://scihub.copernicus.eu/dhus')
 

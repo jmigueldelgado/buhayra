@@ -1,5 +1,6 @@
 from os.path import expanduser
 import sys
+from modules.credentials import *
 
 home = {
     'home' : expanduser("~"),
@@ -32,5 +33,3 @@ MONGO_DB = "sar2watermask"
 MONGO_PORT = 27017
 
 sys.path.insert(0, home['parameters'])
-
-from parameters.credentials import *

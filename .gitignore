@@ -21,7 +21,7 @@ auxdata/cogerh*
 
 # Credentials
 
-parameters/credentials.py*
+modules/credentials.py*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
