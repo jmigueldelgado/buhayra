@@ -1,16 +1,16 @@
 <parameters>
-    <sourceBands>watermask</sourceBands>
+    <sourceBands>watermask_VH</sourceBands>
     <demName>SRTM 3Sec</demName>
     <externalDEMApplyEGM>true</externalDEMApplyEGM>
     <demResamplingMethod>BILINEAR_INTERPOLATION</demResamplingMethod>
     <imgResamplingMethod>BILINEAR_INTERPOLATION</imgResamplingMethod>
     <pixelSpacingInMeter>10.0</pixelSpacingInMeter>
-    <mapProjection>GEOGCS["WGS84(DD)", 
-      DATUM["WGS84", 
-        SPHEROID["WGS84", 6378137.0, 298.257223563]], 
-      PRIMEM["Greenwich", 0.0], 
-      UNIT["degree", 0.017453292519943295], 
-      AXIS["Geodetic longitude", EAST], 
+    <mapProjection>GEOGCS["WGS84(DD)",
+      DATUM["WGS84",
+        SPHEROID["WGS84", 6378137.0, 298.257223563]],
+      PRIMEM["Greenwich", 0.0],
+      UNIT["degree", 0.017453292519943295],
+      AXIS["Geodetic longitude", EAST],
       AXIS["Geodetic latitude", NORTH]]</mapProjection>
     <nodataValueAtSea>true</nodataValueAtSea>
     <saveDEM>false</saveDEM>

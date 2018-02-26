@@ -3,15 +3,17 @@ import sys
 
 home = {
     'home' : expanduser("~"),
-    'proj' : expanduser("~") + '/proj/sar2watermask',
     'auxdata' : expanduser("~") + '/proj/sar2watermask/auxdata',
     'parameters' : expanduser("~") + '/proj/sar2watermask/parameters'
 }
 
 if expanduser("~")=='/home/delgado':
     home['scratch'] = expanduser("~") + '/scratch'
+    home['proj'] = expanduser("~") + '/proj/buhayra/sar2watermask',
 else:
     home['scratch'] = '/mnt/scratch/martinsd'
+    home['proj'] = expanduser("~") + '/proj/sar2watermask',
+
 
 pyt = home['home'] + "/local/miniconda2/envs/gdal/bin/python"
 gdalPol = home['home'] + "/local/miniconda2/envs/gdal/bin/gdal_polygonize.py"
@@ -30,4 +32,8 @@ MONGO_DB = "sar2watermask"
 MONGO_PORT = 27017
 
 sys.path.insert(0, home['parameters'])
+<<<<<<< HEAD
 from credentials import *
+=======
+from parameters.credentials import *
+>>>>>>> fix_VV
