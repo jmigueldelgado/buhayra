@@ -32,8 +32,5 @@ MONGO_DB = "sar2watermask"
 MONGO_PORT = 27017
 
 sys.path.insert(0, home['parameters'])
-<<<<<<< HEAD
-from credentials import *
-=======
+
 from parameters.credentials import *
->>>>>>> fix_VV
