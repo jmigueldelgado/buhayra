@@ -2,7 +2,7 @@ import os
 import subprocess
 import glob
 import datetime
-from getPaths import *
+from modules.getPaths import *
 
 t0=datetime.datetime.now()
 
@@ -21,12 +21,12 @@ newlist = list(set(newlist))
 
 
 for scene in newlist:
-    
+
     print("\n merging mosaics in " + scene + "\n")
     in_tif = glob.glob(sarOut + "/" + scene + "*.tif")
     out_tif = scene + ".tif"
     subprocess.call([pyt,gdalMerge,'-o',sarOut + "/" + out_tif,' '.join(in_tif)])
-    os.remove(sarOut + "/" + scene + "_*")                    
+    os.remove(sarOut + "/" + scene + "_*")
 
     print("\n polygonizing " + scene + "\n")
     out_gml = scene + ".gml"

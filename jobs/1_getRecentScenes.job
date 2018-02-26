@@ -9,4 +9,4 @@
 cd /users/stud09/martinsd/proj/sar2watermask
 source activate snappy
 
-python /users/stud09/martinsd/proj/sar2watermask/bin/getRecentScenes.py
+python /users/stud09/martinsd/proj/sar2watermask/getRecentScenes.py

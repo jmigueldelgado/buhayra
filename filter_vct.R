@@ -15,7 +15,7 @@ if(orson)
     proj="/home/delgado/proj/sar2watermask"
     scratch="/home/delgado/scratch"
 }
-    
+
 sardir=paste0(scratch,"/s1a_scenes")
 sarIn=paste0(sardir,"/in")
 sarOut=paste0(sardir,"/out")
@@ -53,12 +53,12 @@ for(f in flist)
                 mutate(id_in_scene=row_number(),area=st_area(.)) %>%
                 filter(as.numeric(area)>1000) %>%
                 select(-fid,-DN)
-            
+
             psimpl <- st_simplify(p,preserveTopology=TRUE,dTolerance=11)
             ints <- st_intersects(psimpl,cogerh,sparse=TRUE) %>% unclass(.) %>% melt(.)
-            
+
             ids=data_frame(id_cogerh=cogerh$id[ints$value],id_in_scene=psimpl$id_in_scene[ints$L1])
-            
+
                                         #pfilter <- left_join(ids,psimpl) %>% st_as_sf %>% split(.$id_cogerh) %>% lapply(st_union) %>% do.call(c,.) %>% st_cast
             if(nrow(ids)>0)
             {

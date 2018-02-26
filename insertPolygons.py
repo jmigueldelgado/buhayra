@@ -1,11 +1,11 @@
 from pymongo import MongoClient
 import json
 import os
-import sys 
+import sys
 from datetime import datetime
 from sshtunnel import SSHTunnelForwarder
 
-from getPaths import *
+from modules.getPaths import *
 
 server = SSHTunnelForwarder(
     MONGO_HOST,
@@ -38,7 +38,7 @@ for in_file in newlist:
     with open(polOut + '/' + in_file) as f:
         data = json.load(f)
 
-    
+
     for feat in data["features"]:
         dttm = datetime.strptime(feat["properties"]["ingestion_time"],"%Y/%m/%d %H:%M:%S+00")
         feat["properties"]["ingestion_time"] = dttm

@@ -10,4 +10,4 @@ cd /users/stud09/martinsd/proj/sar2watermask
 
 source activate gdal
 
-python /users/stud09/martinsd/proj/sar2watermask/modules/polygonize.py
+python /users/stud09/martinsd/proj/sar2watermask/polygonize.py
