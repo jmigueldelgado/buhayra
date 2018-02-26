@@ -2,6 +2,7 @@ from os.path import expanduser
 import sys
 from modules.credentials import *
 
+
 home = {
     'home' : expanduser("~"),
     'auxdata' : expanduser("~") + '/proj/sar2watermask/auxdata',
