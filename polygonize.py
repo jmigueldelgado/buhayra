@@ -15,9 +15,10 @@ for names in items:
         newlist.append(names[0:67])
 
 newlist = list(set(newlist))
-
+newlist
 
 scene=newlist[0]
+
 
 for scene in newlist:
 
@@ -26,7 +27,7 @@ for scene in newlist:
     out_tif = scene + ".tif"
     subprocess.call([pyt,gdalMerge,'-o',sarOut + "/" + out_tif,' '.join(in_tif)])
     for f in in_tif:
-        os.remove(sarOut + "/" + f)
+        os.remove(f)
 
     print("\n polygonizing " + scene + "\n")
     out_gml = scene + ".gml"
@@ -51,7 +52,6 @@ for names in items:
         newlist.append(names[:-4])
 
 newlist = list(set(newlist))
-
 #print(newlist)
 
 
