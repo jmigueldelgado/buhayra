@@ -10,4 +10,4 @@ cd /users/stud09/martinsd/proj/sar2watermask
 
 source activate r-spatial
 
-Rscript /users/stud09/martinsd/proj/sar2watermask/filter_vct.R
+Rscript /users/stud09/martinsd/proj/sar2watermask/modules/filter_vct.R
