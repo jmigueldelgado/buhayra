@@ -2,28 +2,20 @@ require(sf)
 require(dplyr)
 library(lubridate)
 library(reshape2)
-orson=FALSE
-
 orson=TRUE
-
 if(orson)
 {
-    proj="/users/stud09/martinsd/proj/sar2watermask"
     scratch="/mnt/scratch/martinsd"
 } else
 {
-    proj="/home/delgado/proj/sar2watermask"
     scratch="/home/delgado/scratch"
 }
 
-sardir=paste0(scratch,"/s1a_scenes")
-sarIn=paste0(sardir,"/in")
-sarOut=paste0(sardir,"/out")
 wmIn <- paste0(scratch,"/watermasks")
 
 flist <- list.files(wmIn,pattern="watermask.gml$")
 
-cogerh <- st_read(paste0(proj,"/auxdata/cogerh.geojson")) %>%
+cogerh <- st_read("./parameters/cogerh.geojson") %>%
     as_tibble %>%
     st_as_sf() %>%
     st_set_crs(32724)
@@ -48,11 +40,24 @@ for(f in flist)
         if(nrow(p)>0)
         {
             p <- p %>% st_transform(crs=32724) %>%
-                mutate(ingestion_time=strsplit(f,"_")[[1]][5] %>%
-                           ymd_hms()) %>%
                 mutate(id_in_scene=row_number(),area=st_area(.)) %>%
                 filter(as.numeric(area)>1000) %>%
                 select(-fid,-DN)
+            if(strsplit(f,"_")[[1]][1]==S1A)
+                {
+                  cat("simplifying S1A")
+                  p = p %>%
+                 mutate(ingestion_time=strsplit(f,"_")[[1]][5] %>%
+                 ymd_hms(),platformname='Sentinel-1')
+               }
+            if(strsplit(f,"_")[[1]][1]==S2A)
+               {
+                 cat("simplifying S2A")
+                 p = p %>%
+                 mutate(ingestion_time=strsplit(f,"_")[[1]][3] %>%
+                 ymd_hms(),platformname='Sentinel-2')
+               }
+
 
             psimpl <- st_simplify(p,preserveTopology=TRUE,dTolerance=11)
             ints <- st_intersects(psimpl,cogerh,sparse=TRUE) %>% unclass(.) %>% melt(.)
