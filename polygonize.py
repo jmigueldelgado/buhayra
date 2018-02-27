@@ -16,20 +16,24 @@ for names in items:
 
 newlist = list(set(newlist))
 
+
+scene=newlist[0]
+
 for scene in newlist:
 
     print("\n merging mosaics in " + scene + "\n")
     in_tif = glob.glob(sarOut + "/" + scene + "*.tif")
     out_tif = scene + ".tif"
     subprocess.call([pyt,gdalMerge,'-o',sarOut + "/" + out_tif,' '.join(in_tif)])
-    os.remove(sarOut + "/" + scene + "_*")
+    for f in in_tif:
+        os.remove(sarOut + "/" + f)
 
     print("\n polygonizing " + scene + "\n")
     out_gml = scene + ".gml"
     subprocess.call([pyt,gdalPol,sarOut + "/" + out_tif,"-f","GML",polOut + "/" + out_gml])
     os.remove(sarOut + "/" + out_tif)
 
-print("\n********** polygonize completed!" + str(len(newlist))  + " watermasks processed\n********** Elapsed time: " + str(datetime.datetime.now()-t0) + "\n********** End of message\n")
+print("\n********** sentinel-1 polygonize completed!" + str(len(newlist))  + " watermasks processed\n********** Elapsed time: " + str(datetime.datetime.now()-t0) + "\n********** End of message\n")
 
 
 
@@ -48,21 +52,13 @@ for names in items:
 
 newlist = list(set(newlist))
 
-
 #print(newlist)
 
 
 for scene in newlist:
-
-    print("\n merging mosaics in " + scene + "\n")
-    in_tif = glob.glob(s2aOut + "/" + scene + "*.tif")
-    out_tif = scene + ".tif"
-    subprocess.call([pyt,gdalMerge,'-o',s2aOut + "/" + out_tif,' '.join(in_tif)])
-    os.remove(s2aOut + "/" + scene + "_*")
-
     print("\n polygonizing " + scene + "\n")
     out_gml = scene + ".gml"
     subprocess.call([pyt,gdalPol,s2aOut + "/" + out_tif,"-f","GML",polOut + "/" + out_gml])
     os.remove(s2aOut + "/" + out_tif)
 
-print("\n********** polygonize completed!" + str(len(newlist))  + " watermasks processed\n********** Elapsed time: " + str(datetime.datetime.now()-t0) + "\n********** End of message\n")
+print("\n********** sentinel-2 polygonize completed!" + str(len(newlist))  + " watermasks processed\n********** Elapsed time: " + str(datetime.datetime.now()-t0) + "\n********** End of message\n")

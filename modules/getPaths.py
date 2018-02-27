@@ -26,6 +26,8 @@ scratch= home['scratch']
 sardir=scratch+"/s1a_scenes"
 sarIn=sardir+"/in"
 sarOut=sardir+"/out"
+s2aIn=scratch+"/s2a_scenes/in"
+s2aOut=scratch+"/s2a_scenes/out"
 polOut=scratch + "/watermasks"
 
 MONGO_HOST = "141.89.96.184"

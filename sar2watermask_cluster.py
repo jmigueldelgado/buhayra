@@ -51,7 +51,6 @@ flist=listdir(sarIn)
 
 status=0
 # Read products
-f=flist[0]
 
 for f in flist:
     status=status+1
