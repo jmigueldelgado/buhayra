@@ -1,35 +1,10 @@
-## cronR job
-## id:   data_update_precipitation
-## tags: update, API, prec
-## desc: Update precipitation data from FUNCEME's API
-0 4 * * 0 /usr/lib/R/bin/Rscript '/home/riemer/R/x86_64-pc-linux-gnu-library/3.4/cronR/extdata/API_update_precipitation.R'  >> '/home/riemer/R/x86_64-pc-linux-gnu-library/3.4/cronR/extdata/API_update_precipitation.log' 2>&1
-
-## cronR job
-## id:   data_update_temperature
-## tags: update, API, temp
-## desc: Update mean temperature data from FUNCEME's API
-0 6 * * 0 /usr/lib/R/bin/Rscript '/home/riemer/R/x86_64-pc-linux-gnu-library/3.4/cronR/extdata/API_update_temperature.R'  >> '/home/riemer/R/x86_64-pc-linux-gnu-library/3.4/cronR/extdata/API_update_temperature.log' 2>&1
-
-## cronR job
-## id:   data_update_reservoirs
-## tags: update, API, reservoir
-## desc: Update reservoir volume data from FUNCEME's API
-0 2 * * 0 /usr/lib/R/bin/Rscript '/home/riemer/R/x86_64-pc-linux-gnu-library/3.4/cronR/extdata/API_update_reservoir_data.R'  >> '/home/riemer/R/x86_64-pc-linux-gnu-library/3.4/cronR/extdata/API_update_reservoir_data.log' 2>&1
-
-## cronR job
-## id:   data_download_forecasts
-## tags: update, FTP, echam, downscaling
-## desc: Download new echam forecasts and downscale data
-0 0 13,20,25 * * /usr/lib/R/bin/Rscript '/home/riemer/R/x86_64-pc-linux-gnu-library/3.4/cronR/extdata/FTP_newhindcast_download_downscale.R'  >> '/home/riemer/R/x86_64-pc-linux-gnu-library/3.4/cronR/extdata/FTP_newhindcast_download_downscale.log' 2>&1
-
 ## type: python job
 ## author: delgado
 ## aim: get current state of reservoirs from mongodb
 ## desc: runs a query on mongodb and saves 4 geojson files: one for current state and 3 for the last 3 months
-0 0 15 * * /home/riemer/miniconda2/env/mongodb/bin/python /home/riemer/proj/sar2watermask/modules/getLatestPolygons.py
+0 0 15 * * /home/delgado/miniconda2/env/mongodb/bin/python /home/delgado/proj/sar2watermask/modules/getLatestPolygons.py
 
 ## type: bash job
 ## author: schuettig
 ## aim: merge latest watermasks
-0 2 15 * * /home/riemer/miniconda2/env/gdal22/bin/ogrmerge.py -single -f GPKG -o /home/riemer/watermaskVis/last4month.gpkg /home/riemer/watermaskVis/*.geojson
-
+0 2 15 * * /home/delgado/miniconda2/env/gdal22/bin/ogrmerge.py -single -f GPKG -o /home/delgado/out/last4month.gpkg /home/delgado/out/*.geojson
