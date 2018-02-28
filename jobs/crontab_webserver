@@ -2,9 +2,9 @@
 ## author: delgado
 ## aim: get current state of reservoirs from mongodb
 ## desc: runs a query on mongodb and saves 4 geojson files: one for current state and 3 for the last 3 months
-0 0 15 * * /home/delgado/miniconda2/env/mongodb/bin/python /home/delgado/proj/sar2watermask/modules/getLatestPolygons.py
+0 0 15 * * /home/delgado/local/miniconda2/envs/mongodb/bin/python /home/delgado/proj/sar2watermask/modules/getLatestPolygons.py
 
 ## type: bash job
 ## author: schuettig
 ## aim: merge latest watermasks
-0 2 15 * * /home/delgado/miniconda2/env/gdal22/bin/ogrmerge.py -single -f GPKG -o /home/delgado/out/last4month.gpkg /home/delgado/out/*.geojson
+0 2 15 * * /home/delgado/local/miniconda2/envs/gdal22/bin/ogrmerge.py -single -f GPKG -o /home/delgado/out/last4month.gpkg /home/delgado/out/*.geojson
