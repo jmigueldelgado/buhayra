@@ -2,7 +2,7 @@ require(sf)
 require(dplyr)
 library(lubridate)
 library(reshape2)
-orson=TRUE
+orson=FALSE
 if(orson)
 {
     scratch="/mnt/scratch/martinsd"
@@ -15,17 +15,15 @@ wmIn <- paste0(scratch,"/watermasks")
 
 flist <- list.files(wmIn,pattern="watermask.gml$")
 
-cogerh <- st_read("./parameters/cogerh.geojson") %>%
+cogerh <- st_read("./auxdata/cogerh.geojson") %>%
     as_tibble %>%
     st_as_sf() %>%
     st_set_crs(32724)
-
 ### read, remove small parts, remove DN==0 (land), simplify with threshold between 10 and 15 preserving topology. It should reduce size of vector by a factor of at least 3.
 for(f in flist)
 {
     cat("\nChecking file:\n",f,"\n")
     fname=substr(f,1,nchar(f)-4)
-
 ### if file has't been processed yet:
     if(!file.exists(paste0(wmIn,"/",fname,"_simplified.gml")))
     {
@@ -58,7 +56,6 @@ for(f in flist)
                  ymd_hms(),platformname='Sentinel-2')
                }
 
-
             psimpl <- st_simplify(p,preserveTopology=TRUE,dTolerance=11)
             ints <- st_intersects(psimpl,cogerh,sparse=TRUE) %>% unclass(.) %>% melt(.)
 
@@ -76,7 +73,6 @@ for(f in flist)
             } else cat("\n\nPolygons matching the COGERH watermask were not found in ",f,"\n")
         } else cat("\n\n The watermask was not found, check if scene is over the ocean or if there are no water bodies on the scene. \n\n")
     } else cat("\nAlready processed, jumping over simplify and filter ....\n")
-
 
 ### if file has been processed and input file is still stored, remove it
     if(file.exists(paste0(wmIn,"/",f)))
