@@ -38,7 +38,6 @@ for in_file in newlist:
     with open(polOut + '/' + in_file) as f:
         data = json.load(f)
 
-
     for feat in data["features"]:
         dttm = datetime.strptime(feat["properties"]["ingestion_time"],"%Y/%m/%d %H:%M:%S+00")
         feat["properties"]["ingestion_time"] = dttm
@@ -50,12 +49,11 @@ for in_file in newlist:
     print('\n removing ' + in_file + '\n')
     os.remove(polOut + '/' + in_file)
 
-
 #### IT WORKS!!!
 
 server.stop()
 
-
+data
 #### This works, but would need python installed on the webserver and mount of orson's /mnt/scratch, which is not very reliable
 
 #ssh = paramiko.SSHClient()
