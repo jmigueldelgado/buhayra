@@ -41,19 +41,17 @@ for(f in flist)
                 mutate(id_in_scene=row_number(),area=st_area(.)) %>%
                 filter(as.numeric(area)>1000) %>%
                 select(-fid,-DN)
-            if(strsplit(f,"_")[[1]][1]==S1A)
+            if(strsplit(f,"_")[[1]][1]=="S1A")
                 {
                   cat("simplifying S1A")
                   p = p %>%
-                 mutate(ingestion_time=strsplit(f,"_")[[1]][5] %>%
-                 ymd_hms(),platformname='Sentinel-1')
+                 mutate(ingestion_time=strsplit(f,"_")[[1]][5] %>% ymd_hms(),platformname='Sentinel-1')
                }
-            if(strsplit(f,"_")[[1]][1]==S2A)
+            if(strsplit(f,"_")[[1]][1]=="S2A")
                {
                  cat("simplifying S2A")
                  p = p %>%
-                 mutate(ingestion_time=strsplit(f,"_")[[1]][3] %>%
-                 ymd_hms(),platformname='Sentinel-2')
+                 mutate(ingestion_time=strsplit(f,"_")[[1]][3] %>% ymd_hms(),platformname='Sentinel-2')
                }
 
             psimpl <- st_simplify(p,preserveTopology=TRUE,dTolerance=11)
@@ -67,7 +65,7 @@ for(f in flist)
                 pfilter <- left_join(ids,psimpl) %>%
                     st_as_sf %>%
                     group_by(id_cogerh) %>%
-                    summarize(ingestion_time=first(ingestion_time),area=sum(area)) %>%
+                    summarize(platformname=first(platformname),ingestion_time=first(ingestion_time),area=sum(area)) %>%
                     st_transform(crs=4326) ## back to latlong
                 st_write(pfilter,paste0(wmIn,"/",fname,"_simplified.geojson"),driver="GeoJSON")
             } else cat("\n\nPolygons matching the COGERH watermask were not found in ",f,"\n")
