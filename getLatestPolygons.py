@@ -6,7 +6,7 @@ import os
 import sys
 from datetime import datetime
 from sshtunnel import SSHTunnelForwarder
-from defAggregations import *
+from modules.defAggregations import *
 from modules.getPaths import *
 import subprocess as sp
 
