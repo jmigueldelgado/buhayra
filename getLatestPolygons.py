@@ -43,5 +43,5 @@ f=open(home['home']+'/load_to_postgis/latest.geojson','w')
 geojson.dump(feat_col,f)
 f.close()
 
-if home['home']!='/home/riemer':
+if home['hostname']!='ubuntuserver':
     server.stop()
