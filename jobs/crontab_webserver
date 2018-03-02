@@ -1,5 +1,5 @@
 ## type: python job
 ## author: delgado
 ## aim: get current state of reservoirs from mongodb
-## desc: runs a query on mongodb and saves 4 geojson files: one for current state and 3 for the last 3 months
-0 0 15 * * /home/delgado/local/miniconda2/envs/mongodb/bin/python /home/delgado/proj/sar2watermask/modules/getLatestPolygons.py
+## desc: runs a query on mongodb and saves geojson files
+0 0 15 * * /home/delgado/proj/sar2watermask/jobs/latest_polygons.sh
