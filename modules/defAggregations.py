@@ -3,7 +3,7 @@ import json
 import geojson
 from bson import json_util
 import os
-import sys 
+import sys
 from datetime import datetime,timedelta
 
 def getLatestPolys(s2w):
@@ -21,9 +21,9 @@ def getLatestPolys(s2w):
     ]
 
     aggrLatest=list(s2w.aggregate(pipeline=pipeline))
-    
+
     latest=list()
-    
+
     for feat in aggrLatest:
         poly = s2w.find({'properties.id_cogerh' : feat['_id'],'properties.ingestion_time':feat['latestIngestion']})
         latest.append(poly[0])
@@ -45,7 +45,7 @@ def getLatestIngestionTime(s2w):
 
     aggrLatest=list(s2w.aggregate(pipeline=pipeline))
     latest=list()
-    
+
     for feat in aggrLatest:
         poly = s2w.find({'properties.id_cogerh' : feat['_id'],'properties.ingestion_time':feat['latestIngestion']},{'properties.id_cogerh' : 1,'properties.ingestion_time' : 1})
         latest.append(poly[0])
@@ -67,10 +67,10 @@ def getLatestIngestionTimeMinusOne(s2w):
             }
         }
     ]
-    
+
     aggrLatest=list(s2w.aggregate(pipeline=pipeline))
     latest=list()
-    
+
     for feat in aggrLatest:
         poly = s2w.find({'properties.id_cogerh' : feat['_id'],'properties.ingestion_time':feat['latestIngestion']})
         latest.append(poly[0])
@@ -92,11 +92,11 @@ def getLatestPolysMinusX(s2w,x):
             }
         }
     ]
-    
+
     aggrLatest=list(s2w.aggregate(pipeline=pipeline))
-    
+
     latest=list()
-    
+
     for feat in aggrLatest:
         poly = s2w.find({'properties.id_cogerh' : feat['_id'],'properties.ingestion_time':feat['latestIngestion']})
         latest.append(poly[0])
@@ -112,7 +112,7 @@ def getTimeSeries(s2w):
                 "_id" : "$properties.id_cogerh",
                 "timeSeries" : { "$push" : { "time" : "$properties.ingestion_time" , "area" : "$properties.area"} }
             }
-            
+
         }
     ]
 
@@ -130,11 +130,12 @@ def aggr2geojson(polys):
         del poly['_id']
         poly['properties']['oid']=oid['$oid']
 
-        if len(poly['geometry']['coordinates'])>1:
-            mp=geojson.MultiPolygon()
+        ## this mixture is not accepted by postgis. only one type is accepted. in this case it will be multipolygon
+        #if len(poly['geometry']['coordinates'])>1:
+        mp=geojson.MultiPolygon()
 
-        if len(poly['geometry']['coordinates'])==1:
-            mp=geojson.Polygon()
+        #if len(poly['geometry']['coordinates'])==1:
+        #    mp=geojson.Polygon()
 
         mp['coordinates']=poly['geometry']['coordinates']
 
