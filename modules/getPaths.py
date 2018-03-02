@@ -1,3 +1,4 @@
+import os
 from os.path import expanduser
 import sys
 from modules.credentials import *
@@ -6,7 +7,8 @@ from modules.credentials import *
 home = {
     'home' : expanduser("~"),
     'auxdata' : expanduser("~") + '/proj/sar2watermask/auxdata',
-    'parameters' : expanduser("~") + '/proj/sar2watermask/parameters'}
+    'parameters' : expanduser("~") + '/proj/sar2watermask/parameters',
+    'hostname' : os.uname()[1]}
 
 if expanduser("~")=='/home/delgado':
     home['scratch'] = home['home'] + '/scratch'
