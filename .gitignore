@@ -2,6 +2,7 @@
 
 jobs/*.o14*
 jobs/6_ogr2ogr.sh
+
 # Sentinel data
 
 s1a_scenes/
