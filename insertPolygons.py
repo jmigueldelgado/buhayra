@@ -53,10 +53,6 @@ for in_file in newlist:
 
 server.stop()
 
-<<<<<<< HEAD
-=======
-data
->>>>>>> 0e6e19013b2563b39d4999b6b84d1ce7d2ce95a1
 #### This works, but would need python installed on the webserver and mount of orson's /mnt/scratch, which is not very reliable
 
 #ssh = paramiko.SSHClient()
