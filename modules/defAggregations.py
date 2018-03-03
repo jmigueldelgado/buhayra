@@ -134,11 +134,13 @@ def aggr2geojson(polys):
         #if len(poly['geometry']['coordinates'])>1:
         mp=geojson.MultiPolygon()
 
+        obj
         #if len(poly['geometry']['coordinates'])==1:
         #    mp=geojson.Polygon()
 
         mp['coordinates']=poly['geometry']['coordinates']
-
+        ### rename to insert into postgis
+        mp['properties']['source_id'] = mp['properties'].pop('platformname')
         feats.append(geojson.Feature(geometry=mp,properties=poly['properties']))
 
     feat_col=geojson.FeatureCollection(feats)
