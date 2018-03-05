@@ -134,8 +134,8 @@ def aggr2geojson(polys):
         poly['properties']['oid']=oid['$oid']
 
         ## this mixture is not accepted by postgis. only one type is accepted. in this case it will be multipolygon
-        #if len(poly['geometry']['coordinates'])>1:
-        mp=geojson.MultiPolygon()
+        if len(poly['geometry']['coordinates'])>0:
+            mp=geojson.MultiPolygon()
 
         #if len(poly['geometry']['coordinates'])==1:
         #    mp=geojson.Polygon()
@@ -148,6 +148,11 @@ def aggr2geojson(polys):
                 poly['properties']['source_id']=1
             elif poly['properties']['source_id']=='Sentinel-2':
                 poly['properties']['source_id']=2
+        elif 'source_id' in poly['properties']:
+            print('dealing with correct geojson attributes, no need to change anything\n')
+        else:
+            print('probably one of the first scenes to be processed, before adding sentinel-2, so it must be sentinel-1! passing 1 as source_id.\n')
+            poly['properties']['source_id']=1
 
         feats.append(geojson.Feature(geometry=mp,properties=poly['properties']))
 
