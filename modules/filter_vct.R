@@ -13,7 +13,7 @@ if(orson)
 
 wmIn <- paste0(scratch,"/watermasks")
 
-flist <- list.files(wmIn,pattern="watermask.gml$")
+flist <- list.files(wmIn,pattern="_watermask.gml$")
 
 cogerh <- st_read("./auxdata/cogerh.geojson") %>%
     as_tibble %>%
@@ -25,19 +25,31 @@ for(f in flist)
     cat("\nChecking file:\n",f,"\n")
     fname=substr(f,1,nchar(f)-4)
 ### if file has't been processed yet:
-    if(!file.exists(paste0(wmIn,"/",fname,"_simplified.gml")))
+    if(!file.exists(paste0(wmIn,"/",fname,"_simplified.geojson")))
     {
         cat("\nNot yet processed, processing ....\n")
 
-        p <- st_read(paste0(wmIn,"/",f)) %>%
+        if(substr(f,1,3)=="S1A")
+          {
+            p <- st_read(paste0(wmIn,"/",f)) %>%
             as_tibble %>%
             st_as_sf %>%
             st_set_crs(4326) %>%
+            st_transform(crs=32724) %>%
             filter(DN>0)
+          }
+        if(substr(f,1,3)=="S2A")
+            {
+              p <- st_read(paste0(wmIn,"/",f)) %>%
+              as_tibble %>%
+              st_as_sf %>%
+              st_set_crs(32724) %>%
+              filter(DN>0)
+            }
 
         if(nrow(p)>0)
         {
-            p <- p %>% st_transform(crs=32724) %>%
+            p <- p %>%
                 mutate(id_in_scene=row_number(),area=st_area(.)) %>%
                 filter(as.numeric(area)>1000) %>%
                 select(-fid,-DN)

@@ -40,7 +40,7 @@ items=os.listdir(s2aOut)
 
 for scene in items:
     print("\n polygonizing " + scene + "\n")
-    out_gml = scene + ".gml"
+    out_gml = scene[:-4] + "_watermask.gml"
     subprocess.call([pyt,gdalPol,s2aOut + "/" + scene,"-f","GML",polOut + "/" + out_gml])
     os.remove(s2aOut + "/" + scene)
 
