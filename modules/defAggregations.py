@@ -142,12 +142,12 @@ def aggr2geojson(polys):
 
         mp['coordinates']=poly['geometry']['coordinates']
         ### rename to insert into postgis
-        if 'platformname' in mp['properties']:
-            mp['properties']['source_id'] = mp['properties'].pop('platformname')
-            if mp['properties']['source_id']=='Sentinel-1':
-                mp['properties']['source_id']=1
-            elif mp['properties']['source_id']=='Sentinel-2':
-                mp['properties']['source_id']=2
+        if 'platformname' in poly['properties']:
+            poly['properties']['source_id'] = poly['properties'].pop('platformname')
+            if poly['properties']['source_id']=='Sentinel-1':
+                poly['properties']['source_id']=1
+            elif poly['properties']['source_id']=='Sentinel-2':
+                poly['properties']['source_id']=2
 
         feats.append(geojson.Feature(geometry=mp,properties=poly['properties']))
 
