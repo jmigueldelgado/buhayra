@@ -29,7 +29,7 @@ for(f in flist)
     {
         cat("\nNot yet processed, processing ....\n")
 
-        if(substr(f,1,3)=="S1A")
+        if(substr(f,1,2)=="S1")
           {
             p <- st_read(paste0(wmIn,"/",f)) %>%
             as_tibble %>%
@@ -38,7 +38,7 @@ for(f in flist)
             st_transform(crs=32724) %>%
             filter(DN>0)
           }
-        if(substr(f,1,3)=="S2A")
+        if(substr(f,1,2)=="S2")
             {
               p <- st_read(paste0(wmIn,"/",f)) %>%
               as_tibble %>%
