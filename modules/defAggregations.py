@@ -120,6 +120,9 @@ def getTimeSeries(s2w):
     return(TimeSeries)
 
 
+#dict={'key1':{'subkey1':'one','subkey2':'two'},'key2':2}
+#'subkey1' in dict['key1']
+
 def aggr2geojson(polys):
     feats=[]
     for poly in polys:
@@ -140,7 +143,13 @@ def aggr2geojson(polys):
 
         mp['coordinates']=poly['geometry']['coordinates']
         ### rename to insert into postgis
-        mp['properties']['source_id'] = mp['properties'].pop('platformname')
+        if 'platformname' in mp['properties']:
+            mp['properties']['source_id'] = mp['properties'].pop('platformname')
+            if mp['properties']['source_id']=='Sentinel-1':
+                mp['properties']['source_id']=1
+            elif mp['properties']['source_id']=='Sentinel-2':
+                mp['properties']['source_id']=2
+
         feats.append(geojson.Feature(geometry=mp,properties=poly['properties']))
 
     feat_col=geojson.FeatureCollection(feats)
