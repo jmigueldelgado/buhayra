@@ -37,19 +37,11 @@ print("\n********** sentinel-1 polygonize completed!" + str(len(newlist))  + " w
 print("... now polygonize S2A\n")
 
 items=os.listdir(s2aOut)
-newlist = []
-for names in items:
-    if names.endswith("watermask.tif"):
-        newlist.append(names[:-4])
 
-newlist = list(set(newlist))
-#print(newlist)
-
-
-for scene in newlist:
+for scene in items:
     print("\n polygonizing " + scene + "\n")
     out_gml = scene + ".gml"
-    subprocess.call([pyt,gdalPol,s2aOut + "/" + scene + ".tif","-f","GML",polOut + "/" + out_gml])
-    os.remove(s2aOut + "/" + scene + ".tif")
+    subprocess.call([pyt,gdalPol,s2aOut + "/" + scene,"-f","GML",polOut + "/" + out_gml])
+    os.remove(s2aOut + "/" + scene)
 
-print("\n********** sentinel-2 polygonize completed!" + str(len(newlist))  + " watermasks processed\n********** Elapsed time: " + str(datetime.datetime.now()-t0) + "\n********** End of message\n")
+print("\n********** sentinel-2 polygonize completed!" + str(len(items))  + " watermasks processed\n********** Elapsed time: " + str(datetime.datetime.now()-t0) + "\n********** End of message\n")
