@@ -137,7 +137,6 @@ def aggr2geojson(polys):
         #if len(poly['geometry']['coordinates'])>1:
         mp=geojson.MultiPolygon()
 
-        obj
         #if len(poly['geometry']['coordinates'])==1:
         #    mp=geojson.Polygon()
 
