@@ -77,7 +77,7 @@ for(f in flist)
                 pfilter <- left_join(ids,psimpl) %>%
                     st_as_sf %>%
                     group_by(id_cogerh) %>%
-                    summarize(source_id=first(source_id),ingestion_time=first(ingestion_time),area=sum(area)) %>%
+                    summarize(source_id=as.integer(first(source_id)),ingestion_time=first(ingestion_time),area=sum(area)) %>%
                     st_transform(crs=4326) ## back to latlong
                 st_write(pfilter,paste0(wmIn,"/",fname,"_simplified.geojson"),driver="GeoJSON")
             } else cat("\n\nPolygons matching the COGERH watermask were not found in ",f,"\n")
