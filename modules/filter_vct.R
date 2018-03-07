@@ -57,13 +57,13 @@ for(f in flist)
                 {
                   cat("simplifying S1A")
                   p = p %>%
-                 mutate(ingestion_time=strsplit(f,"_")[[1]][5] %>% ymd_hms(),source_id=1)
+                 mutate(ingestion_time=strsplit(f,"_")[[1]][5] %>% ymd_hms(),source_id=as.integer(1))
                }
-            if(strsplit(f,"_")[[1]][1]=="S2A")
+            if(strsplit(f,"_")[[1]][1] %in% c("S2A","S2B","S2C") )
                {
                  cat("simplifying S2A")
                  p = p %>%
-                 mutate(ingestion_time=strsplit(f,"_")[[1]][3] %>% ymd_hms(),source_id=2)
+                 mutate(ingestion_time=strsplit(f,"_")[[1]][3] %>% ymd_hms(),source_id=as.integer(2))
                }
 
             psimpl <- st_simplify(p,preserveTopology=TRUE,dTolerance=11)
