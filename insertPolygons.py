@@ -41,6 +41,7 @@ for in_file in newlist:
     for feat in data["features"]:
         dttm = datetime.strptime(feat["properties"]["ingestion_time"],"%Y/%m/%d %H:%M:%S+00")
         feat["properties"]["ingestion_time"] = dttm
+        feat["properties"]["source_id"] = int(feat["properties"]["source_id"])
         #dicio = {"geometry":feat["geometry"],"id_cogerh":feat["properties"]["id_cogerh"]}
         feat_id = s2w.update_one(feat,{"$set" : feat},upsert=True).upserted_id
 #        feat_id = s2w.insert_one(feat).inserted_id
