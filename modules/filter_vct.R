@@ -57,7 +57,7 @@ join_ids_with_feats <- function(ids,psimpl) {
         # If you want more than one expression to be executed, then you
         # need to wrap them in curly brackets ({...}); otherwise you could
         # just have written 'finally=<expression>'
-#            message(paste("Processed URL:", url))
+            message(paste("Processed another gml file. In case output was a zero, it means that the function tried did not work"))
 #            message("Some other message at the end")
         }
     )
