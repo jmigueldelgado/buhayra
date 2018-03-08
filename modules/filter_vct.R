@@ -74,11 +74,11 @@ for(f in flist)
                                         #pfilter <- left_join(ids,psimpl) %>% st_as_sf %>% split(.$id_cogerh) %>% lapply(st_union) %>% do.call(c,.) %>% st_cast
             if(nrow(ids)>0)
             {
-                pfilter <- left_join(ids,psimpl) %>%
+                try(pfilter <- left_join(ids,psimpl) %>%
                     st_as_sf %>%
                     group_by(id_cogerh) %>%
                     summarize(source_id=as.integer(first(source_id)),ingestion_time=first(ingestion_time),area=sum(area)) %>%
-                    st_transform(crs=4326) ## back to latlong
+                    st_transform(crs=4326)) ## back to latlong
                 st_write(pfilter,paste0(wmIn,"/",fname,"_simplified.geojson"),driver="GeoJSON")
             } else cat("\n\nPolygons matching the COGERH watermask were not found in ",f,"\n")
         } else cat("\n\n The watermask was not found, check if scene is over the ocean or if there are no water bodies on the scene. \n\n")
