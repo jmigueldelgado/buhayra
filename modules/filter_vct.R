@@ -28,6 +28,7 @@ join_ids_with_feats <- function(ids,psimpl) {
                 summarize(source_id=as.integer(first(source_id)),ingestion_time=first(ingestion_time),area=sum(area)) %>%
                 st_transform(crs=4326) ## back to latlong
 
+
             # The return value of `readLines()` is the actual value
             # that will be returned in case there is no condition
             # (e.g. warning or error).
@@ -130,8 +131,10 @@ for(f in flist)
             if(nrow(ids)>0)
             {
               pfilter=join_ids_with_feats(ids,psimpl)
+
               if(pfilter!=0)
               {
+                cat("\n",colnames(pfilter),"\n",wmIn,"\n",fname,"\n")
                 st_write(pfilter,paste0(wmIn,"/",fname,"_simplified.geojson"),driver="GeoJSON")
               }
 
