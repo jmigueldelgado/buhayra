@@ -25,9 +25,9 @@ MAILTO="jmigueldelgado@gmail.com"
 0 13 * * * qsub /users/stud09/martinsd/proj/sar2watermask/jobs/4_st_simplify.job
 
 ### insert polygons into mongodb database in webserver
-0 23 * * 3 /users/stud09/martinsd/local/miniconda2/envs/mongodb/bin/python2 /users/stud09/martinsd/proj/sar2watermask/insertPolygons.py
-0 23 * * 5 /users/stud09/martinsd/local/miniconda2/envs/mongodb/bin/python2 /users/stud09/martinsd/proj/sar2watermask/insertPolygons.py
-0 23 * * 7 /users/stud09/martinsd/local/miniconda2/envs/mongodb/bin/python2 /users/stud09/martinsd/proj/sar2watermask/insertPolygons.py
+0 23 * * 3 /users/stud09/martinsd/proj/sar2watermask/jobs_insert_polys.sh
+0 23 * * 5 /users/stud09/martinsd/proj/sar2watermask/jobs_insert_polys.sh
+0 23 * * 7 /users/stud09/martinsd/proj/sar2watermask/jobs_insert_polys.sh
 
 ### clean up
 #52 15 * * 5 /users/stud09/martinsd/local/miniconda2/envs/mongodb/bin/python2 /users/stud09/martinsd/proj/sar2watermask/cleanup.py
