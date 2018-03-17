@@ -27,7 +27,6 @@ s2w = db.sar2watermask ##  collection
 
 newlist = []
 items=os.listdir(polOut)
-
 for names in items:
     if names.endswith('simplified.geojson'):
         newlist.append(names)
@@ -45,7 +44,6 @@ for in_file in newlist:
         #dicio = {"geometry":feat["geometry"],"id_cogerh":feat["properties"]["id_cogerh"]}
         feat_id = s2w.update_one(feat,{"$set" : feat},upsert=True).upserted_id
 #        feat_id = s2w.insert_one(feat).inserted_id
-        print feat_id
 
     print('\n removing ' + in_file + '\n')
     os.remove(polOut + '/' + in_file)
