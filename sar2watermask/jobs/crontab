@@ -4,12 +4,8 @@ MAILTO="jmigueldelgado@gmail.com"
 
 
 ### acquire scenes from ESA
-0 20 * * 1 /users/stud09/martinsd/local/miniconda2/envs/snappy/bin/python2 /users/stud09/martinsd/proj/sar2watermask/getRecentScenes.py
-0 20 * * 3 /users/stud09/martinsd/local/miniconda2/envs/snappy/bin/python2 /users/stud09/martinsd/proj/sar2watermask/getRecentScenes.py
-0 20 * * 5 /users/stud09/martinsd/local/miniconda2/envs/snappy/bin/python2 /users/stud09/martinsd/proj/sar2watermask/getRecentScenes.py
 
 0 20 * * 1 /users/stud09/martinsd/local/miniconda2/envs/snappy/bin/python2 /users/stud09/martinsd/proj/ndwi2watermask "getscenes"
-0 20 * * 3 /users/stud09/martinsd/local/miniconda2/envs/snappy/bin/python2 /users/stud09/martinsd/proj/ndwi2watermask "getscenes"
 0 20 * * 5 /users/stud09/martinsd/local/miniconda2/envs/snappy/bin/python2 /users/stud09/martinsd/proj/ndwi2watermask "getscenes"
 
 
