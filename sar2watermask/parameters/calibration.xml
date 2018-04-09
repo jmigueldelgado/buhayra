@@ -1,0 +1,11 @@
+<parameters>
+    <sourceBands/>
+    <outputImageInComplex>false</outputImageInComplex>
+    <outputImageScaleInDb>false</outputImageScaleInDb>
+    <createGammaBand>false</createGammaBand>
+    <createBetaBand>false</createBetaBand>
+    <selectedPolarisations>VV</selectedPolarisations>
+    <outputSigmaBand>true</outputSigmaBand>
+    <outputGammaBand>false</outputGammaBand>
+    <outputBetaBand>false</outputBetaBand>
+</parameters>

@@ -1,6 +1,6 @@
 import os
 import time
-from getPaths import *
+from modules.getPaths import *
 
 current_time = time.time()
 

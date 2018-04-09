@@ -1,11 +1,11 @@
 from pymongo import MongoClient
 import json
 import os
-import sys 
+import sys
 from datetime import datetime
 from sshtunnel import SSHTunnelForwarder
 
-from getPaths import *
+from modules.getPaths import *
 
 server = SSHTunnelForwarder(
     MONGO_HOST,
@@ -27,7 +27,6 @@ s2w = db.sar2watermask ##  collection
 
 newlist = []
 items=os.listdir(polOut)
-
 for names in items:
     if names.endswith('simplified.geojson'):
         newlist.append(names)
@@ -38,23 +37,20 @@ for in_file in newlist:
     with open(polOut + '/' + in_file) as f:
         data = json.load(f)
 
-    
     for feat in data["features"]:
         dttm = datetime.strptime(feat["properties"]["ingestion_time"],"%Y/%m/%d %H:%M:%S+00")
         feat["properties"]["ingestion_time"] = dttm
+        feat["properties"]["source_id"] = int(feat["properties"]["source_id"])
         #dicio = {"geometry":feat["geometry"],"id_cogerh":feat["properties"]["id_cogerh"]}
         feat_id = s2w.update_one(feat,{"$set" : feat},upsert=True).upserted_id
 #        feat_id = s2w.insert_one(feat).inserted_id
-        print feat_id
 
     print('\n removing ' + in_file + '\n')
     os.remove(polOut + '/' + in_file)
 
-
 #### IT WORKS!!!
 
 server.stop()
-
 
 #### This works, but would need python installed on the webserver and mount of orson's /mnt/scratch, which is not very reliable
 

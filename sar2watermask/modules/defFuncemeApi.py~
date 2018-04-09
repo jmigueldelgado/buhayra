@@ -1,0 +1,33 @@
+import json
+import geojson
+from bson import json_util
+import os
+import sys 
+from datetime import datetime,timedelta,date
+import requests
+
+def getIds():
+    url = 'http://api.funceme.br/rest/acude/reservatorio?paginator'
+    
+    r = requests.get(url)
+    dams = json.loads(r.text)
+    
+    feats = []
+    
+    for dam in dams:
+        pt = geojson.Point()
+        pt['coordinates'] = [dam['longitude'],dam['latitude']]
+        feats.append(geojson.Feature(geometry=pt,properties={ 'name':dam['nome'] }))
+
+    feat_col = geojson.FeatureCollection(feats)
+    return(feat_col)
+
+def getRecentVolume(res_id):
+    url = 'http://api.funceme.br/rest/acude/volume?reservatorio.cod=' + str(res_id) +'&dataColeta.GTE=' + str(date.today()-timedelta(days=33))
+    r = requests.get(url)
+    volumes = json.loads(r.text)
+    ts = []
+    for volume in volumes['list']:
+        ts.append({'timestamp' : volume['dataColeta'], 'value' : volume['valor'] })
+    return(ts)
+    

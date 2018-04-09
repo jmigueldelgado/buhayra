@@ -3,20 +3,20 @@ from bson import json_util
 import geojson
 import json
 import os
-import sys 
+import sys
 from datetime import datetime
 from sshtunnel import SSHTunnelForwarder
 from defAggregations import *
 from getPaths import *
 import subprocess as sp
 
-if home['home']!='/home/riemer':
+if home['home']!='/home/delgado':
     server = SSHTunnelForwarder(
         MONGO_HOST,
         ssh_username=MONGO_USER,
         ssh_password=MONGO_PASS,
         remote_bind_address=('127.0.0.1', MONGO_PORT))
-    
+
     server.start()
     print("started ssh tunnel")
 
@@ -47,15 +47,15 @@ feat_col3=aggr2geojson(polys3)
 ## write
 f=open(home['home']+'/0_latest.geojson','w')
 geojson.dump(feat_col,f)
-f.close()            
+f.close()
 
 f=open(home['home']+'/1_month_ago.geojson','w')
 geojson.dump(feat_col1,f)
-f.close()            
+f.close()
 
 f=open(home['home']+'/2_months_ago.geojson','w')
 geojson.dump(feat_col2,f)
-f.close()            
+f.close()
 
 f=open(home['home']+'/3_months_ago.geojson','w')
 geojson.dump(feat_col3,f)
@@ -73,4 +73,3 @@ f3 = home['home']+'/watermaskVis/3_month_ago.geojson'
 
 if home['home']!='/home/riemer':
     server.stop()
-
