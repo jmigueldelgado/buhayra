@@ -10,4 +10,4 @@
 
 source activate raster
 export LD_LIBRARY_PATH=""
-python /users/stud09/martinsd/proj/buhayra/ndwi2watermask "rmclouds"
+python /users/stud09/martinsd/proj/buhayra "rmclouds"

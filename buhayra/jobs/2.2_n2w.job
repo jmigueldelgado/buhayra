@@ -9,4 +9,4 @@
 
 source activate fiorio3.6
 export LD_LIBRARY_PATH=""
-python /users/stud09/martinsd/proj/buhayra/ndwi2watermask "ndwi"
+python /users/stud09/martinsd/proj/buhayra "ndwi"

@@ -1,5 +1,5 @@
 #!/bin/bash
 
 source activate mongodb
-cd /users/stud09/martinsd/proj/sar2watermask
+cd /users/stud09/martinsd/proj/buhayra
 python insertPolygons.py
