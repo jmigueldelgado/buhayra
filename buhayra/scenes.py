@@ -3,7 +3,7 @@ from sentinelsat import SentinelAPI, read_geojson, geojson_to_wkt
 from datetime import date, datetime, timedelta
 import sys
 import os
-from ndwi2watermask.getpaths import *
+from buhayra.getpaths import *
 
 def getscenes():
 

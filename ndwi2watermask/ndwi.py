@@ -5,7 +5,7 @@ import glob
 import rasterio as rio
 import zipfile
 import os
-import ndwi2watermask.getpaths as pths
+import buhayra.getpaths as pths
 import numpy as np
 import re
 from shutil import rmtree

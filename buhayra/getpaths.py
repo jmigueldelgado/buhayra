@@ -12,8 +12,8 @@ else:
     home = {
         'home' : expanduser("~"),
         'scratch' : '/mnt/scratch/martinsd',
-        'proj' : expanduser("~") + '/proj/ndwi2watermask',
-        'parameters' : expanduser("~") + '/proj/ndwi2watermask/parameters'}
+        'proj' : expanduser("~") + '/proj/buhayra/ndwi2watermask',
+        'parameters' : expanduser("~") + '/proj/buhayra/ndwi2watermask/parameters'}
 
 pyt = home['home'] + "/local/miniconda2/envs/gdal/bin/python"
 pyGdal = home['home'] + "/local/miniconda2/envs/gdal/bin/python"

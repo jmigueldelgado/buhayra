@@ -5,7 +5,7 @@ import sys
 from datetime import datetime
 from sshtunnel import SSHTunnelForwarder
 
-from modules.getPaths import *
+from buhayra.getpaths import *
 
 server = SSHTunnelForwarder(
     MONGO_HOST,

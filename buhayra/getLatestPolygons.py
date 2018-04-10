@@ -6,8 +6,8 @@ import os
 import sys
 from datetime import datetime
 from sshtunnel import SSHTunnelForwarder
-from modules.defAggregations import *
-from modules.getPaths import *
+from buhayra.defAggregations import *
+from buhayra.getpaths import *
 import subprocess as sp
 
 if home['hostname']!='ubuntuserver':

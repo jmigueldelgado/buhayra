@@ -1,8 +1,0 @@
-
-SHELL=/bin/bash
-MAILTO="jmigueldelgado@gmail.com"
-HOME=/users/stud09/martinsd
-#0 5 * * 0 /users/stud09/martinsd/proj/sar2watermask/jobs/cron.weekly
-#0 5 * * 0 /users/stud09/martinsd/proj/sar2watermask/jobs/cron.daily
-#* * * * * /home/delgado/TMP/crontest.sh
-

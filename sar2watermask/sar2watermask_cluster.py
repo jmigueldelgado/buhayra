@@ -18,7 +18,7 @@ from snappy import HashMap
 from snappy import Rectangle
 
 
-from modules.getPaths import *
+from buhayra.getpaths import *
 
 
 #############################

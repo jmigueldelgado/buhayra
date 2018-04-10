@@ -2,7 +2,7 @@ import os
 import subprocess
 import glob
 import datetime
-from modules.getPaths import *
+from buhayra.getpaths import *
 
 t0=datetime.datetime.now()
 
