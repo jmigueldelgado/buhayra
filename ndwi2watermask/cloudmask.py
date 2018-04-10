@@ -1,7 +1,7 @@
 import zipfile
 import subprocess
 import os
-import modules.getpaths as pths
+import ndwi2watermask.getpaths as pths
 import numpy as np
 import re
 from rasterio.warp import reproject,Resampling

@@ -1,11 +1,11 @@
 import rasterio.mask
-from modules.cloudmask import list_pols,merge_pols,unzipJp2,unzipMasks,getBandDir
+from ndwi2watermask.cloudmask import list_pols,merge_pols,unzipJp2,unzipMasks,getBandDir
 import fiona
 import glob
 import rasterio as rio
 import zipfile
 import os
-import modules.getpaths as pths
+import ndwi2watermask.getpaths as pths
 import numpy as np
 import re
 from shutil import rmtree

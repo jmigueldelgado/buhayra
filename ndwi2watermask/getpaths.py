@@ -47,4 +47,4 @@ MONGO_DB = "sar2watermask"
 MONGO_PORT = 27017
 
 sys.path.insert(0, home['parameters'])
-from modules.credentials import *
+#from ndwi2watermask.credentials import *
