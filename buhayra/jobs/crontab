@@ -8,6 +8,9 @@ MAILTO="jmigueldelgado@gmail.com"
 0 20 * * 1 /users/stud09/martinsd/local/miniconda2/envs/snappy/bin/python2 /users/stud09/martinsd/proj/buhayra "getscenes"
 0 20 * * 5 /users/stud09/martinsd/local/miniconda2/envs/snappy/bin/python2 /users/stud09/martinsd/proj/buhayra "getscenes"
 
+### testing today
+20 11 * * * /users/stud09/martinsd/local/miniconda2/envs/snappy/bin/python2 /users/stud09/martinsd/proj/buhayra "getscenes"
+
 
 ### process acquired scenes
 0 2 * * * qsub /users/stud09/martinsd/proj/buhayra/buhayra/jobs/2_sar2watermask.job

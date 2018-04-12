@@ -25,7 +25,6 @@ def getscenes():
 
     # download all results from the search
     #s2aIn = '/home/delgado/Documents/tmp' # in case you are just testing
-    api.download_all(products_s2a,directory_path=s2aIn)
 
     products_s1a = api.query(footprint,
                          date=(
@@ -38,3 +37,4 @@ def getscenes():
 
         # download all results from the search
     api.download_all(products_s1a,directory_path=sarIn)
+    api.download_all(products_s2a,directory_path=s2aIn)
