@@ -6,7 +6,7 @@ def main():
     if sys.argv[1] is None:
         print("an argument is needed, for example: cleanup or get_scenes")
     elif sys.argv[1]=="getscenes":
-        import ndwi2watermask.scenes as scenes
+        import buhayra.scenes as scenes
         scenes.getscenes()
     elif sys.argv[1]=="rmclouds":
         print("remove clouds\n")
