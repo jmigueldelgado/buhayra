@@ -113,7 +113,7 @@ for f in flist:
 
         params = HashMap()
 
-        root = xml.etree.ElementTree.parse(proj+"/parameters/"+'calibration.xml').getroot()
+        root = xml.etree.ElementTree.parse(home['parameters']+'/calibration.xml').getroot()
         for child in root:
             params.put(child.tag,child.text)
 
@@ -122,7 +122,7 @@ for f in flist:
         ## Speckle filtering
 
         params = HashMap()
-        root = xml.etree.ElementTree.parse(proj+"/parameters/"+'speckle_filtering.xml').getroot()
+        root = xml.etree.ElementTree.parse(home['parameters']+'/speckle_filtering.xml').getroot()
         for child in root:
             params.put(child.tag,child.text)
 
@@ -130,7 +130,7 @@ for f in flist:
 
         ## Band Arithmetics 1
 
-        expression = open(proj+"/parameters/"+'band_maths1.txt',"r").read()
+        expression = open(home['parameters'] +'/band_maths1.txt',"r").read()
 
         targetBand1 = BandDescriptor()
         targetBand1.name = 'watermask'
@@ -152,7 +152,7 @@ for f in flist:
         ## Geometric correction
 
         params = HashMap()
-        root = xml.etree.ElementTree.parse(proj+"/parameters/"+'terrain_correction.xml').getroot()
+        root = xml.etree.ElementTree.parse(home['parameters']+'/terrain_correction.xml').getroot()
         for child in root:
             params.put(child.tag,child.text)
 
@@ -163,7 +163,7 @@ for f in flist:
 
         ## Band Arithmetics 2
 
-        expression = open(proj+"/parameters/"+'band_maths2.txt',"r").read()
+        expression = open(home['parameters']+'/band_maths2.txt',"r").read()
         #band_names = CalSfWaterCorr1.getBandNames()
         #print("Bands:   %s" % (list(band_names)))
 

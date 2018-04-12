@@ -7,7 +7,7 @@ if expanduser("~")=='/home/delgado':
         'home' : expanduser("~"),
         'scratch' : expanduser("~") + '/scratch',
         'proj' : expanduser("~") + '/proj/buhayra/ndwi2watermask',
-        'parameters' : expanduser("~") + '/proj/buhayra/ndwi2watermask/parameters'}
+        'parameters' : expanduser("~") + '/proj/buhayra/buhayra/parameters'}
 else:
     home = {
         'home' : expanduser("~"),
