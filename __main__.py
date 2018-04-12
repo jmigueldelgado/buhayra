@@ -12,6 +12,10 @@ def main():
         print("remove clouds\n")
         import ndwi2watermask.cloudmask as clouds
         clouds.rmclouds()
+    elif sys.argv[1]=="sar":
+        print("processing sar scene and thresholding\n")
+        import sar2watermask.sar as sar
+        sar.sar2w()
     elif sys.argv[1]=="ndwi":
         print("processing scene and computing ndwi\n")
         import ndwi2watermask.ndwi as n2w
