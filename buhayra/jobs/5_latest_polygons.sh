@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /home/delgado/proj/buhayra/sar2watermask
+cd /home/delgado/proj/buhayra/buhayra
 
 source activate mongodb
 
