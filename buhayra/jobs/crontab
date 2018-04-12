@@ -28,8 +28,8 @@ MAILTO="jmigueldelgado@gmail.com"
 #52 15 * * 5 /users/stud09/martinsd/local/miniconda2/envs/mongodb/bin/python2 /users/stud09/martinsd/proj/buhayra/buhayra/cleanup.py
 
 
-# download scenes every saturday at 6 am
-# process data every saturday at 6 pm
-# polygonize every sunday at 6 am
-# simplify in R and save as geojson
-# insert json documents into mongodb in webserver
+# download scenes mondays and wednesdays at 8 pm
+# process data every day at 2 am to retry in case wall time is violated
+# polygonize every day at 2 pm
+# simplify in R and save as geojson every day at 1 pm
+# insert json documents into mongodb in webserver wednesdays, fridays and sundays at 11 pm
