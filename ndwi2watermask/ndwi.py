@@ -62,7 +62,7 @@ def ndwi2watermask():
             ### but since we are interested in the index, there is no need for that
             print("Opening band 3\n")
             dataset3 = rio.open(p3[0])
-            if len(masks>0):
+            if len(masks)>0:
                 band3, out_transform =rio.mask.mask(dataset3,masks,all_touched=True,invert=True)
             else:
                 band3 = dataset3.read(1)
@@ -70,7 +70,7 @@ def ndwi2watermask():
 
             print("Opening band 8\n")
             dataset8 = rio.open(p8[0])
-            if len(masks>0):
+            if len(masks)>0:
                 band8, out_transform =rio.mask.mask(dataset8,masks,all_touched=True,invert=True)
             else:
                 band8 = dataset8.read(1)
