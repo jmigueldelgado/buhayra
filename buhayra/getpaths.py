@@ -11,6 +11,7 @@ if socket.gethostname()=='mondego':
 elif socket.gethostname()=='ubuntuserver':
     home = {
         'home' : expanduser("~"),
+        'scratch' : 'None',
         'proj' : expanduser("~") + '/proj/buhayra',
         'parameters' : expanduser("~") + '/proj/buhayra/buhayra/parameters'}
 else:
