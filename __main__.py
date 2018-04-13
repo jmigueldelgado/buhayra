@@ -33,6 +33,10 @@ def main():
         except Exception, e:
             f.write('An exceptional thing happed - %s' % e)
         f.close()
+    elif sys.argv[1]=="recent polys":
+        print("obtain most recent polygons from mongodb\n")
+        import buhayra.getLatestPolygons as gLP
+        gLP.connect_and_get()
     elif sys.argv[1]=="test":
         print("tests environment\n")
         import ndwi2watermask.ndwi as n2w
