@@ -21,11 +21,14 @@ def list_pols(sceneMasks):
     for fname in sceneMasks:
 #        fname=sceneMasks[0]
         print("opening masks:\n--- ",fname,"---\n")
-        with open(pths.s2aIn + '/' + fname) as geojson1:
-            poly_geojson = json.load(geojson1)
+        if(os.path.getsize(pths.s2aIn + '/' + fname)>0) :
+            with open(pths.s2aIn + '/' + fname) as geojson1:
+                poly_geojson = json.load(geojson1)
 
-        for feat in poly_geojson['features']:
-            listPolygon.append(feat['geometry'])
+            for feat in poly_geojson['features']:
+                listPolygon.append(feat['geometry'])
+        else:
+            print("   Mask is empty!\n")
     return(listPolygon)
 
 def merge_pols(sceneMasks):
