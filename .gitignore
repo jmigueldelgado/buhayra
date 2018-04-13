@@ -1,8 +1,5 @@
 ### buhayra
 
-# log files
-
-jobs/*.o14*
 buhayra/jobs/7_ogr2ogr.sh
 
 # Sentinel data
