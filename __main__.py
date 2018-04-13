@@ -27,12 +27,12 @@ def main():
     elif sys.argv[1]=="insert":
         print("inserting into mongodb\n")
         import buhayra.insertPolygons as ipol
-        f = open('insert.log', 'w')
-        try:
-            ipol.insertPolygons()
-        except Exception, e:
-            f.write('An exceptional thing happed - %s' % e)
-        f.close()
+        #f = open('insert.log', 'w')
+        #try:
+        ipol.insertPolygons()
+        #except Exception, e:
+        #    f.write('An exceptional thing happed - %s' % e)
+        #f.close()
     elif sys.argv[1]=="recent polys":
         print("obtain most recent polygons from mongodb\n")
         import buhayra.getLatestPolygons as gLP
