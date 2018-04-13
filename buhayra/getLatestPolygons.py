@@ -4,6 +4,7 @@ import geojson
 import json
 import os
 import sys
+import socket
 from datetime import datetime
 from sshtunnel import SSHTunnelForwarder
 from buhayra.defAggregations import *
@@ -11,7 +12,7 @@ from buhayra.getpaths import *
 import subprocess as sp
 
 def connect_and_get():
-    if home['hostname']!='ubuntuserver':
+    if socket.gethostname()!='ubuntuserver':
         server = SSHTunnelForwarder(
             MONGO_HOST,
             ssh_username=MONGO_USER,

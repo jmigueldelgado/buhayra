@@ -1,18 +1,23 @@
 from os.path import expanduser
 import sys
+import socket
 
-
-if expanduser("~")=='/home/delgado':
+if socket.gethostname()=='mondego':
     home = {
         'home' : expanduser("~"),
         'scratch' : expanduser("~") + '/scratch',
-        'proj' : expanduser("~") + '/proj/buhayra/ndwi2watermask',
+        'proj' : expanduser("~") + '/proj/buhayra',
+        'parameters' : expanduser("~") + '/proj/buhayra/buhayra/parameters'}
+elif socket.gethostname()=='ubuntuserver':
+    home = {
+        'home' : expanduser("~"),
+        'proj' : expanduser("~") + '/proj/buhayra',
         'parameters' : expanduser("~") + '/proj/buhayra/buhayra/parameters'}
 else:
     home = {
         'home' : expanduser("~"),
         'scratch' : '/mnt/scratch/martinsd',
-        'proj' : expanduser("~") + '/proj/buhayra/ndwi2watermask',
+        'proj' : expanduser("~") + '/proj/buhayra',
         'parameters' : expanduser("~") + '/proj/buhayra/buhayra/parameters'}
 
 pyt = home['home'] + "/local/miniconda2/envs/gdal/bin/python"
