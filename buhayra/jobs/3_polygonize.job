@@ -10,4 +10,4 @@ cd /users/stud09/martinsd/proj/buhayra
 
 source activate gdal
 
-python /users/stud09/martinsd/proj/buhayra/buhayra/polygonize.py
+python /users/stud09/martinsd/proj/buhayra "polygonize"
