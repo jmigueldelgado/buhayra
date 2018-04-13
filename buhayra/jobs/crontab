@@ -25,6 +25,8 @@ MAILTO="jmigueldelgado@gmail.com"
 0 23 * * 5 /users/stud09/martinsd/proj/buhayra/buhayra/jobs/5_insert_polys_mongo.sh
 0 23 * * 7 /users/stud09/martinsd/proj/buhayra/buhayra/jobs/5_insert_polys_mongo.sh
 
+49 13 * * 7 /users/stud09/martinsd/proj/buhayra/buhayra/jobs/5_insert_polys_mongo.sh
+
 ### clean up
 #52 15 * * 5 /users/stud09/martinsd/local/miniconda2/envs/mongodb/bin/python2 /users/stud09/martinsd/proj/buhayra/buhayra/cleanup.py
 
