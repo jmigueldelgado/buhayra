@@ -12,6 +12,7 @@ MAILTO="jmigueldelgado@gmail.com"
 0 2 * * * qsub /users/stud09/martinsd/proj/buhayra/buhayra/jobs/2_sar2watermask.job
 #0 2 * * * qsub /users/stud09/martinsd/proj/buhayra/buhayra/jobs/2.1_doCloudMask.job
 0 7 * * * qsub /users/stud09/martinsd/proj/buhayra/buhayra/jobs/2.2_n2w.job
+23 11 * * * qsub /users/stud09/martinsd/proj/buhayra/buhayra/jobs/2.2_n2w.job
 
 ### polygonize scenes from sentinel 1 and 2
 0 14 * * * qsub /users/stud09/martinsd/proj/buhayra/buhayra/jobs/3_polygonize.job
