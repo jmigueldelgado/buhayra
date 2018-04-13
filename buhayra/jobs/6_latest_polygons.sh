@@ -2,4 +2,4 @@
 
 source activate mongodb
 
-python /users/stud09/martinsd/proj/buhayra "recent polys"
+python $HOME/proj/buhayra "recent polys"
