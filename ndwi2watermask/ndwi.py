@@ -37,10 +37,11 @@ from rasterio.features import shapes
 #pths.s2aIn="/home/delgado/Documents/tmp"
 #pths.s2aOut="/home/delgado/Documents/tmp"
 def ndwi2watermask():
-    print("Executing ndwi2watermask():")
+    print("Executing ndwi2watermask()...")
     items=os.listdir(pths.s2aIn)
     for item in items:
         scenename=item
+        print("----",scenename,"----\n")
         item=pths.s2aIn + '/' + item
         if re.search('^.*\.zip$', item):
             sceneJp2 = unzipJp2(item)
