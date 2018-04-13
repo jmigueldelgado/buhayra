@@ -20,6 +20,10 @@ def main():
         print("processing scene and computing ndwi\n")
         import ndwi2watermask.ndwi as n2w
         n2w.ndwi2watermask()
+    elif sys.argv[1]=="polygonize":
+        print("polygonizing water rasters\n")
+        import buhayra.polygonize as polly
+        polly.polygonize()
     elif sys.argv[1]=="test":
         print("tests environment\n")
         import ndwi2watermask.ndwi as n2w
