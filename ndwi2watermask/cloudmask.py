@@ -20,6 +20,7 @@ def list_pols(sceneMasks):
     listPolygon = list()
     for fname in sceneMasks:
 #        fname=sceneMasks[0]
+        print("opening masks:\n--- ",fname,"---\n")
         with open(pths.s2aIn + '/' + fname) as geojson1:
             poly_geojson = json.load(geojson1)
 
