@@ -136,7 +136,7 @@ for(f in flist)
               if(class(pfilter)!='numeric')
               {
                 cat("\n",colnames(pfilter),"\n",wmIn,"\n",fname,"\n")
-                st_write(pfilter,paste0(,"/",fname,"_simplified.geojson"),driver="GeoJSON")
+                st_write(pfilter,paste0(wmIn,"/",fname,"_simplified.geojson"),driver="GeoJSON")
               }
 
             } else cat("\n\nPolygons matching the COGERH watermask were not found in ",f,"\n")
@@ -144,7 +144,7 @@ for(f in flist)
     } else cat("\nAlready processed, jumping over simplify and filter ....\n")
 
 ### if file has been processed and input file is still stored, remove it
-    if(file.exists(paste0(,"/",f)))
+    if(file.exists(paste0(wmIn,"/",f)))
     {
         cat("\nDeleting:\n",paste0(wmIn,"/",f))
         try(file.remove(paste0(wmIn,"/",fname,".gml")),silent=TRUE)
