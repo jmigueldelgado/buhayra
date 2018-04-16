@@ -1,4 +1,4 @@
-import rasterio.mask
+#import rasterio.mask
 from ndwi2watermask.cloudmask import list_pols,merge_pols,unzipJp2,unzipMasks,getBandDir
 import fiona
 import glob
@@ -31,6 +31,15 @@ from rasterio.features import shapes
 #ar_out[ar<50] =
 
 #ar_bool.shape
+p3="/home/delgado/Documents/tmp/S2B_MSIL1C_20180225T125259_N0206_R052_T24MYV_20180225T131850.SAFE/GRANULE/L1C_T24MYV_A005083_20180225T125259/IMG_DATA/clip_B03.jp2.jp.tif"
+dataset3 = rio.open(p3)
+band3 = dataset3.read(1)
+
+band3 = band3.astype(float)
+ndwi_bool = band3 > 1000
+ndwi_bool
+
+ndwi_int=band3.astype('int16')
 
 #ar[ar_bool] = 0
 #ar.shape
@@ -63,17 +72,23 @@ def ndwi2watermask():
             print("Opening band 3\n")
             dataset3 = rio.open(p3[0])
             if len(masks)>0:
+                print("Number of masks available for band 3: ",len(masks),"------ Proceeding WITH masks!\n")
                 band3, out_transform =rio.mask.mask(dataset3,masks,all_touched=True,invert=True)
             else:
+                print("Number of masks available for band 3: ",len(masks),"------ Proceeding WITHOUT masks!\n")
                 band3 = dataset3.read(1)
+
             band3 = band3.astype(float)
 
             print("Opening band 8\n")
             dataset8 = rio.open(p8[0])
             if len(masks)>0:
+                print("Number of masks available for band 8: ",len(masks),"------ Proceeding WITH masks!\n")
                 band8, out_transform =rio.mask.mask(dataset8,masks,all_touched=True,invert=True)
             else:
+                print("Number of masks available for band 8: ",len(masks),"------ Proceeding WITHOUT masks!\n")
                 band8 = dataset8.read(1)
+
             band8 = band8.astype(float)
             print("Computing NDWI\n")
 
