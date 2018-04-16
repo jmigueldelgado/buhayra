@@ -6,8 +6,8 @@
 #PBS -l nodes=1:ppn=1
 #PBS -l walltime=12:00:00
 #PBS -l mem=20gb
-cd /users/stud09/martinsd/proj/buhayra
+cd /users/stud09/martinsd/proj/buhayra/buhayra
 
 source activate r-spatial
 
-Rscript ./buhayra/filter_vct.R
+Rscript ./filter_vct.R
