@@ -1,4 +1,5 @@
 #!/bin/bash
+exec 1>7_ogr2ogr.log 2>&1
 
 source activate gdal22
 
