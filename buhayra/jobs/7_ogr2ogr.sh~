@@ -1,0 +1,7 @@
+#!/bin/bash
+
+source activate gdal22
+
+ogr2ogr -f "PostgreSQL" PG:"host=localhost dbname=watermasks user=sar2water password=eg_BertS101" "/home/delgado/load_to_postgis/latest.geojson" -nln masks -append -skipfailures
+
+touch finished.ogr2ogr
