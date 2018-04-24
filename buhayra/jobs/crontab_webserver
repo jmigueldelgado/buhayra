@@ -4,5 +4,5 @@
 ## desc: runs a query on mongodb and saves geojson files
 
 
-1 16 20 * * /home/delgado/proj/buhayra/buhayra/jobs/6_latest_polygons.sh
+9 16 20 * * /home/delgado/proj/buhayra/buhayra/jobs/6_latest_polygons.sh
 0 17 21 * * /home/delgado/proj/buhayra/buhayra/jobs/7_ogr2ogr.sh
