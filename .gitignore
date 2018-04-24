@@ -1,5 +1,5 @@
 ### buhayra
-
+*~
 buhayra/jobs/7_ogr2ogr.sh
 
 # Sentinel data
@@ -17,7 +17,8 @@ s1a_scenes/
 
 # auxdata
 
-buhayra/auxdata/cogerh*
+cogerh*
+dfd2*
 
 # Credentials
 
