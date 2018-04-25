@@ -25,7 +25,7 @@ join_ids_with_feats <- function(ids,psimpl) {
 
             pfilter <- left_join(ids,psimpl) %>%
                 st_as_sf %>%
-                group_by(id_cogerh) %>%
+                group_by(id_funceme) %>%
                 summarize(source_id=as.integer(first(source_id)),ingestion_time=first(ingestion_time),area=sum(area)) %>%
                 st_transform(crs=4326) ## back to latlong
             return(pfilter)
@@ -60,7 +60,7 @@ wmIn <- paste0(scratch,"/watermasks")
 
 flist <- list.files(wmIn,pattern="_watermask.gml$")
 
-cogerh <- st_read("./auxdata/cogerh.geojson") %>%
+funceme <- st_read("./auxdata/funceme.geojson") %>%
     as_tibble %>%
     st_as_sf() %>%
     st_set_crs(32724)
@@ -119,9 +119,9 @@ for(f in flist)
               valid=st_is_valid(psimpl)
               psimpl = psimpl[valid,]
 
-            ints <- st_intersects(psimpl,cogerh,sparse=TRUE) %>% unclass(.) %>% melt(.)
+            ints <- st_intersects(psimpl,funceme,sparse=TRUE) %>% unclass(.) %>% melt(.)
 
-            ids=data_frame(id_cogerh=cogerh$id[ints$value],id_in_scene=psimpl$id_in_scene[ints$L1])
+            ids=data_frame(id_funceme=funceme$id[ints$value],id_in_scene=psimpl$id_in_scene[ints$L1])
 
             if(nrow(ids)>0)
             {
@@ -135,7 +135,7 @@ for(f in flist)
                 st_write(pfilter,paste0(wmIn,"/",fname,"_simplified.geojson"),driver="GeoJSON")
               }
 
-            } else cat("\n\nPolygons matching the COGERH watermask were not found in ",f,"\n")
+            } else cat("\n\nPolygons matching the funceme watermask were not found in ",f,"\n")
         } else cat("\n\n The watermask was not found, check if scene is over the ocean or if there are no water bodies on the scene. \n\n")
     } else cat("\nAlready processed, jumping over simplify and filter ....\n")
 
