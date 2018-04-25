@@ -2,6 +2,7 @@ require(sf)
 require(dplyr)
 library(lubridate)
 library(reshape2)
+
 orson=TRUE
 if(orson)
 {
@@ -27,14 +28,6 @@ join_ids_with_feats <- function(ids,psimpl) {
                 group_by(id_cogerh) %>%
                 summarize(source_id=as.integer(first(source_id)),ingestion_time=first(ingestion_time),area=sum(area)) %>%
                 st_transform(crs=4326) ## back to latlong
-
-
-            # The return value of `readLines()` is the actual value
-            # that will be returned in case there is no condition
-            # (e.g. warning or error).
-            # You don't need to state the return value via `return()` as code
-            # in the "try" part is not wrapped insided a function (unlike that
-            # for the condition handlers for warnings and error below)
             return(pfilter)
         },
         error=function(cond) {
@@ -55,11 +48,7 @@ join_ids_with_feats <- function(ids,psimpl) {
         # NOTE:
         # Here goes everything that should be executed at the end,
         # regardless of success or error.
-        # If you want more than one expression to be executed, then you
-        # need to wrap them in curly brackets ({...}); otherwise you could
-        # just have written 'finally=<expression>'
             message(paste("Processed another gml file. In case output was a zero, it means that the function tried did not work"))
-#            message("Some other message at the end")
         }
     )
     return(out)
@@ -122,17 +111,24 @@ for(f in flist)
                  mutate(ingestion_time=strsplit(f,"_")[[1]][3] %>% ymd_hms(),source_id=as.integer(2))
                }
 
-            psimpl <- st_simplify(p,preserveTopology=TRUE,dTolerance=11)
+               ## make valid
+            psimpl <- st_simplify(p,preserveTopology=TRUE,dTolerance=11) %>%
+              st_make_valid()
+
+              ## exclude invalid features
+              valid=st_is_valid(psimpl)
+              psimpl = psimpl[valid,]
+
             ints <- st_intersects(psimpl,cogerh,sparse=TRUE) %>% unclass(.) %>% melt(.)
 
             ids=data_frame(id_cogerh=cogerh$id[ints$value],id_in_scene=psimpl$id_in_scene[ints$L1])
 
-                                        #pfilter <- left_join(ids,psimpl) %>% st_as_sf %>% split(.$id_cogerh) %>% lapply(st_union) %>% do.call(c,.) %>% st_cast
             if(nrow(ids)>0)
             {
-              cat("starting pfilter\n")
+              cat("starting join ids with filter\n")
               pfilter=join_ids_with_feats(ids,psimpl)
-              cat("ended pfilter\n")
+              cat("ended join ids with filter\n")
+
               if(class(pfilter)!='numeric')
               {
                 cat("\n",colnames(pfilter),"\n",wmIn,"\n",fname,"\n")
