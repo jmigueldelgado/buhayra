@@ -2,6 +2,7 @@ library(sf)
 library(lwgeom)
 pols=st_read("/home/delgado/Documents/S1A_IW_GRDH_1SDV_20180422T081723_20180422T081748_021577_0252FF_65E0_x1000_y8425_watermask_simplified.geojson")
 
+
 valid=st_is_valid(pols)
 
 polsval=pols[valid,]
