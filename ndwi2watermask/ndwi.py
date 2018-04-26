@@ -30,16 +30,16 @@ from rasterio.features import shapes
 #np.sum(ar > -1)
 #ar_out[ar<50] =
 
-#ar_bool.shape
-p3="/home/delgado/Documents/tmp/S2B_MSIL1C_20180225T125259_N0206_R052_T24MYV_20180225T131850.SAFE/GRANULE/L1C_T24MYV_A005083_20180225T125259/IMG_DATA/clip_B03.jp2.jp.tif"
-dataset3 = rio.open(p3)
-band3 = dataset3.read(1)
-
-band3 = band3.astype(float)
-ndwi_bool = band3 > 1000
-ndwi_bool
-
-ndwi_int=band3.astype('int16')
+# #ar_bool.shape
+# p3="/home/delgado/Documents/tmp/S2B_MSIL1C_20180225T125259_N0206_R052_T24MYV_20180225T131850.SAFE/GRANULE/L1C_T24MYV_A005083_20180225T125259/IMG_DATA/clip_B03.jp2.jp.tif"
+# dataset3 = rio.open(p3)
+# band3 = dataset3.read(1)
+#
+# band3 = band3.astype(float)
+# ndwi_bool = band3 > 1000
+# ndwi_bool
+#
+# ndwi_int=band3.astype('int16')
 
 #ar[ar_bool] = 0
 #ar.shape
