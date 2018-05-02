@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-import json
+import geojson
 import os
 import sys
 from datetime import datetime
@@ -36,7 +36,7 @@ def insertPolygons():
         print('\n inserting ' + in_file + ' in mongodb\n')
 
         with open(polOut + '/' + in_file) as f:
-            data = json.load(f)
+            data = geojson.load(f)
 
         for feat in data["features"]:
             dttm = datetime.strptime(feat["properties"]["ingestion_time"],"%Y/%m/%d %H:%M:%S+00")
