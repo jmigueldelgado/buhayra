@@ -3,19 +3,25 @@ library(lwgeom)
 pols=st_read("/home/delgado/Documents/S1A_IW_GRDH_1SDV_20180422T081723_20180422T081748_021577_0252FF_65E0_x1000_y8425_watermask_simplified.geojson")
 
 
-valid=st_is_valid(pols)
 
-polsval=pols[valid,]
+pols2=st_read("/home/delgado/Documents/latest.geojson")
+pols2=st_read("/home/delgado/Documents/id_cogerh_1.geojson")
 
-head(polsval)
+plot(pols2)
 
-sf_extSoftVersion()["lwgeom"]
+
+p1=st_as_sfc("MULTIPOLYGON(((-38.98700715127529 -7.006288515707424, -38.98700715127529 -7.006737673349483, -38.9866478251617 -7.006737673349472, -38.9866478251617 -7.00628851570742, -38.98700715127529 -7.006288515707424)))")
+
+p1
+plot(p1)
+sum(st_is_valid(pols))
+nrow(pols)
+
+
+
 
 pols_val=st_make_valid(pols)
 
 val=st_is_valid(pols_val)
 sum(val)==length(val)
 st_crs(pols)
-
-
-pols2=st_read("/home/delgado/Documents/S2B_MSIL1C_20180310T130239_N0206_R095_T24MXU_20180310T143948_watermask_simplified.geojson")
