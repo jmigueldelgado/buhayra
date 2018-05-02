@@ -20,13 +20,13 @@ for geom in MASKS:
     newgeom['geometry']=fiona.transform.transform_geom(MASKS.crs['init'],dataset.crs['init'],geom['geometry'])
     newMASKS.append(newgeom)
 
+dataset.crs
+newMASKS=type(newMASKS)
+newMASKS
+### the mask has to be a list of geojson!
+band, out_transform =rio.mask.mask(dataset,[newMASKS[101]],all_touched=True,crop=True)
+imshow(band)
 
 band.max()
 band.min()
 band[band<300]=300
-
-band, out_transform =rio.mask.mask(dataset,newMASKS,all_touched=True) ### the mask has to be a list of geojson!
-
-list()
-
-band
