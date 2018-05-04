@@ -1,4 +1,3 @@
-#import rasterio.mask
 from ndwi2watermask.cloudmask import list_pols,merge_pols,unzipJp2,unzipMasks,getBandDir
 import fiona
 import glob
@@ -11,6 +10,10 @@ import re
 from shutil import rmtree
 import json
 from rasterio.features import shapes
+import rasterio.mask as riomask
+
+
+
 ## some exercises with geotiffs:
 
 #scene='/home/delgado/scratch/s2a_scenes/out/S2A_MSIL1C_20180223T130241_N0206_R095_T24MTT_20180223T192653.tif'
@@ -73,7 +76,7 @@ def ndwi2watermask():
             dataset3 = rio.open(p3[0])
             if len(masks)>0:
                 print("Number of masks available for band 3: ",len(masks),"------ Proceeding WITH masks!\n")
-                band3, out_transform =rio.mask.mask(dataset3,masks,all_touched=True,invert=True)
+                band3, out_transform =riomask.mask(dataset3,masks,all_touched=True,invert=True)
             else:
                 print("Number of masks available for band 3: ",len(masks),"------ Proceeding WITHOUT masks!\n")
                 band3 = dataset3.read(1)
@@ -84,7 +87,7 @@ def ndwi2watermask():
             dataset8 = rio.open(p8[0])
             if len(masks)>0:
                 print("Number of masks available for band 8: ",len(masks),"------ Proceeding WITH masks!\n")
-                band8, out_transform =rio.mask.mask(dataset8,masks,all_touched=True,invert=True)
+                band8, out_transform =riomask.mask(dataset8,masks,all_touched=True,invert=True)
             else:
                 print("Number of masks available for band 8: ",len(masks),"------ Proceeding WITHOUT masks!\n")
                 band8 = dataset8.read(1)
