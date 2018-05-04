@@ -13,13 +13,26 @@ dataset = rio.open(fname)
 # with fiona
 m="/home/delgado/Documents/S1A_IW_GRDH_1SDV_20180422T081723_20180422T081748_021577_0252FF_65E0_x1000_y0_watermask_simplified.geojson"
 MASKS=fio.open(m)
+MASKS.bounds
+dataset.bounds
+clipped = MASKS.filter(bbox=dataset.bounds)
+
+clipped_schema=MASKS.schema.copy()
+
+
 
 #with geojson
 #with open(m) as f:
 #    MASKS=geojson.load(f)
+newgeom=geom
+geom['geometry']
+newgeom=
+fiona.transform.transform_geom(MASKS.crs['init'],dataset.crs['init'],geom['geometry'])
 
 newMASKS=list()
-geom=MASKS[1]
+
+MASKS.
+
 for geom in MASKS:
     newgeom=geom
     newgeom['geometry']=fiona.transform.transform_geom(MASKS.crs['init'],dataset.crs['init'],geom['geometry'])
