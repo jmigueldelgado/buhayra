@@ -9,7 +9,7 @@ import numpy as np
 import re
 from shutil import rmtree
 import json
-from rasterio.features import shapes
+# from rasterio.features import shapes
 import rasterio.mask as riomask
 
 
@@ -113,7 +113,7 @@ def ndwi2watermask():
                 "width": ndwi_int.shape[2],
                 "transform": out_transform,
                 "dtype": 'int16'})
-            with rasterio.open(pths.s2aOut + '/' + scenename[:-4] + '_watermask.tif' , "w", **out_meta) as dest:
+            with rio.open(pths.s2aOut + '/' + scenename[:-4] + '_watermask.tif' , "w", **out_meta) as dest:
                 dest.write(ndwi_int)
 
             ### polygonize is still now working quite well...
