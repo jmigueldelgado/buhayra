@@ -64,7 +64,7 @@ funceme <- st_read("./auxdata/funceme.geojson") %>%
     as_tibble %>%
     st_as_sf() %>%
     st_set_crs(32724)
-    
+
 ### read, remove small parts, remove DN==0 (land), simplify with threshold between 10 and 15 preserving topology. It should reduce size of vector by a factor of at least 3.
 for(f in flist)
 {
@@ -113,8 +113,8 @@ for(f in flist)
                }
 
                ## make valid
-            psimpl <- st_simplify(p,preserveTopology=TRUE,dTolerance=11) %>%
-              st_make_valid()
+            psimpl <- st_simplify(p,preserveTopology=TRUE,dTolerance=11)# %>%
+            #  st_make_valid()
 
               ## exclude invalid features
               valid=st_is_valid(psimpl)
