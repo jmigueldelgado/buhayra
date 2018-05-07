@@ -7,6 +7,12 @@ from buhayra.getpaths import *
 
 def getscenes():
 
+    i = 1
+    while os.path.exists(home['home'] + "/1_getscenes_%s.log" % i):
+        i += 1
+
+    fh = open("sample%s.xml" % i, "w")
+
     api = SentinelAPI(username, password, 'https://scihub.copernicus.eu/dhus')
 
     # download single scene by known product id
