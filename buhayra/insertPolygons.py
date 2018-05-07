@@ -10,7 +10,7 @@ from buhayra.getpaths import *
 
 def insertPolygons():
     i = 1
-    while os.path.exists(home['home'] + "/1_getscenes_%s.log" % i):
+    while os.path.exists(home['home'] + "/5_insert_ %s.log" % i):
         i += 1
         print(i)
     logging.basicConfig(filename=home['home'] + "/5_insert_%s.log" % i,level=logging.DEBUG)
