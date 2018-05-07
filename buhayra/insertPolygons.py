@@ -4,10 +4,17 @@ import os
 import sys
 from datetime import datetime
 from sshtunnel import SSHTunnelForwarder
+import logging
 
 from buhayra.getpaths import *
 
 def insertPolygons():
+    i = 1
+    while os.path.exists(home['home'] + "/1_getscenes_%s.log" % i):
+        i += 1
+        print(i)
+    logging.basicConfig(filename=home['home'] + "/5_insert_%s.log" % i,level=logging.DEBUG)
+
     server = SSHTunnelForwarder(
         MONGO_HOST,
         ssh_username=MONGO_USER,
@@ -33,7 +40,7 @@ def insertPolygons():
             newlist.append(names)
 
     for in_file in newlist:
-        print('\n inserting ' + in_file + ' in mongodb\n')
+        logging.info('\n inserting ' + in_file + ' in mongodb\n')
 
         with open(polOut + '/' + in_file) as f:
             data = geojson.load(f)
@@ -46,7 +53,7 @@ def insertPolygons():
             #feat_id = s2w.update_one(feat,{"$set" : feat},upsert=True).upserted_id
             feat_id = s2w.insert_one(feat).inserted_id
 
-        print('\n removing ' + in_file + '\n')
+        logging.info('\n removing ' + in_file + '\n')
         os.remove(polOut + '/' + in_file)
 
     #### IT WORKS!!!
