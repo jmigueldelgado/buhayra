@@ -46,13 +46,12 @@ import rasterio.mask as riomask
 
 #ar[ar_bool] = 0
 #ar.shape
-pths.s2aIn="/home/delgado/scratch/s2a_scenes/in.bak"
+#Spths.s2aIn="/home/delgado/scratch/s2a_scenes/in.bak"
 #pths.s2aOut="/home/delgado/Documents/tmp"
 def ndwi2watermask():
     print("Executing ndwi2watermask()...")
     items=os.listdir(pths.s2aIn)
     for item in items:
-        item='S2A_MSIL1C_20180328T131241_N0206_R138_T24MUS_20180328T195705.zip'
         scenename=item
         print("----",scenename,"----\n")
         item=pths.s2aIn + '/' + item

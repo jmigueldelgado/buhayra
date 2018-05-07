@@ -4,17 +4,19 @@ from datetime import date, datetime, timedelta
 import sys
 import os
 from buhayra.getpaths import *
+import logging
 
 def getscenes():
 
     i = 1
     while os.path.exists(home['home'] + "/1_getscenes_%s.log" % i):
         i += 1
+        print(i)
 
-    fh = open("sample%s.xml" % i, "w")
+    logging.basicConfig(filename=home['home'] + "/1_getscenes_%s.log" % i,level=logging.DEBUG)
 
     api = SentinelAPI(username, password, 'https://scihub.copernicus.eu/dhus')
-
+    logging.info(api.api_url)
     # download single scene by known product id
     #api.download(<product_id>)
     t0 = datetime.now() - timedelta(days=7)
@@ -29,8 +31,11 @@ def getscenes():
                             platformname='Sentinel-2',
                             cloudcoverpercentage = (0, 20))
 
+
     # download all results from the search
     #s2aIn = '/home/delgado/Documents/tmp' # in case you are just testing
+    for item in products_s2a:
+        logging.info(products_s2a[item]['title'])
 
     products_s1a = api.query(footprint,
                          date=(
@@ -39,7 +44,8 @@ def getscenes():
                          ),
                          producttype="GRD",
                          platformname='Sentinel-1')
-
+    for item in products_s1a:
+        logging.info(products_s1a[item]['title'])
 
         # download all results from the search
     api.download_all(products_s1a,directory_path=sarIn)
