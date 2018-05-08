@@ -26,7 +26,7 @@ In short, the following steps are done sequentially:
 
 - polygonize watermask using [gdal](https://pypi.python.org/pypi/GDAL/)
 
-- simplify polygons (with [R's sf](https://github.com/r-spatial/sf/)) and match their IDs with the [COGERH](https://www.cogerh.com.br/) dataset
+- simplify polygons (with [R's sf](https://github.com/r-spatial/sf/)) and match their IDs with the [FUNCEME](https://www.funceme.br/) dataset
 
 - insert into mongodb and PostGIS (still running these two in parallel, not sure which one will survive)
 
