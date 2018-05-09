@@ -133,10 +133,13 @@ def aggr2geojson(polys):
         del poly['_id']
         poly['properties']['oid']=oid['$oid']
 
-        ## this mixture is not accepted by postgis. only one type is accepted. in this case it will be multipolygon
+        ## mixing poly and multiply is not accepted by postgis. we will force Polygon into MultiPolygon
         if len(poly['geometry']['coordinates'])>0:
             mp=geojson.MultiPolygon()
 
+        ## now we have to correct syntax of MultiPolygon which was forced from Polygon so it generates valid geojson in the end
+        if poly["geometry"]["type"]=='Polygon':
+            poly["geometry"]["coordinates"]=[poly["geometry"]["coordinates"]]
         #if len(poly['geometry']['coordinates'])==1:
         #    mp=geojson.Polygon()
 
