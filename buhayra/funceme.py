@@ -1,10 +1,37 @@
 import requests
 import json
 from buhayra.getpaths import *
-import pymongo
+from pymongo import MongoClient
 from sshtunnel import SSHTunnelForwarder
 import geojson
+from datetime import datetime
+def insert_toponyms():
+    server = SSHTunnelForwarder(
+        MONGO_HOST,
+        ssh_username=MONGO_USER,
+        ssh_password=MONGO_PASS,
+        remote_bind_address=('127.0.0.1', MONGO_PORT))
 
+    server.start()
+
+    client = MongoClient('127.0.0.1', server.local_bind_port) # server.local_bind_port is assigned local port
+
+    ## in case you want the local host:
+    #client = MongoClient('mongodb://localhost:27017/')
+
+    db = client.sar2watermask
+    toponyms = db.toponyms
+
+    with open(home['proj'] + '/buhayra/auxdata/res_meta.geojson') as geojson_data:
+        topo=geojson.load(geojson_data)
+
+    for item in topo['features']:
+        topo_id = toponyms.update_one({'properties.cod':item['properties']['cod']},{'$set':item},upsert=True).upserted_id
+
+    server.stop()
+
+#        toponyms[0]['properties']['id_funceme']
+#        toponyms[0]['properties']['cod']
 
 def get_reservoir_meta():
     res = requests.get('http://api.funceme.br/rest/acude/reservatorio', params={'paginator':False})
@@ -37,8 +64,9 @@ def get_cav_api():
             cav.json()
             #pdcav=pandas.read_json(cav.text,'columns')
 
-#id=2481
-#dt='2018-02-01'
+dt='2018-02-01'
+
+id_funceme=26686
 
 def insert_insitu_monitoring(id_funceme,dt):
     server = SSHTunnelForwarder(
@@ -57,16 +85,53 @@ def insert_insitu_monitoring(id_funceme,dt):
     db = client.sar2watermask
     insitu = db.insitu ##  collection
     toponyms = db.toponyms
-
     res=toponyms.find({'properties.id_funceme':id_funceme})
-    if res is not empty and res['properties.cod'] != None:
-        vol=requests.get('http://api.funceme.br/rest/acude/volume',params={'reservatorio.cod':id,'dataColeta.GTE':dt})
 
-        for item in vol.json()['list']:
-            record['date']=item['dataColeta']
-            record['value']=item['valor']
-            record['id_funceme']=id
+    if res.count()==1:
+        vol=requests.get('http://api.funceme.br/rest/acude/volume',params={'reservatorio.cod':res[0]['properties']['cod'],'dataColeta.GTE':dt})
+        if len(vol.json()['list'])>0:
+            for item in vol.json()['list']:
+                vol.json()['list'][0]['dataColeta']
+                item=vol.json()['list'][0]
 
-            record_id = insitu.insert_one(record).inserted_id
+                record['date']=datetime.strptime(item['dataColeta'],"%Y-%m-%d %H:%M:%S")
+                record['value']=item['valor']
+                record['id_funceme']=id
+                record_id = insitu.update_one({'id_funceme':record['id_funceme'],'date':record['date']},{'$set':record},upsert=True).upserted_id
+
+    server.stop()
+
+
+def insert_insitu_monitoring_base_data():
+    dt='2018-02-01'
+
+    server = SSHTunnelForwarder(
+        MONGO_HOST,
+        ssh_username=MONGO_USER,
+        ssh_password=MONGO_PASS,
+        remote_bind_address=('127.0.0.1', MONGO_PORT))
+
+    server.start()
+
+    client = MongoClient('127.0.0.1', server.local_bind_port) # server.local_bind_port is assigned local port
+
+    ## in case you want the local host:
+    #client = MongoClient('mongodb://localhost:27017/')
+
+    db = client.sar2watermask
+    insitu = db.insitu ##  collection
+    toponyms = db.toponyms
+    topos=toponyms.find({'properties.id_funceme':{'$ne' : None}})
+    for topo in topos:
+        vol=requests.get('http://api.funceme.br/rest/acude/volume',params={'reservatorio.cod':topo['properties']['cod'],'dataColeta.GTE':dt})
+        if len(vol.json()['list'])>0:
+            for item in vol.json()['list']:
+                vol.json()['list'][0]['dataColeta']
+                item=vol.json()['list'][0]
+                record={}
+                record['date']=datetime.strptime(item['dataColeta'],"%Y-%m-%d %H:%M:%S")
+                record['value']=item['valor']
+                record['id_funceme']=topo['properties']['id_funceme']
+                insitu.update_one({'id_funceme':record['id_funceme'],'date':record['date']},{'$set':record},upsert=True).upserted_id
 
     server.stop()
