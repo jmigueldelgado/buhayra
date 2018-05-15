@@ -2,7 +2,9 @@ import requests
 import json
 from buhayra.getpaths import *
 import pymongo
-import pandas
+from sshtunnel import SSHTunnelForwarder
+import geojson
+
 
 def get_reservoir_meta():
     res = requests.get('http://api.funceme.br/rest/acude/reservatorio', params={'paginator':False})
@@ -35,9 +37,36 @@ def get_cav_api():
             cav.json()
             #pdcav=pandas.read_json(cav.text,'columns')
 
+#id=2481
+#dt='2018-02-01'
 
-def get_water_level(id,dt):
-    id=2481
-    dt='2018-02-01'
-    requests.get('http://api.funceme.br/rest/acude/volume',params={'reservatorio.cod':id,'dataColeta.GTE':dt})
-    http://api.funceme.br/rest/acude/volume?reservatorio.cod=2481&dataColeta.GTE=2018-02-01
+def insert_insitu_monitoring(id_funceme,dt):
+    server = SSHTunnelForwarder(
+        MONGO_HOST,
+        ssh_username=MONGO_USER,
+        ssh_password=MONGO_PASS,
+        remote_bind_address=('127.0.0.1', MONGO_PORT))
+
+    server.start()
+
+    client = MongoClient('127.0.0.1', server.local_bind_port) # server.local_bind_port is assigned local port
+
+    ## in case you want the local host:
+    #client = MongoClient('mongodb://localhost:27017/')
+
+    db = client.sar2watermask
+    insitu = db.insitu ##  collection
+    toponyms = db.toponyms
+
+    res=toponyms.find({'properties.id_funceme':id_funceme})
+    if res is not empty and res['properties.cod'] != None:
+        vol=requests.get('http://api.funceme.br/rest/acude/volume',params={'reservatorio.cod':id,'dataColeta.GTE':dt})
+
+        for item in vol.json()['list']:
+            record['date']=item['dataColeta']
+            record['value']=item['valor']
+            record['id_funceme']=id
+
+            record_id = insitu.insert_one(record).inserted_id
+
+    server.stop()
