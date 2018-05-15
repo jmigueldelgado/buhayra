@@ -19,18 +19,9 @@ def load_reservoir_meta():
         json_data.close()
     return(res)
 
-def save_reservoir_meta_table():
-    res=load_reservoir_meta()
-    pandas.read_json(res.text)
-
-
-
-    return(res)
-
-
-i=0
-res[10]
-res
+#def save_reservoir_meta_table():
+#    res=load_reservoir_meta()
+#    pandas.read_json(res.text)
 
 
 def get_cav_api():
@@ -43,3 +34,10 @@ def get_cav_api():
 
             cav.json()
             #pdcav=pandas.read_json(cav.text,'columns')
+
+
+def get_water_level(id,dt):
+    id=2481
+    dt='2018-02-01'
+    requests.get('http://api.funceme.br/rest/acude/volume',params={'reservatorio.cod':id,'dataColeta.GTE':dt})
+    http://api.funceme.br/rest/acude/volume?reservatorio.cod=2481&dataColeta.GTE=2018-02-01

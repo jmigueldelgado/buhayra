@@ -14,19 +14,18 @@ cav=read_csv("./buhayra/auxdata/reservoir_tbl.meta") %>%
   st_transform(32724)
 
 yes=st_is_within_distance(cav,wm,dist=300,sparse=TRUE)
-yes
-st_crs(cav)
 
-st_write(wm,"/home/delgado/funceme.gpkg")
-st_write(cav,"/home/delgado/res_meta.gpkg")
+meta=mutate(cav,id_funceme=NA)
 
+for(i in seq(1,length(yes)))
+  {
+      if(length(yes[[i]])==1)
+      {
+       	meta$id_funceme[i]=yes[[i]]
+      }
 
+  }
+  st_write(meta,"/home/delgado/res_meta.geojson")
 
-for( i in seq(1,length(yes))
-{
-    cav
-
-
-}
-
-wm[12555,]
+#st_write(wm,"/home/delgado/funceme.gpkg")
+#st_write(cav,"/home/delgado/res_meta.gpkg")
