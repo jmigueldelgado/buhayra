@@ -4,7 +4,8 @@ from buhayra.getpaths import *
 from pymongo import MongoClient
 from sshtunnel import SSHTunnelForwarder
 import geojson
-from datetime import datetime
+import datetime
+
 def insert_toponyms():
     server = SSHTunnelForwarder(
         MONGO_HOST,
@@ -35,15 +36,15 @@ def insert_toponyms():
 
 def get_reservoir_meta():
     res = requests.get('http://api.funceme.br/rest/acude/reservatorio', params={'paginator':False})
-    pds=pandas.read_json(res.text)
-    pds.to_csv(home['proj'] + '/buhayra/auxdata/reservoir_tbl.meta')
+    # pds=pandas.read_json(res.text)
+    # pds.to_csv(home['proj'] + '/buhayra/auxdata/reservoir_tbl.meta')
 
-    with open(home['proj'] + '/buhayra/auxdata/reservoir.meta', 'w') as outfile:
+    with open(home['proj'] + '/buhayra/auxdata/res_meta.geojson', 'w') as outfile:
         json.dump(res.json(), outfile)
 
 
 def load_reservoir_meta():
-    with open(home['proj'] + '/buhayra/auxdata/reservoir.meta') as json_data:
+    with open(home['proj'] + '/buhayra/auxdata/res_meta.geojson') as json_data:
         res=json.load(json_data)
         json_data.close()
     return(res)
@@ -53,22 +54,9 @@ def load_reservoir_meta():
 #    pandas.read_json(res.text)
 
 
-def get_cav_api():
+def api2hav():
     res=load_reservoir_meta()
-    for i in range(0,len(res):
-        if res[i]['latitude']!=None
-            cav = requests.get('http://api.funceme.br/v1/rest/acude/referencia-cav', params={'reservatorio.cod':res[i]['cod'],'paginator':False})
 
-            feat_id = hav.insert_one(feat).inserted_id
-
-            cav.json()
-            #pdcav=pandas.read_json(cav.text,'columns')
-
-dt='2018-02-01'
-
-id_funceme=26686
-
-def insert_insitu_monitoring(id_funceme,dt):
     server = SSHTunnelForwarder(
         MONGO_HOST,
         ssh_username=MONGO_USER,
@@ -83,27 +71,20 @@ def insert_insitu_monitoring(id_funceme,dt):
     #client = MongoClient('mongodb://localhost:27017/')
 
     db = client.sar2watermask
-    insitu = db.insitu ##  collection
-    toponyms = db.toponyms
-    res=toponyms.find({'properties.id_funceme':id_funceme})
+    hav = db.hav
+    # i=0
 
-    if res.count()==1:
-        vol=requests.get('http://api.funceme.br/rest/acude/volume',params={'reservatorio.cod':res[0]['properties']['cod'],'dataColeta.GTE':dt})
-        if len(vol.json()['list'])>0:
-            for item in vol.json()['list']:
-                vol.json()['list'][0]['dataColeta']
-                item=vol.json()['list'][0]
-
-                record['date']=datetime.strptime(item['dataColeta'],"%Y-%m-%d %H:%M:%S")
-                record['value']=item['valor']
-                record['id_funceme']=id
-                record_id = insitu.update_one({'id_funceme':record['id_funceme'],'date':record['date']},{'$set':record},upsert=True).upserted_id
+    for i in range(0,len(res)):
+        if res[i]['latitude']!=None:
+            cav = requests.get('http://api.funceme.br/v1/rest/acude/referencia-cav', params={'reservatorio.cod':res[i]['cod'],'paginator':False})
+            for feat in cav.json():
+                hav.update_one({'reservatorio':feat['reservatorio'],'codigo':feat['codigo']},{'$set':feat},upsert=True).upserted_id
 
     server.stop()
 
-
-def insert_insitu_monitoring_base_data():
-    dt='2018-02-01'
+def insert_insitu_monitoring():
+    #dt='2018-02-01'
+    dt=datetime.date.today()-datetime.timedelta(weeks=2)
 
     server = SSHTunnelForwarder(
         MONGO_HOST,
@@ -129,7 +110,7 @@ def insert_insitu_monitoring_base_data():
                 vol.json()['list'][0]['dataColeta']
                 item=vol.json()['list'][0]
                 record={}
-                record['date']=datetime.strptime(item['dataColeta'],"%Y-%m-%d %H:%M:%S")
+                record['date']=datetime.datetime.strptime(item['dataColeta'],"%Y-%m-%d %H:%M:%S")
                 record['value']=item['valor']
                 record['id_funceme']=topo['properties']['id_funceme']
                 insitu.update_one({'id_funceme':record['id_funceme'],'date':record['date']},{'$set':record},upsert=True).upserted_id
