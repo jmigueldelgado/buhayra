@@ -37,6 +37,10 @@ def main():
         print("obtain most recent polygons from mongodb\n")
         import buhayra.getLatestPolygons as gLP
         gLP.connect_and_get()
+    elif sys.argv[1]=="update validation":
+        print("obtain validation dataset from funceme api\n")
+        import buhayra.funceme as fcm
+        fcm.insert_insitu_monitoring()
     elif sys.argv[1]=="test":
         print("tests environment\n")
         import ndwi2watermask.ndwi as n2w
