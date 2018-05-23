@@ -18,33 +18,6 @@ import sys
 import rasterio as rio
 from statistics import mean
 from collections import OrderedDict
-import pdb
-
-
-def map2pixel(x, y, geotransform):
-    """Converts geospatial coordinates to pixel (array) coordinates
-
-    Parameters
-    ----------
-    x : int, float
-        x coordinate
-    y : int, float
-        y coordinate
-    geotransform : list or tuple of int, float
-        GDAL transform in its native form
-
-    Returns
-    ----------
-    (x, y): tuple of int
-        Pixel coordinates
-    """
-    ulX = geotransform[0]
-    ulY = geotransform[3]
-    xDist = geotransform[1]
-    yDist = geotransform[5]
-    col = int((x - ulX) / xDist)
-    row = int((ulY - y) / -yDist)
-    return (col, row)
 
 
 pathIn = os.path.expanduser("~/Seafile/UniArbeit/hykli/aktuell/pythonHavData/in")
@@ -142,8 +115,8 @@ mpSchema = {'geometry': 'MultiPoint',
     ])
 }
 
+# sample points
 for key in sPoints:
-    # sample points
     # Class rasterio._io.DatasetReaderBase implements method 'sample'
     # expects iterable with tuples of (x, y) and returns generator
     sPoints[key]['sampleVals'] = list(raster.sample(sPoints[key]['sampleCoords']))
@@ -180,3 +153,22 @@ for key in sPoints:
             schema=mpSchema,
             driver="ESRI Shapefile") as c:
         c.write(samplingMP)
+
+# mask raster and derive hav curve
+for multipoly in masks.filter(bbox=raster.bounds):
+    out_image, out_transform = rio.mask.mask(raster,
+                                             [multipoly['geometry']],
+                                             crop=True)
+    out_meta = raster.meta.copy()
+
+    out_meta.update({"driver": "GTiff",
+                 "height": out_image.shape[1],
+                 "width": out_image.shape[2],
+                 "transform": out_transform})
+
+    with rio.open("{}_masked.tif".
+                  format(multipoly['properties']['id_cogerh']),
+                  "w",
+                  **out_meta) as dest:
+        dest.write(out_image)
+
