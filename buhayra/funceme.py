@@ -9,8 +9,8 @@ import datetime
 def insert_toponyms():
     server = SSHTunnelForwarder(
         MONGO_HOST,
-        ssh_username=MONGO_USER,
-        ssh_password=MONGO_PASS,
+        ssh_username=username,
+        ssh_password=password,
         remote_bind_address=('127.0.0.1', MONGO_PORT))
 
     server.start()
