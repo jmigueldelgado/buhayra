@@ -1,15 +1,5 @@
 #! /usr/bin/env python3
 
-############################
-# TODO
-# x convert multipolygon features to polygon features (or iterate each polygon feature)
-# x convert polygon features to lines
-# x create evenly spaced (in raster resolution or less) points between points of line
-# x sample points in raster and calc mean
-# 5 mask raster with multipolygon
-# 6 further steps see original tdx2hav script from Shuping
-############################
-
 import fiona as fio
 from pygeotools.lib import geolib
 from osgeo import ogr
@@ -23,7 +13,6 @@ import numpy.ma as ma
 import numpy as np
 import matplotlib.pyplot as plt
 import pdb
-import json
 
 
 pathIn = os.path.expanduser("~/Seafile/UniArbeit/hykli/aktuell/pythonHavData/in")
@@ -79,17 +68,6 @@ for multipoly in masks.filter(bbox=raster.bounds):
         continue
     # get each individual polygon in multipolygon
     for poly in multipoly['geometry']['coordinates']:
-
-        # if multipoly['properties']['id_cogerh'] == 14152:
-        #     if len(poly) != 1:
-        #         print(len(poly))
-        #         hasHole = any(isinstance(i, list) for i in poly)
-        #         # print(hasHole)
-        #         for hole in poly:
-        #             for line in poly:
-        #                 pdb.set_trace()
-        #                 print(line)
-
         if len(poly) != 1: # special case for holes in polygons
             # create individual multiline geometry for each poly in multiploly
             lineGeom = ogr.Geometry(ogr.wkbLineString)
@@ -113,7 +91,6 @@ for multipoly in masks.filter(bbox=raster.bounds):
             sPtsX.extend(x)
             sPtsY.extend(y)
             # these polygons are the holes in the first polygon
-
             for hole in poly[1:]:
                 lineGeom = ogr.Geometry(ogr.wkbLineString)
                 for point in hole:
@@ -126,7 +103,6 @@ for multipoly in masks.filter(bbox=raster.bounds):
                 sPtsY.extend(y)
 
         else:  # simple polygon
-            # create individual multiline geometry for each poly in multiploly
             lineGeom = ogr.Geometry(ogr.wkbLineString)
             for line in poly:
                 for point in line:
@@ -165,6 +141,14 @@ for key in sPoints:
     arrVals = []
     for arr in sPoints[key]['sampleVals']:
         arrVals.extend(arr.tolist())
+
+    # remove values that were sampled outside of the raster
+    arrVals = [i for i in arrVals if i > 0]
+    # remove features that are outside valid raster bounds
+    if not arrVals:
+        sPoints.pop(key)
+        break
+
     # set values in dict
     sPoints[key]['sampleVals'] = arrVals
     # compute mean
@@ -189,13 +173,15 @@ for key in sPoints:
     else:
         fMode = 'w'
     with fio.open(
-            'latest_sample_MultiPoints.shp', fMode,
+            'latest_sample_MultiPoints.shp',
+            fMode,
             crs=masks.crs,
             schema=mpSchema,
             driver="ESRI Shapefile") as c:
         c.write(samplingMP)
-pdb.set_trace()
+
 # mask raster and derive hav curve
+hav = {}
 for multipoly in masks.filter(bbox=raster.bounds):
     # out_image is ndarray
     out_image, out_transform = rasterio.mask.mask(raster,
@@ -220,13 +206,14 @@ for multipoly in masks.filter(bbox=raster.bounds):
     # convert to masked array
     out_image = ma.masked_values(out_image, -9999.0)
     data = out_image[~out_image.mask]
-
-    # get sample mean height
-    mean_height = sPoints[str(id_cogerh)]['sampleMean']
-    print(id_cogerh)
-    # create sequence of min height and mean height in reservoir
-    height_seq = np.arange(data.min(), mean_height, 0.5).tolist()
-    height_seq.append(mean_height)
+    try:
+        # get sample mean height
+        mean_height = sPoints[str(id_cogerh)]['sampleMean']
+        # create sequence of min height and mean height in reservoir
+        height_seq = np.arange(data.min(), mean_height, 0.5).tolist()
+        height_seq.append(mean_height)
+    except KeyError:  # removed because outside valid raster bounds:149
+        continue
 
     # use map with calculation function,
     # should be faster
@@ -239,10 +226,13 @@ for multipoly in masks.filter(bbox=raster.bounds):
         if wv is ma.masked:
             wv = 0
         temp.append([h, wa, wv])
-    hav = {id_cogerh: temp}
+    # hav[str(id_cogerh)] = temp
 
     # plot values and save
-
-
+    x = [i[1] for i in temp]
+    y = [i[2] for i in temp]
+    plt.plot(x, y)
+    plt.savefig('{}.png'.format(id_cogerh))
+    plt.close()
 
 
