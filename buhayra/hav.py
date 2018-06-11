@@ -16,8 +16,14 @@ from osgeo import ogr
 import os
 import sys
 import rasterio as rio
+import rasterio.mask
 from statistics import mean
 from collections import OrderedDict
+import numpy.ma as ma
+import numpy as np
+import matplotlib.pyplot as plt
+import pdb
+import json
 
 
 pathIn = os.path.expanduser("~/Seafile/UniArbeit/hykli/aktuell/pythonHavData/in")
@@ -73,29 +79,64 @@ for multipoly in masks.filter(bbox=raster.bounds):
         continue
     # get each individual polygon in multipolygon
     for poly in multipoly['geometry']['coordinates']:
-        # create individual multiline geometry for each poly in multiploly
-        lineGeom = ogr.Geometry(ogr.wkbLineString)
-        # get each line in polygon
-        for line in poly:
-            for point in line:
-                lineGeom.AddPoint(point[0], point[1])
-        # rest of feature creation for inspection
-        # create a new feature
-        outFeature = ogr.Feature(featureDefn)
+
+        # if multipoly['properties']['id_cogerh'] == 14152:
+        #     if len(poly) != 1:
+        #         print(len(poly))
+        #         hasHole = any(isinstance(i, list) for i in poly)
+        #         # print(hasHole)
+        #         for hole in poly:
+        #             for line in poly:
+        #                 pdb.set_trace()
+        #                 print(line)
+
+        if len(poly) != 1: # special case for holes in polygons
+            # create individual multiline geometry for each poly in multiploly
+            lineGeom = ogr.Geometry(ogr.wkbLineString)
+            # first list contains coordinates of embracing polygon
+            for point in poly[0]:
+                    lineGeom.AddPoint(point[0], point[1])
+            outFeature = ogr.Feature(featureDefn)
             # Set new geometry
-        outFeature.SetGeometry(lineGeom)
-        # Add new feature to output Layer
-        outLayer.CreateFeature(outFeature)
-        # create points on line in sampling distance
-        # IMPORTANT !!!
-        # ogr.Geometry.AddPoint() adds height information
-        # i.e a z coordinate which defaults to zero
-        # in order to fix this issue, a 3rd dimension needs to be added
-        # to the function pygeotools.lib.geolib.line2pts
-        # on line 947 and 948 for unpacking
-        garbage, x, y = geolib.line2pts(lineGeom, sDist)
-        sPtsX.extend(x)
-        sPtsY.extend(y)
+            outFeature.SetGeometry(lineGeom)
+            # Add new feature to output Layer
+            outLayer.CreateFeature(outFeature)
+            # create points on line in sampling distance
+            # IMPORTANT !!!
+            # ogr.Geometry.AddPoint() adds height information
+            # i.e a z coordinate which defaults to zero
+            # in order to fix this issue, a 3rd dimension
+            # needs to be added
+            # to the function pygeotools.lib.geolib.line2pts
+            # on line 947 and 948 for unpacking
+            garbage, x, y = geolib.line2pts(lineGeom, sDist)
+            sPtsX.extend(x)
+            sPtsY.extend(y)
+            # these polygons are the holes in the first polygon
+
+            for hole in poly[1:]:
+                lineGeom = ogr.Geometry(ogr.wkbLineString)
+                for point in hole:
+                    lineGeom.AddPoint(point[0], point[1])
+                outFeature = ogr.Feature(featureDefn)
+                outFeature.SetGeometry(lineGeom)
+                outLayer.CreateFeature(outFeature)
+                garbage, x, y = geolib.line2pts(lineGeom, sDist)
+                sPtsX.extend(x)
+                sPtsY.extend(y)
+
+        else:  # simple polygon
+            # create individual multiline geometry for each poly in multiploly
+            lineGeom = ogr.Geometry(ogr.wkbLineString)
+            for line in poly:
+                for point in line:
+                    lineGeom.AddPoint(point[0], point[1])
+            outFeature = ogr.Feature(featureDefn)
+            outFeature.SetGeometry(lineGeom)
+            outLayer.CreateFeature(outFeature)
+            garbage, x, y = geolib.line2pts(lineGeom, sDist)
+            sPtsX.extend(x)
+            sPtsY.extend(y)
 
     # dereference the feature
     outFeature = None
@@ -153,12 +194,15 @@ for key in sPoints:
             schema=mpSchema,
             driver="ESRI Shapefile") as c:
         c.write(samplingMP)
-
+pdb.set_trace()
 # mask raster and derive hav curve
 for multipoly in masks.filter(bbox=raster.bounds):
-    out_image, out_transform = rio.mask.mask(raster,
+    # out_image is ndarray
+    out_image, out_transform = rasterio.mask.mask(raster,
                                              [multipoly['geometry']],
-                                             crop=True)
+                                             crop=True,
+                                             nodata=-9999)
+    # write masked raster for inspection
     out_meta = raster.meta.copy()
 
     out_meta.update({"driver": "GTiff",
@@ -166,9 +210,39 @@ for multipoly in masks.filter(bbox=raster.bounds):
                  "width": out_image.shape[2],
                  "transform": out_transform})
 
+    id_cogerh = multipoly['properties']['id_cogerh']
     with rio.open("{}_masked.tif".
-                  format(multipoly['properties']['id_cogerh']),
+                  format(id_cogerh),
                   "w",
                   **out_meta) as dest:
         dest.write(out_image)
+
+    # convert to masked array
+    out_image = ma.masked_values(out_image, -9999.0)
+    data = out_image[~out_image.mask]
+
+    # get sample mean height
+    mean_height = sPoints[str(id_cogerh)]['sampleMean']
+    print(id_cogerh)
+    # create sequence of min height and mean height in reservoir
+    height_seq = np.arange(data.min(), mean_height, 0.5).tolist()
+    height_seq.append(mean_height)
+
+    # use map with calculation function,
+    # should be faster
+    temp = []
+    for h in height_seq:
+        wl = h - data
+        wl = ma.masked_less_equal(wl, 0)           # water level
+        wa = pixelSizeX * pixelSizeY * wl.count()  # water area
+        wv = pixelSizeX * pixelSizeY * wl.sum()    # water volume
+        if wv is ma.masked:
+            wv = 0
+        temp.append([h, wa, wv])
+    hav = {id_cogerh: temp}
+
+    # plot values and save
+
+
+
 
