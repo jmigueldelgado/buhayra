@@ -37,3 +37,9 @@ In short, the following steps are done sequentially:
 
 ## In progress:
 - combine the water extent collection with bathymetric survey from TanDEM-X
+
+## Some references
+
+We were at ESAs [_mapping water bodies from space 2nd conference_](http://mwbs2018.esa.int/) in Frascati (Rome), and at the [_World Water Forum_](http://www.worldwaterforum8.org/) in Brasília 2018.
+
+[Shuping's talk](presentation167.pdf) and [Martin's poster](poster08.pdf) in Frascati. [My talk](wwf2018.pdf) in Brasília.
