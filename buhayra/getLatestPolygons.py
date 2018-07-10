@@ -45,5 +45,5 @@ def connect_and_get():
     geojson.dump(feat_col,f)
     f.close()
 
-    if home['hostname']!='ubuntuserver':
+    if socket.gethostname()!='ubuntuserver':
         server.stop()

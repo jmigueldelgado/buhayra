@@ -5,6 +5,7 @@ import sys
 from datetime import datetime
 from sshtunnel import SSHTunnelForwarder
 import logging
+import shutil
 
 from buhayra.getpaths import *
 
@@ -53,8 +54,8 @@ def insertPolygons():
             #feat_id = s2w.update_one(feat,{"$set" : feat},upsert=True).upserted_id
             feat_id = s2w.insert_one(feat).inserted_id
 
-        logging.info('\n removing ' + in_file + '\n')
-        os.remove(polOut + '/' + in_file)
+        logging.info('\n moving away ' + in_file + '\n')
+        shutil.move(polOut + '/' + in_file,procOut)
 
     #### IT WORKS!!!
 

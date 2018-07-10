@@ -47,6 +47,7 @@ sarIn=sardir+"/in"
 sarOut=sardir+"/out"
 
 polOut=scratch + "/watermasks"
+procOut=scratch + "/processed_watermasks"
 
 MONGO_HOST = "141.89.96.184"
 MONGO_DB = "sar2watermask"

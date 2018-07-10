@@ -5,6 +5,55 @@ from bson import json_util
 import os
 import sys
 from datetime import datetime,timedelta
+from buhayra.getpaths import *
+import socket
+from sshtunnel import SSHTunnelForwarder
+
+
+### for testing purposes only
+def establishConnectionManually():
+    if socket.gethostname()!='ubuntuserver':
+        server = SSHTunnelForwarder(
+            MONGO_HOST,
+            ssh_username=MONGO_USER,
+            ssh_password=MONGO_PASS,
+            remote_bind_address=('127.0.0.1', MONGO_PORT))
+
+        server.start()
+        print("started ssh tunnel")
+
+        client = MongoClient('127.0.0.1', server.local_bind_port) # server.local_bind_port is assigned local port
+    else:
+        print("connecting to local host")
+        client = MongoClient('mongodb://localhost:27017/')
+
+
+    db = client.sar2watermask
+    s2w = db.sar2watermask ##  collection
+
+
+
+def getLatestDates(s2w):
+    # pipeline with id_cogerh and ingestion dates
+
+
+    pipeline =  [   {'$project' : {'properties.id_cogerh':1, 'properties.ingestion_time':1}},
+                    {"$sort" : {"properties.id_cogerh" : 1, "properties.ingestion_time" : 1 }},
+                    {"$group": {
+                                "_id" : "$properties.id_cogerh",
+                                "latestIngestion" : {
+                                    "$last":"$properties.ingestion_time"
+                                    }
+                                }}
+                ]
+
+    aggrLatest=list(s2w.aggregate(pipeline=pipeline,allowDiskUse=True))
+    june=list()
+    aggrLatest[0]
+    for row in aggrLatest:
+        if row['latestIngestion']>datetime(2018,5,15,0,0,0):
+            june.append(row)
+
 
 def getLatestPolys(s2w):
     pipeline = [
@@ -20,7 +69,7 @@ def getLatestPolys(s2w):
         }
     ]
 
-    aggrLatest=list(s2w.aggregate(pipeline=pipeline))
+    aggrLatest=list(s2w.aggregate(pipeline=pipeline,allowDiskUse=True))
 
     latest=list()
 
