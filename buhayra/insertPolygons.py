@@ -53,9 +53,8 @@ def insertPolygons():
 
             logging.info("Current feature's properties:")
             logging.info("Ingestion Date:%s",feat["properties"]["ingestion_time"])
-            logging.info("ID:%s",feat["properties"]["id_cogerh"])
+            logging.info("ID:%s",feat["properties"]["id_funceme"])
 
-            #dicio = {"geometry":feat["geometry"],"id_cogerh":feat["properties"]["id_cogerh"]}
             feat_id = s2w.update_one(feat,upsert=True).upserted_id
             #feat_id = s2w.insert_one(feat).inserted_id
             logging.info('Inserted feature ID: %s',feat_id)
