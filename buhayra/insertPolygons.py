@@ -54,8 +54,7 @@ def insertPolygons():
             logging.info("Current feature's properties:")
             logging.info("Ingestion Date:%s",feat["properties"]["ingestion_time"])
             logging.info("ID:%s",feat["properties"]["id_funceme"])
-
-            feat_id = s2w.insert_one(feat).inserted_id
+            feat_id = s2w.update_one({'properties.id_funceme':feat["properties"]["id_funceme"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },feat,upsert=True).upserted_id
             logging.info('Inserted feature ID: %s',feat_id)
         logging.info('\n\n\n moving away ' + in_file + '\n\n\n')
         shutil.move(polOut + '/' + in_file,procOut)

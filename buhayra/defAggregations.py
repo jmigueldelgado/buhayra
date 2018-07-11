@@ -37,10 +37,10 @@ def getLatestDates(s2w):
     # pipeline with id_cogerh and ingestion dates
 
 
-    pipeline =  [   {'$project' : {'properties.id_cogerh':1, 'properties.ingestion_time':1}},
-                    {"$sort" : {"properties.id_cogerh" : 1, "properties.ingestion_time" : 1 }},
+    pipeline =  [   {'$project' : {'properties.id_funceme':1, 'properties.ingestion_time':1}},
+                    {"$sort" : {"properties.id_funceme" : 1, "properties.ingestion_time" : 1 }},
                     {"$group": {
-                                "_id" : "$properties.id_cogerh",
+                                "_id" : "$properties.id_funceme",
                                 "latestIngestion" : {
                                     "$last":"$properties.ingestion_time"
                                     }
