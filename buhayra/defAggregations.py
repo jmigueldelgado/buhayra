@@ -31,60 +31,14 @@ def establishConnectionManually():
     db = client.sar2watermask
     s2w = db.sar2watermask ##  collection
 
-
-
-def getLatestDates(s2w):
-    # pipeline with id_cogerh and ingestion dates
-
-
-    pipeline =  [   {'$project' : {'properties.id_funceme':1, 'properties.ingestion_time':1}},
-                    {"$sort" : {"properties.id_funceme" : 1, "properties.ingestion_time" : 1 }},
-                    {"$group": {
-                                "_id" : "$properties.id_funceme",
-                                "latestIngestion" : {
-                                    "$last":"$properties.ingestion_time"
-                                    }
-                                }}
-                ]
-
-    aggrLatest=list(s2w.aggregate(pipeline=pipeline,allowDiskUse=True))
-    june=list()
-    aggrLatest[0]
-    for row in aggrLatest:
-        if row['latestIngestion']>datetime(2018,5,15,0,0,0):
-            june.append(row)
-
-
-def getLatestPolys(s2w):
-    pipeline = [
-        { "$sort" : {"properties.id_cogerh" : 1, "properties.ingestion_time" : 1 }},
-        {
-            "$group":
-            {
-                "_id" : "$properties.id_cogerh",
-                "latestIngestion" : {
-                    "$last":"$properties.ingestion_time"
-                }
-            }
-        }
-    ]
-
-    aggrLatest=list(s2w.aggregate(pipeline=pipeline,allowDiskUse=True))
-
-    latest=list()
-
-    for feat in aggrLatest:
-        poly = s2w.find({'properties.id_cogerh' : feat['_id'],'properties.ingestion_time':feat['latestIngestion']})
-        latest.append(poly[0])
-    return(latest)
-
+## also for manual use
 def getLatestIngestionTime(s2w):
     pipeline = [
-        { "$sort" : {"properties.id_cogerh" : 1, "properties.ingestion_time" : 1 }},
+        { "$sort" : {"properties.id_funceme" : 1, "properties.ingestion_time" : 1 }},
         {
             "$group":
             {
-                "_id" : "$properties.id_cogerh",
+                "_id" : "$properties.id_funceme",
                 "latestIngestion" : {
                     "$last":"$properties.ingestion_time"
                 }
@@ -96,20 +50,44 @@ def getLatestIngestionTime(s2w):
     latest=list()
 
     for feat in aggrLatest:
-        poly = s2w.find({'properties.id_cogerh' : feat['_id'],'properties.ingestion_time':feat['latestIngestion']},{'properties.id_cogerh' : 1,'properties.ingestion_time' : 1})
+        poly = s2w.find({'properties.id_funceme' : feat['_id'],'properties.ingestion_time':feat['latestIngestion']},{'properties.id_funceme' : 1,'properties.ingestion_time' : 1})
         latest.append(poly[0])
     return(latest)
 
+
+
+def getLatestPolys(s2w):
+    pipeline = [
+        { "$sort" : {"properties.id_funceme" : 1, "properties.ingestion_time" : 1 }},
+        {
+            "$group":
+            {
+                "_id" : "$properties.id_funceme",
+                "latestIngestion" : {
+                    "$last":"$properties.ingestion_time"
+                }
+            }
+        }
+    ]
+
+    aggrLatest=list(s2w.aggregate(pipeline=pipeline,allowDiskUse=True))
+
+    latest=list()
+
+    for feat in aggrLatest:
+        poly = s2w.find({'properties.id_funceme' : feat['_id'],'properties.ingestion_time':feat['latestIngestion']})
+        latest.append(poly[0])
+    return(latest)
 
 def getLatestIngestionTimeMinusOne(s2w):
     thresh_date=datetime.now() - timedelta(days=30)
     pipeline = [
         { "$match" : {"properties.ingestion_time" : {"$lte" : thresh_date}}},
-        { "$sort" : {"properties.id_cogerh" : 1, "properties.ingestion_time" : 1 }},
+        { "$sort" : {"properties.id_funceme" : 1, "properties.ingestion_time" : 1 }},
         {
             "$group":
             {
-                "_id" : "$properties.id_cogerh",
+                "_id" : "$properties.id_funceme",
                 "latestIngestion" : {
                     "$last":"$properties.ingestion_time"
                 }
@@ -121,20 +99,20 @@ def getLatestIngestionTimeMinusOne(s2w):
     latest=list()
 
     for feat in aggrLatest:
-        poly = s2w.find({'properties.id_cogerh' : feat['_id'],'properties.ingestion_time':feat['latestIngestion']})
+        poly = s2w.find({'properties.id_funceme' : feat['_id'],'properties.ingestion_time':feat['latestIngestion']})
         latest.append(poly[0])
     return(latest)
 
 
-def getLatestPolysMinusX(s2w,x):
+def getLatestPolysMinusX(s2w,x):    
     thresh_date=datetime.now() - timedelta(days=x*30)
     pipeline = [
         { "$match" : {"properties.ingestion_time" : {"$lte" : thresh_date}}},
-        { "$sort" : {"properties.id_cogerh" : 1, "properties.ingestion_time" : 1 }},
+        { "$sort" : {"properties.id_funceme" : 1, "properties.ingestion_time" : 1 }},
         {
             "$group":
             {
-                "_id" : "$properties.id_cogerh",
+                "_id" : "$properties.id_funceme",
                 "latestIngestion" : {
                     "$last":"$properties.ingestion_time"
                 }
@@ -142,12 +120,12 @@ def getLatestPolysMinusX(s2w,x):
         }
     ]
 
-    aggrLatest=list(s2w.aggregate(pipeline=pipeline))
+    aggrLatest=list(s2w.aggregate(pipeline=pipeline,allowDiskUse=True))
 
     latest=list()
 
     for feat in aggrLatest:
-        poly = s2w.find({'properties.id_cogerh' : feat['_id'],'properties.ingestion_time':feat['latestIngestion']})
+        poly = s2w.find({'properties.id_funceme' : feat['_id'],'properties.ingestion_time':feat['latestIngestion']})
         latest.append(poly[0])
     return(latest)
 
@@ -158,7 +136,7 @@ def getTimeSeries(s2w):
         {
             "$group":
             {
-                "_id" : "$properties.id_cogerh",
+                "_id" : "$properties.id_funceme",
                 "timeSeries" : { "$push" : { "time" : "$properties.ingestion_time" , "area" : "$properties.area"} }
             }
 

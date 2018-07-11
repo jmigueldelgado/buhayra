@@ -11,7 +11,7 @@ from buhayra.defAggregations import *
 from buhayra.getpaths import *
 import subprocess as sp
 
-def connect_and_get():
+def connect_and_get(x):
     if socket.gethostname()!='ubuntuserver':
         server = SSHTunnelForwarder(
             MONGO_HOST,
@@ -32,11 +32,10 @@ def connect_and_get():
     s2w = db.sar2watermask ##  collection
 
     #TimeSeries = getTimeSeries(s2w)
-    latestIngestionTime = getLatestIngestionTime(s2w)
+    #latestIngestionTime = getLatestIngestionTime(s2w)
 
-    ## get most recent polygons from mongodb
-    polys = getLatestPolys(s2w)
-
+    ## get polygons from x months ago from mongodb
+    polys = getLatestPolysMinusX(sw2,x)
     ## get geojson standard feature collection
     feat_col=aggr2geojson(polys)
 

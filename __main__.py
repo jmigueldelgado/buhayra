@@ -36,7 +36,15 @@ def main():
     elif sys.argv[1]=="recent polys":
         print("obtain most recent polygons from mongodb\n")
         import buhayra.getLatestPolygons as gLP
-        gLP.connect_and_get()
+        gLP.connect_and_get(0)
+    elif sys.argv[1]=="1 month old polys":
+        print("obtain last month's polygons from mongodb\n")
+        import buhayra.getLatestPolygons as gLP
+        gLP.connect_and_get(1)
+    elif sys.argv[1]=="2 months old polys":
+        print("obtain polygons from 2 months ago from mongodb\n")
+        import buhayra.getLatestPolygons as gLP
+        gLP.connect_and_get(2)
     elif sys.argv[1]=="update validation":
         print("obtain validation dataset from funceme api\n")
         import buhayra.funceme as fcm
