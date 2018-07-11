@@ -35,7 +35,7 @@ def connect_and_get(x):
     #latestIngestionTime = getLatestIngestionTime(s2w)
 
     ## get polygons from x months ago from mongodb
-    polys = getLatestPolysMinusX(sw2,x)
+    polys = getLatestPolysMinusX(s2w,x)
     ## get geojson standard feature collection
     feat_col=aggr2geojson(polys)
 
