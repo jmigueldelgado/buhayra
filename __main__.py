@@ -1,4 +1,30 @@
 import sys
+import logging
+import logging.config
+import os
+import json
+
+
+
+def setup_logging(
+    default_path='./buhayra/parameters/logging.json',
+    default_level=logging.INFO,
+    env_key='LOG_CFG'
+):
+    """Setup logging configuration
+
+    """
+    path = default_path
+    value = os.getenv(env_key, None)
+    if value:
+        path = value
+    if os.path.exists(path):
+        with open(path, 'rt') as f:
+            config = json.load(f)
+        logging.config.dictConfig(config)
+    else:
+        logging.basicConfig(level=default_level)
+
 
 def main():
     """The main routine."""
@@ -55,10 +81,14 @@ def main():
         n2w.test_one_ndwi()
     elif sys.argv[1]=="another test":
         print("tests environment\n")
-        print("test!!!!\n")
+        #print("test!!!!\n")
+        import buhayra.testlog as tl
+        tl.testing_logging()
     else:
         print('please provide one of "rmclouds", "getscenes" or "ndwi"')
 
 
 if __name__ == "__main__":
+    setup_logging()
+    logger = logging.getLogger(__name__)
     print(main())

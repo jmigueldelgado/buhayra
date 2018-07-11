@@ -10,8 +10,7 @@ import shutil
 from buhayra.getpaths import *
 
 def insertPolygons():
-    logging.basicConfig(filename=home['home'] + "/5_insert_polys.pylog",level=logging.DEBUG)
-
+    logger = logging.getLogger(__name__)
     server = SSHTunnelForwarder(
         MONGO_HOST,
         ssh_username=MONGO_USER,
