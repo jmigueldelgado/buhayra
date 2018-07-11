@@ -104,7 +104,7 @@ def getLatestIngestionTimeMinusOne(s2w):
     return(latest)
 
 
-def getLatestPolysMinusX(s2w,x):    
+def getLatestPolysMinusX(s2w,x):
     thresh_date=datetime.now() - timedelta(days=x*30)
     pipeline = [
         { "$match" : {"properties.ingestion_time" : {"$lte" : thresh_date}}},
