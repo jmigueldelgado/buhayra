@@ -10,18 +10,7 @@ import shutil
 from buhayra.getpaths import *
 
 def insertPolygons():
-#    logging.basicConfig(filename=home['home'] + "/5_insert_polys.pylog",level=logging.DEBUG)
-    logger = logging.getLogger(__name__)
-
-    # create a file handler
-    handler = logging.FileHandler(home['home'] + "/5_insert_polys.pylog")
-    handler.setLevel(logging.DEBUG)
-    # create a logging format
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
-
-    # add the handlers to the logger
-    logger.addHandler(handler)
+    logging.basicConfig(filename=home['home'] + "/5_insert_polys.pylog",level=logging.DEBUG)
 
     server = SSHTunnelForwarder(
         MONGO_HOST,
@@ -31,6 +20,8 @@ def insertPolygons():
 
     server.start()
 
+    logging.info("%s",server)
+
     client = MongoClient('127.0.0.1', server.local_bind_port) # server.local_bind_port is assigned local port
 
     ## in case you want the local host:
@@ -38,8 +29,10 @@ def insertPolygons():
 
     db = client.sar2watermask
     s2w = db.sar2watermask ##  collection
-
     #print(db.collection_names())
+    logging.info("Connected to mongodb")
+    logging.info("db.collection_names()")
+    logging.info("%s",db.collection_names())
 
     newlist = []
     items=os.listdir(polOut)
@@ -48,7 +41,7 @@ def insertPolygons():
             newlist.append(names)
 
     for in_file in newlist:
-        logger.info('\n inserting ' + in_file + ' in mongodb\n')
+        logging.info('\n inserting ' + in_file + ' in mongodb\n')
 
         with open(polOut + '/' + in_file) as f:
             data = geojson.load(f)
@@ -61,7 +54,7 @@ def insertPolygons():
             #feat_id = s2w.update_one(feat,{"$set" : feat},upsert=True).upserted_id
             feat_id = s2w.insert_one(feat).inserted_id
 
-        logger.info('\n\n\n moving away ' + in_file + '\n\n\n')
+        logging.info('\n\n\n moving away ' + in_file + '\n\n\n')
         shutil.move(polOut + '/' + in_file,procOut)
 
     #### IT WORKS!!!
