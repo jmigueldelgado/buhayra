@@ -50,10 +50,15 @@ def insertPolygons():
             dttm = datetime.strptime(feat["properties"]["ingestion_time"],"%Y/%m/%d %H:%M:%S+00")
             feat["properties"]["ingestion_time"] = dttm
             feat["properties"]["source_id"] = int(feat["properties"]["source_id"])
-            #dicio = {"geometry":feat["geometry"],"id_cogerh":feat["properties"]["id_cogerh"]}
-            #feat_id = s2w.update_one(feat,{"$set" : feat},upsert=True).upserted_id
-            feat_id = s2w.insert_one(feat).inserted_id
 
+            logging.info("Current feature's properties:")
+            logging.info("Ingestion Date:%s",feat["properties"]["ingestion_time"])
+            logging.info("ID:%s",feat["properties"]["id_cogerh"])
+
+            #dicio = {"geometry":feat["geometry"],"id_cogerh":feat["properties"]["id_cogerh"]}
+            feat_id = s2w.update_one(feat,upsert=True).upserted_id
+            #feat_id = s2w.insert_one(feat).inserted_id
+            logging.info('Inserted feature ID: %s',feat_id)
         logging.info('\n\n\n moving away ' + in_file + '\n\n\n')
         shutil.move(polOut + '/' + in_file,procOut)
 
