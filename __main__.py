@@ -30,7 +30,7 @@ def main():
     """The main routine."""
 
     if sys.argv[1] is None:
-        print("an argument is needed, for example: cleanup or get_scenes")
+        print("an argument is needed, for example:\nget_scenes\nrmclouds\nsar\nndwi\npolygonize\ninsert\nrecent polys\n1 month old polys\n2 months old polys\nupdate validation")
     elif sys.argv[1]=="getscenes":
         import buhayra.scenes as scenes
         scenes.getscenes()

@@ -1,5 +1,3 @@
-print("1 begin imports\n")
-
 from os import listdir
 import os
 import datetime
@@ -16,7 +14,7 @@ from snappy import ProductIO
 from snappy import jpy
 from snappy import HashMap
 from snappy import Rectangle
-
+import logging
 
 from buhayra.getpaths import *
 
@@ -34,10 +32,10 @@ from buhayra.getpaths import *
 # Some definitions
 
 def sar2w():
-
+    logger = logging.getLogger(__name__)
     t0=datetime.datetime.now()
 
-    print("2 begin defining functions from snappy\n")
+    logger.info("importing functions from snappy")
 
     outForm='GeoTIFF+XML'
     WKTReader = snappy.jpy.get_type('com.vividsolutions.jts.io.WKTReader')
@@ -47,7 +45,10 @@ def sar2w():
     Dimension = snappy.jpy.get_type('java.awt.Dimension')
     System = jpy.get_type('java.lang.System')
     BandDescriptor = jpy.get_type('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor')
-
+    logger.debug(WKTReader)
+    logger.debug(HashMap)
+    logger.debug(BandDescriptor)
+    logger.debug(System)
 
     flist=listdir(sarIn)
 
@@ -57,13 +58,12 @@ def sar2w():
     for f in flist:
         status=status+1
 
-        print("SCENE " + str(status) + " of " + str(len(flist)) + "\n\n")
+        logger.info("SCENE " + str(status) + " of " + str(len(flist)))
 
-        print("3 begin reading product\n")
+        logger.info("reading product.......")
 
         product = ProductIO.readProduct(sarIn+"/"+f)
-        print("\n processing " + f + "\n")
-        print("at " + str(datetime.datetime.now()) + "\n")
+        logger.info("processing " + f)
 
         # Obtain some attributes
 
@@ -74,7 +74,7 @@ def sar2w():
         band_names = product.getBandNames()
 
         # Initiate processing
-        print("4 initiate processing\n")
+        logger.info("start processing")
 
         GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
 
@@ -148,7 +148,7 @@ def sar2w():
             CalSfWater = GPF.createProduct('BandMaths', parameters, CalSf)
 
             current_bands = CalSfWater.getBandNames()
-            print("Current Bands after Band Arithmetics 2:   %s \n" % (list(current_bands)))
+            logger.debug("Current Bands after Band Arithmetics 2:   %s" % (list(current_bands)))
 
 
             ## Geometric correction
@@ -161,7 +161,7 @@ def sar2w():
             CalSfWaterCorr1 = GPF.createProduct('Terrain-Correction',params,CalSfWater)
 
             current_bands = CalSfWaterCorr1.getBandNames()
-            print("Current Bands after Terrain Correction:   %s \n" % (list(current_bands)))
+            logger.debug("Current Bands after Terrain Correction:   %s" % (list(current_bands)))
 
             ## Band Arithmetics 2
 
@@ -184,7 +184,7 @@ def sar2w():
             CalSfWaterCorr2 = GPF.createProduct('BandMaths', parameters, CalSfWaterCorr1)
 
             current_bands = CalSfWaterCorr2.getBandNames()
-            print("Current Bands after Band Arithmetics 2:   %s \n" % (list(current_bands)))
+            logger.debug("Current Bands after Band Arithmetics 2:   %s" % (list(current_bands)))
 
 
             ### write output
@@ -200,8 +200,8 @@ def sar2w():
         System.gc()
 
         ### remove scene from folder
-        print("\n REMOVING " + f + "\n")
+        logger.info("REMOVING " + f)
 
         os.remove(sarIn+"/"+f)
 
-    print("\n********** sar2watermask completed!" + str(len(flist))  + " scenes processed\n********** Elapsed time: " + str(datetime.datetime.now()-t0) + "\n********** End of message\n")
+    logger.info("**** sar2watermask completed!" + str(len(flist))  + " scenes processed\n********** Elapsed time: " + str(datetime.datetime.now()-t0) + "****")
