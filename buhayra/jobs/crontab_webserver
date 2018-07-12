@@ -4,9 +4,9 @@
 ## desc: runs a query on mongodb and saves geojson files
 
 0 3 21 * * /home/delgado/proj/buhayra/buhayra/jobs/5.2_funceme_api.sh
-45 14 11 * * /home/delgado/proj/buhayra/buhayra/jobs/6_2_months_old_polygons.sh
-0 17 11 * * /home/delgado/proj/buhayra/buhayra/jobs/7_ogr2ogr.sh
-#45 14 11 * * /home/delgado/proj/buhayra/buhayra/jobs/6_1_month_old_polygons.sh
-#0 17 21 * * /home/delgado/proj/buhayra/buhayra/jobs/7_ogr2ogr.sh
-#45 14 11 * * /home/delgado/proj/buhayra/buhayra/jobs/6_latest_polygons.sh
-#0 17 21 * * /home/delgado/proj/buhayra/buhayra/jobs/7_ogr2ogr.sh
+#01 15 * * 1 /home/delgado/proj/buhayra/buhayra/jobs/6_2_months_old_polygons.sh
+#0 19 * * 1 /home/delgado/proj/buhayra/buhayra/jobs/7_ogr2ogr.sh
+#45 23 * * 1 /home/delgado/proj/buhayra/buhayra/jobs/6_1_month_old_polygons.sh
+#45 3 * * 2 /home/delgado/proj/buhayra/buhayra/jobs/7_ogr2ogr.sh
+45 4 * * 2 /home/delgado/proj/buhayra/buhayra/jobs/6_latest_polygons.sh
+45 8 * * 2 /home/delgado/proj/buhayra/buhayra/jobs/7_ogr2ogr.sh
