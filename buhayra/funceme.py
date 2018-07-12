@@ -72,7 +72,6 @@ def api2hav():
 
     db = client.sar2watermask
     hav = db.hav
-    # i=0
 
     for i in range(0,len(res)):
         if res[i]['latitude']!=None:
@@ -84,6 +83,7 @@ def api2hav():
 
 def insert_insitu_monitoring():
     #dt='2018-02-01'
+    logger = logging.getLogger(__name__)
     dt=datetime.date.today()-datetime.timedelta(weeks=2)
 
     server = SSHTunnelForwarder(
@@ -93,6 +93,7 @@ def insert_insitu_monitoring():
         remote_bind_address=('127.0.0.1', MONGO_PORT))
 
     server.start()
+    logger.info("%s",server)
 
     client = MongoClient('127.0.0.1', server.local_bind_port) # server.local_bind_port is assigned local port
 
@@ -102,7 +103,12 @@ def insert_insitu_monitoring():
     db = client.sar2watermask
     insitu = db.insitu ##  collection
     toponyms = db.toponyms
+    logger.info("Connected to mongodb:")
+    logger.info("%s",toponyms)
+
     topos=toponyms.find({'properties.id_funceme':{'$ne' : None}})
+    logger.debug("%s",topos[0:5])
+
     for topo in topos:
         vol=requests.get('http://api.funceme.br/rest/acude/volume',params={'reservatorio.cod':topo['properties']['cod'],'dataColeta.GTE':dt})
         if len(vol.json()['list'])>0:
@@ -113,6 +119,6 @@ def insert_insitu_monitoring():
                 record['date']=datetime.datetime.strptime(item['dataColeta'],"%Y-%m-%d %H:%M:%S")
                 record['value']=item['valor']
                 record['id_funceme']=topo['properties']['id_funceme']
-                insitu.update_one({'id_funceme':record['id_funceme'],'date':record['date']},{'$set':record},upsert=True).upserted_id
-
+                insert_id = insitu.update_one({'id_funceme':record['id_funceme'],'date':record['date']},{'$set':record},upsert=True).upserted_id
+                logger.debug("%s",insert_id)
     server.stop()

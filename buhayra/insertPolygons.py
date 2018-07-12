@@ -19,7 +19,7 @@ def insertPolygons():
 
     server.start()
 
-    logging.info("%s",server)
+    logger.info("%s",server)
 
     client = MongoClient('127.0.0.1', server.local_bind_port) # server.local_bind_port is assigned local port
 
@@ -29,9 +29,8 @@ def insertPolygons():
     db = client.sar2watermask
     s2w = db.sar2watermask ##  collection
     #print(db.collection_names())
-    logging.info("Connected to mongodb")
-    logging.info("db.collection_names()")
-    logging.info("%s",db.collection_names())
+    logger.info("Connected to mongodb:")
+    logger.info("%s",s2w)
 
     newlist = []
     items=os.listdir(polOut)
@@ -40,7 +39,7 @@ def insertPolygons():
             newlist.append(names)
 
     for in_file in newlist:
-        logging.info('\n inserting ' + in_file + ' in mongodb\n')
+        logger.info('\n inserting ' + in_file + ' in mongodb\n')
 
         with open(polOut + '/' + in_file) as f:
             data = geojson.load(f)
@@ -50,12 +49,12 @@ def insertPolygons():
             feat["properties"]["ingestion_time"] = dttm
             feat["properties"]["source_id"] = int(feat["properties"]["source_id"])
 
-            logging.info("Current feature's properties:")
-            logging.info("Ingestion Date:%s",feat["properties"]["ingestion_time"])
-            logging.info("ID:%s",feat["properties"]["id_funceme"])
+            logger.info("Current feature's properties:")
+            logger.info("Ingestion Date:%s",feat["properties"]["ingestion_time"])
+            logger.info("ID:%s",feat["properties"]["id_funceme"])
             feat_id = s2w.update_one({'properties.id_funceme':feat["properties"]["id_funceme"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },feat,upsert=True).upserted_id
-            logging.info('Inserted feature ID: %s',feat_id)
-        logging.info('\n\n\n moving away ' + in_file + '\n\n\n')
+            logger.info('Inserted feature ID: %s',feat_id)
+        logger.info('\n\n\n moving away ' + in_file + '\n\n\n')
         shutil.move(polOut + '/' + in_file,procOut)
 
     #### IT WORKS!!!
