@@ -56,14 +56,4 @@ def insertPolygons():
         logger.info('\n\n\n moving away ' + in_file + '\n\n\n')
         shutil.move(polOut + '/' + in_file,procOut)
 
-    #### IT WORKS!!!
-
-    server.stop()
-
-#### This works, but would need python installed on the webserver and mount of orson's /mnt/scratch, which is not very reliable
-
-#ssh = paramiko.SSHClient()
-#ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-#ssh.connect(hostname=MONGO_HOST,username=MONGO_USER,password=MONGO_PASS)
-#stdin, stdout, stderr = ssh.exec_command('python ')
-#ssh.close()
+#    server.stop()
