@@ -3,12 +3,14 @@ import subprocess
 import glob
 import datetime
 from buhayra.getpaths import *
-
+import logging
 
 def polygonize():
+    logger = logging.getLogger('root')
+
     t0=datetime.datetime.now()
 
-    print("First polygonize SAR\n")
+    logger.info("polygonize SAR")
 
     items=os.listdir(sarOut)
     newlist = []
@@ -22,12 +24,13 @@ def polygonize():
 
     for scene in newlist:
 
-        print("\n polygonizing " + scene + "\n")
+        logger.info("\n polygonizing " + scene + "\n")
         out_gml = scene + ".gml"
         subprocess.call([pyt,gdalPol,sarOut + "/" + scene + ".tif","-f","GML",polOut + "/" + out_gml])
         os.remove(sarOut + "/" + scene + ".tif")
 
-    print("\n********** sentinel-1 polygonize completed!" + str(len(newlist))  + " watermasks processed\n********** Elapsed time: " + str(datetime.datetime.now()-t0) + "\n********** End of message\n")
+    logger.info("sentinel-1 polygonize completed!" + str(len(newlist))  + " watermasks processed")
+    logger.info("Elapsed time: " + str(datetime.datetime.now()-t0))
 
 
 
@@ -36,14 +39,16 @@ def polygonize():
     ######### polygonize S2A
 
 
-    print("... now polygonize S2A\n")
+    logger.info("... now polygonize S2A")
 
     items=os.listdir(s2aOut)
 
     for scene in items:
-        print("\n polygonizing " + scene + "\n")
+        logger.info("\n polygonizing " + scene)
         out_gml = scene[:-4] + "_watermask.gml"
         subprocess.call([pyt,gdalPol,s2aOut + "/" + scene,"-f","GML",polOut + "/" + out_gml])
         os.remove(s2aOut + "/" + scene)
 
-    print("\n********** sentinel-2 polygonize completed!" + str(len(items))  + " watermasks processed\n********** Elapsed time: " + str(datetime.datetime.now()-t0) + "\n********** End of message\n")
+    logger.info("sentinel-2 polygonize completed!" + str(len(items))  + " watermasks processed")
+    logger.info("Elapsed time: " + str(datetime.datetime.now()-t0))
+    logger.info("End of poligonize")

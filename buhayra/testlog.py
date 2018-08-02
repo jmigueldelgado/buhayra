@@ -1,7 +1,10 @@
 import logging
 
 def testing_logging():
-    logger = logging.getLogger(__name__)
+    # print("testing logging")
+    logger = logging.getLogger('root')
+    # logger.addHandler(handler)
+
     a='abc'
     #print(a+'\n')
     logger.debug('My message with %s', a)

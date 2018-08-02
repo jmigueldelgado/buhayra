@@ -10,15 +10,15 @@ import shutil
 from buhayra.getpaths import *
 
 def insertPolygons():
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger('root')
 
     ### SSHTunnelForwarder no longer necessary with remote access to mongodb enabled. See:
 #   https://ianlondon.github.io/blog/mongodb-auth/
 #   and
 #   allow port 27017 in firewall with ufw
 
-
-#    client = MongoClient('127.0.0.1', server.local_bind_port) # server.local_bind_port is assigned local port
+    logger.info("logger start")
+    # client = MongoClient('127.0.0.1', server.local_bind_port) # server.local_bind_port is assigned local port
     client = MongoClient('mongodb://'+ MONGO_USER + ':' + MONGO_PASS + '@' + MONGO_HOST + '/' + MONGO_DB)
     logger.info("%s",client)
 
