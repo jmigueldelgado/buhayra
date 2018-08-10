@@ -21,13 +21,12 @@ def insertPolygons():
     # client = MongoClient('127.0.0.1', server.local_bind_port) # server.local_bind_port is assigned local port
     client = MongoClient('mongodb://'+ MONGO_USER + ':' + MONGO_PASS + '@' + MONGO_HOST + '/' + MONGO_DB)
     logger.info("%s",client)
-
     ## in case you want the local host:
     #client = MongoClient('mongodb://localhost:27017/')
 
     db = client.sar2watermask
     s2w = db.sar2watermask ##  collection
-    #print(db.collection_names())
+    # print(db.collection_names())
     logger.info("Connected to mongodb:")
     logger.info("%s",s2w)
 
@@ -57,3 +56,25 @@ def insertPolygons():
         shutil.move(polOut + '/' + in_file,procOut)
 
 #    server.stop()
+
+
+
+def testMongoConnect():
+    logger = logging.getLogger('root')
+
+    ### SSHTunnelForwarder no longer necessary with remote access to mongodb enabled. See:
+#   https://ianlondon.github.io/blog/mongodb-auth/
+#   and
+#   allow port 27017 in firewall with ufw
+
+    logger.info("logger start")
+    # client = MongoClient('127.0.0.1', server.local_bind_port) # server.local_bind_port is assigned local port
+    client = MongoClient('mongodb://'+ MONGO_USER + ':' + MONGO_PASS + '@' + MONGO_HOST + '/' + MONGO_DB)
+    logger.info("%s",client)
+    ## in case you want the local host:
+    #client = MongoClient('mongodb://localhost:27017/')
+
+    db = client.sar2watermask
+    s2w = db.sar2watermask ##  collection
+    logger.debug(db.collection_names())
+    print(db.collection_names()+'\n')

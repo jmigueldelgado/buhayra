@@ -62,7 +62,11 @@ def main():
         # print("tests environment\n")
         import ndwi2watermask.ndwi as n2w
         n2w.test_one_ndwi()
-    elif sys.argv[1]=="another test":
+    elif sys.argv[1]=="test insert":
+        # print("tests environment\n")
+        import buhayra.insertPolygons as insPol
+        insPol.testMongoConnect()
+    elif sys.argv[1]=="test logging":
         # print("tests environment\n")
         #print("test!!!!\n")
         import buhayra.testlog as tl
