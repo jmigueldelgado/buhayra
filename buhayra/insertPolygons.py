@@ -77,4 +77,4 @@ def testMongoConnect():
     db = client.sar2watermask
     s2w = db.sar2watermask ##  collection
     logger.debug(db.collection_names())
-    print(db.collection_names()+'\n')
+    print(db.collection_names())
