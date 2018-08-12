@@ -94,6 +94,7 @@ def testMongoConnect():
             data = geojson.load(f)
 
         for feat in data["features"][0]:
+            logger.info("Ingestion Date:%s",feat["properties"]["ingestion_time"])
             dttm = datetime.strptime(feat["properties"]["ingestion_time"],"%Y/%m/%d %H:%M:%S+00")
             feat["properties"]["ingestion_time"] = dttm
             feat["properties"]["source_id"] = int(feat["properties"]["source_id"])
