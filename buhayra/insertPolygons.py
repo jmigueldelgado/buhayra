@@ -87,7 +87,7 @@ def testMongoConnect():
         if names.endswith('simplified.geojson'):
             newlist.append(names)
 
-    for in_file in newlist[0]:
+    for in_file in newlist:
         logger.info('\n inserting ' + in_file + ' in mongodb\n')
 
         with open(polOut + '/' + in_file) as f:
@@ -103,3 +103,5 @@ def testMongoConnect():
             logger.info("ID:%s",feat["properties"]["id_funceme"])
             feat_id = s2w.update_one({'properties.id_funceme':feat["properties"]["id_funceme"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True).upserted_id
             logger.info('Inserted feature ID: %s',feat_id)
+            logger.info('exiting after test')
+            break
