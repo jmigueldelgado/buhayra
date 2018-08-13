@@ -6,7 +6,7 @@ import os
 import json
 import buhayra.log as log
 
-logger = log.setup_custom_logger('root')
+logger = log.setup_custom_logger('root','INFO')
 
 def main():
 

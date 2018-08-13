@@ -43,15 +43,13 @@ def insertPolygons():
             data = geojson.load(f)
 
         for feat in data["features"]:
+            logger.debug('id - ' + str(feat['properties']['id_funceme']) + ' - type' + feat['geometry']['type'])
             dttm = datetime.strptime(feat["properties"]["ingestion_time"],"%Y/%m/%d %H:%M:%S+00")
             feat["properties"]["ingestion_time"] = dttm
             feat["properties"]["source_id"] = int(feat["properties"]["source_id"])
-
-            logger.info("Current feature's properties:")
-            logger.info("Ingestion Date:%s",feat["properties"]["ingestion_time"])
-            logger.info("ID:%s",feat["properties"]["id_funceme"])
-            feat_id = s2w.update_one({'properties.id_funceme':feat["properties"]["id_funceme"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },feat,upsert=True).upserted_id
-            logger.info('Inserted feature ID: %s',feat_id)
+            logger.debug("Ingestion Date:%s",feat["properties"]["ingestion_time"])
+            feat_id = s2w.update_one({'properties.id_funceme':feat["properties"]["id_funceme"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True).upserted_id
+            logger.debug('Inserted feature ID: %s',feat_id)
         logger.info('\n\n\n moving away ' + in_file + '\n\n\n')
         shutil.move(polOut + '/' + in_file,procOut)
 
@@ -93,16 +91,18 @@ def testMongoConnect():
         with open(polOut + '/' + in_file) as f:
             data = geojson.load(f)
 
-        for feat in data["features"][0]:
-            logger.info(feat["properties"]["ingestion_time"])
+        for feat in data["features"]:
+            logger.debug('id - ' + str(feat['properties']['id_funceme']) + ' - type' + feat['geometry']['type'])
             dttm = datetime.strptime(feat["properties"]["ingestion_time"],"%Y/%m/%d %H:%M:%S+00")
             feat["properties"]["ingestion_time"] = dttm
             feat["properties"]["source_id"] = int(feat["properties"]["source_id"])
-
-            logger.info("Current feature's properties:")
-            logger.info("Ingestion Date:%s",feat["properties"]["ingestion_time"])
-            logger.info("ID:%s",feat["properties"]["id_funceme"])
+            logger.debug("Ingestion Date:%s",feat["properties"]["ingestion_time"])
             feat_id = s2w.update_one({'properties.id_funceme':feat["properties"]["id_funceme"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True).upserted_id
+            logger.debug('Inserted feature ID: %s',feat_id)
+            if feat_id != None:
+                break
+        if feat_id != None:
+            logger.info('id - ' + str(feat['properties']['id_funceme']) + ' - type' + feat['geometry']['type'])
+            logger.info("Ingestion Date:%s",feat["properties"]["ingestion_time"])
             logger.info('Inserted feature ID: %s',feat_id)
-            logger.info('exiting after test')
             break

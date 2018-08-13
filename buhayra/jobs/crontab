@@ -1,7 +1,6 @@
 
 SHELL=/bin/bash
-MAILTO="jmigueldelgado@gmail.com"
-
+MAILTO="martinsd@uni-potsdam.de"
 
 ### acquire scenes from ESA
 
@@ -26,10 +25,3 @@ MAILTO="jmigueldelgado@gmail.com"
 
 ### clean up
 #52 15 * * 5 /users/stud09/martinsd/local/miniconda2/envs/mongodb/bin/python2 /users/stud09/martinsd/proj/buhayra/buhayra/cleanup.py
-
-
-# download scenes mondays and fridays at 8 pm
-# process data every day at 2 am (in case wall time is violated it continues previous work)
-# polygonize every day at 2 pm
-# simplify in R and save as geojson every day at 1 pm
-# insert json documents into mongodb in webserver wednesdays, fridays and sundays at 11 pm
