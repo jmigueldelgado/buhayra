@@ -37,11 +37,13 @@ def insertPolygons():
             newlist.append(names)
 
     for in_file in newlist:
-        logger.info('\n inserting ' + in_file + ' in mongodb\n')
+        logger.info('inserting ' + in_file + ' in mongodb')
 
         with open(polOut + '/' + in_file) as f:
             data = geojson.load(f)
 
+        count=0
+        countNone=0
         for feat in data["features"]:
             logger.debug('id - ' + str(feat['properties']['id_funceme']) + ' - type' + feat['geometry']['type'])
             dttm = datetime.strptime(feat["properties"]["ingestion_time"],"%Y/%m/%d %H:%M:%S+00")
@@ -50,7 +52,13 @@ def insertPolygons():
             logger.debug("Ingestion Date:%s",feat["properties"]["ingestion_time"])
             feat_id = s2w.update_one({'properties.id_funceme':feat["properties"]["id_funceme"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True).upserted_id
             logger.debug('Inserted feature ID: %s',feat_id)
-        logger.info('\n\n\n moving away ' + in_file + '\n\n\n')
+            if feat_id != None:
+                count = count + 1
+            if feat_id == None:
+                countNone = countNone + 1
+        logger.info('inserted %d features',count)
+        logger.info('there were %d Nones',countNone)
+        logger.info('moving away ' + in_file)
         shutil.move(polOut + '/' + in_file,procOut)
 
 #    server.stop()

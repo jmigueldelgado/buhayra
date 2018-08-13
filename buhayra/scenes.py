@@ -7,13 +7,7 @@ from buhayra.getpaths import *
 import logging
 
 def getscenes():
-
-    i = 1
-    while os.path.exists(home['home'] + "/1_getscenes_%s.log" % i):
-        i += 1
-        print(i)
-
-    logging.basicConfig(filename=home['home'] + "/1_getscenes_%s.log" % i,level=logging.DEBUG)
+    logger = logging.getLogger('root')
 
     api = SentinelAPI(username, password, 'https://scihub.copernicus.eu/dhus')
     logging.info(api.api_url)

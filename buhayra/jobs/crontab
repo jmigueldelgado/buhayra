@@ -18,6 +18,7 @@ MAILTO="martinsd@uni-potsdam.de"
 0 13 * * * qsub /users/stud09/martinsd/proj/buhayra/buhayra/jobs/4_st_simplify.job
 
 ### insert polygons into mongodb database in webserver
+36 15 * * 1 /users/stud09/martinsd/proj/buhayra/buhayra/jobs/5_insert_polys_mongo.sh
 0 23 * * 3 /users/stud09/martinsd/proj/buhayra/buhayra/jobs/5_insert_polys_mongo.sh
 0 23 * * 5 /users/stud09/martinsd/proj/buhayra/buhayra/jobs/5_insert_polys_mongo.sh
 0 23 * * 7 /users/stud09/martinsd/proj/buhayra/buhayra/jobs/5_insert_polys_mongo.sh

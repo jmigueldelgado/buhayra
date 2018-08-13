@@ -10,7 +10,7 @@ logger = log.setup_custom_logger('root','INFO')
 
 def main():
 
-    logger.info("message from main!!")
+    logger.info("Message from __main__.py. Starting process.")
 
     if sys.argv[1] is None:
         print("an argument is needed, for example:\nget_scenes\nrmclouds\nsar\nndwi\npolygonize\ninsert\nrecent polys\n1 month old polys\n2 months old polys\nupdate validation")
