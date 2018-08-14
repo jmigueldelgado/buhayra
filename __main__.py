@@ -13,28 +13,32 @@ def main():
     logger.info("Message from __main__.py. Starting process.")
 
     if sys.argv[1] is None:
-        print("an argument is needed, for example:\nget_scenes\nrmclouds\nsar\nndwi\npolygonize\ninsert\nrecent polys\n1 month old polys\n2 months old polys\nupdate validation")
+        logger.error("an argument is needed, for example: get_scenes, rmclouds, sar, ndwi, polygonize, insert, recent polys, 1 month old polys, 2 months old polys, update validation")
     elif sys.argv[1]=="getscenes":
         import buhayra.scenes as scenes
+        logger.info("starting scenes.getscenes(): downloading scenes from sentinel API")
         scenes.getscenes()
+        logger.info("finished downloading scenes. Check info.log in home folder and inside package folder")
     elif sys.argv[1]=="rmclouds":
-        print("remove clouds\n")
+        logger.info("starting clouds.rmclouds(): cloud removing")
         import ndwi2watermask.cloudmask as clouds
         clouds.rmclouds()
+        logger.info("finished cloud removing")
     elif sys.argv[1]=="sar":
-        print("processing sar scene and thresholding\n")
+        logger.info("starting sar.sar2w(): processing sar scene and thresholding")
         import sar2watermask.sar as sar
         sar.sar2w()
+        logger.info("finished sar2wm")
     elif sys.argv[1]=="ndwi":
-        print("processing scene and computing ndwi\n")
+        logger.info("processing scene and computing ndwi")
         import ndwi2watermask.ndwi as n2w
         n2w.ndwi2watermask()
     elif sys.argv[1]=="polygonize":
-        print("polygonizing water rasters\n")
+        logger.info("polygonizing water rasters")
         import buhayra.polygonize as polly
         polly.polygonize()
     elif sys.argv[1]=="insert":
-        print("inserting into mongodb\n")
+        logger.info("inserting into mongodb")
         import buhayra.insertPolygons as ipol
         #f = open('insert.log', 'w')
         #try:
@@ -43,36 +47,32 @@ def main():
         #    f.write('An exceptional thing happed - %s' % e)
         #f.close()
     elif sys.argv[1]=="recent polys":
-        print("obtain most recent polygons from mongodb\n")
+        logger.info("obtain most recent polygons from mongodb")
         import buhayra.getLatestPolygons as gLP
         gLP.connect_and_get(0)
     elif sys.argv[1]=="1 month old polys":
-        print("obtain last month's polygons from mongodb\n")
+        logger.info("obtain last month's polygons from mongodb")
         import buhayra.getLatestPolygons as gLP
         gLP.connect_and_get(1)
     elif sys.argv[1]=="2 months old polys":
-        print("obtain polygons from 2 months ago from mongodb\n")
+        logger.info("obtain polygons from 2 months ago from mongodb")
         import buhayra.getLatestPolygons as gLP
         gLP.connect_and_get(2)
     elif sys.argv[1]=="update validation":
-        print("obtain validation dataset from funceme api\n")
+        logger.info("obtain validation dataset from funceme api")
         import buhayra.funceme as fcm
         fcm.insert_insitu_monitoring()
     elif sys.argv[1]=="test":
-        # print("tests environment\n")
         import ndwi2watermask.ndwi as n2w
         n2w.test_one_ndwi()
     elif sys.argv[1]=="test insert":
-        # print("tests environment\n")
         import buhayra.insertPolygons as insPol
         insPol.testMongoConnect()
     elif sys.argv[1]=="test logging":
-        # print("tests environment\n")
-        #print("test!!!!\n")
         import buhayra.testlog as tl
         tl.testing_logging()
     else:
-        print('please provide one of "rmclouds", "getscenes" or "ndwi"')
+        logger.error("an argument is needed, for example: get_scenes, rmclouds, sar, ndwi, polygonize, insert, recent polys, 1 month old polys, 2 months old polys, update validation")
 
 
 if __name__ == "__main__":
