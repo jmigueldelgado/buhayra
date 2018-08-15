@@ -8,5 +8,5 @@
 #0 19 * * 1 /home/delgado/proj/buhayra/buhayra/jobs/7_ogr2ogr.sh
 #45 23 * * 1 /home/delgado/proj/buhayra/buhayra/jobs/6_1_month_old_polygons.sh
 #45 3 * * 2 /home/delgado/proj/buhayra/buhayra/jobs/7_ogr2ogr.sh
-45 4 * * 2 /home/delgado/proj/buhayra/buhayra/jobs/6_latest_polygons.sh
-45 8 * * 2 /home/delgado/proj/buhayra/buhayra/jobs/7_ogr2ogr.sh
+02 12 * * 3 /home/delgado/proj/buhayra/buhayra/jobs/6_latest_polygons.sh
+58 20 * * 4 /home/delgado/proj/buhayra/buhayra/jobs/7_ogr2ogr.sh

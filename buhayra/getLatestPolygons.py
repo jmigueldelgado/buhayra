@@ -14,21 +14,17 @@ import subprocess as sp
 
 def connect_and_get(x):
     logger = logging.getLogger('root')
+    
     if socket.gethostname()!='ubuntuserver':
-        server = SSHTunnelForwarder(
-            MONGO_HOST,
-            ssh_username=MONGO_USER,
-            ssh_password=MONGO_PASS,
-            remote_bind_address=('127.0.0.1', MONGO_PORT))
-
-        server.start()
-        logger.info("started ssh tunnel")
-
-        client = MongoClient('127.0.0.1', server.local_bind_port) # server.local_bind_port is assigned local port
+        logger.info("connecting to remote mongodb")       
+        client = MongoClient('mongodb://'+ MONGO_USER + ':' + MONGO_PASS + '@' + MONGO_HOST + '/' + MONGO_DB) #### untested!
     else:
         logger.info("connecting to local host")
-        client = MongoClient('mongodb://localhost:27017/')
-
+        try:
+            client = MongoClient('mongodb://'+ MONGO_USER + ':' + MONGO_PASS + '@' + MONGO_HOST + '/' + MONGO_DB)
+        except:
+            logger.exception("Error: something went wrong when connecting to mongodb on host " + MONGO_HOST)
+            raise
 
     db = client.sar2watermask
     s2w = db.sar2watermask ##  collection
@@ -45,6 +41,3 @@ def connect_and_get(x):
     f=open(home['home']+'/load_to_postgis/latest.geojson','w')
     geojson.dump(feat_col,f)
     f.close()
-
-    if socket.gethostname()!='ubuntuserver':
-        server.stop()
