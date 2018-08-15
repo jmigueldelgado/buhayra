@@ -11,7 +11,7 @@ from shutil import rmtree
 import json
 # from rasterio.features import shapes
 import rasterio.mask as riomask
-
+import logging
 
 
 ## some exercises with geotiffs:
@@ -49,17 +49,18 @@ import rasterio.mask as riomask
 #Spths.s2aIn="/home/delgado/scratch/s2a_scenes/in.bak"
 #pths.s2aOut="/home/delgado/Documents/tmp"
 def ndwi2watermask():
-    print("Executing ndwi2watermask()...")
+    logging.getLogger('root')
+    logger.info("Executing ndwi2watermask()...")
     items=os.listdir(pths.s2aIn)
     for item in items:
         scenename=item
-        print("----",scenename,"----\n")
+        logger.info("----"+scenename+"----")
         item=pths.s2aIn + '/' + item
         if re.search('^.*\.zip$', item):
             statinfo=os.stat(item)
             statinfo.st_size
             if statinfo.st_size < 100000000:
-                print("File is too small. Possibly error prone so we are skipping it for now.")
+                logger.info("File is too small. Possibly error prone so we are skipping it for now.")
                 return None
             sceneJp2 = unzipJp2(item)
             sceneMasks = unzipMasks(item)
@@ -77,28 +78,28 @@ def ndwi2watermask():
             ### the product is provided as a uint16.
             ### usually one could divide by 1000 to get the real TOA values,
             ### but since we are interested in the index, there is no need for that
-            print("Opening band 3\n")
+            logger.info("Opening band 3")
             dataset3 = rio.open(p3[0])
             if len(masks)>0:
-                print("Number of masks available for band 3: ",len(masks),"------ Proceeding WITH masks!\n")
+                logger.info("Number of masks available for band 3: ",len(masks),"------ Proceeding WITH masks!")
                 band3, out_transform =riomask.mask(dataset3,masks,all_touched=True,invert=True)
             else:
-                print("Number of masks available for band 3: ",len(masks),"------ Proceeding WITHOUT masks!\n")
+                logger.info("Number of masks available for band 3: ",len(masks),"------ Proceeding WITHOUT masks!")
                 band3 = dataset3.read(1)
 
             band3 = band3.astype(float)
 
-            print("Opening band 8\n")
+            logger.info("Opening band 8")
             dataset8 = rio.open(p8[0])
             if len(masks)>0:
-                print("Number of masks available for band 8: ",len(masks),"------ Proceeding WITH masks!\n")
+                logger.info("Number of masks available for band 8: ",len(masks),"------ Proceeding WITH masks!")
                 band8, out_transform =riomask.mask(dataset8,masks,all_touched=True,invert=True)
             else:
-                print("Number of masks available for band 8: ",len(masks),"------ Proceeding WITHOUT masks!\n")
+                logger.info("Number of masks available for band 8: ",len(masks),"------ Proceeding WITHOUT masks!")
                 band8 = dataset8.read(1)
 
             band8 = band8.astype(float)
-            print("Computing NDWI\n")
+            logger.info("Computing NDWI")
 
 
             ### the threshold must be set here, because if it is lower than 0, it messes up with the mask
