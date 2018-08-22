@@ -14,9 +14,9 @@ import subprocess as sp
 
 def connect_and_get(x):
     logger = logging.getLogger('root')
-    
+
     if socket.gethostname()!='ubuntuserver':
-        logger.info("connecting to remote mongodb")       
+        logger.info("connecting to remote mongodb")
         client = MongoClient('mongodb://'+ MONGO_USER + ':' + MONGO_PASS + '@' + MONGO_HOST + '/' + MONGO_DB) #### untested!
     else:
         logger.info("connecting to local host")
@@ -37,7 +37,13 @@ def connect_and_get(x):
     ## get geojson standard feature collection
     feat_col=aggr2geojson(polys)
 
-    logger.info('writing out to ' + home['home']+'/load_to_postgis/latest.geojson')
-    f=open(home['home']+'/load_to_postgis/latest.geojson','w')
-    geojson.dump(feat_col,f)
-    f.close()
+    if(x==0):
+        logger.info('writing out to ' + home['home']+'/load_to_postgis/latest.geojson')
+        f=open(home['home']+'/load_to_postgis/latest.geojson','w')
+        geojson.dump(feat_col,f)
+        f.close()
+    else:
+        logger.info('writing out to ' + home['home']+'/load_to_postgis/latest-',str(x),'-month.geojson')
+        f=open(home['home']+'/load_to_postgis/latest-',str(x),'-month.geojson','w')
+        geojson.dump(feat_col,f)
+        f.close()

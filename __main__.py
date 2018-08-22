@@ -58,6 +58,10 @@ def main():
         logger.info("obtain polygons from 2 months ago from mongodb")
         import buhayra.getLatestPolygons as gLP
         gLP.connect_and_get(2)
+    elif sys.argv[1]=="3 months old polys":
+        logger.info("obtain polygons from 3 months ago from mongodb")
+        import buhayra.getLatestPolygons as gLP
+        gLP.connect_and_get(3)
     elif sys.argv[1]=="update validation":
         logger.info("obtain validation dataset from funceme api")
         import buhayra.funceme as fcm
