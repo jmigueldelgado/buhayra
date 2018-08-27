@@ -12,14 +12,12 @@ import geojson
 from functools import partial
 import shapely.geometry
 import shapely.ops
-
-#pths.s2aIn="/home/delgado/Documents/tmp"
-#sceneMasks = ['S2B_MSIL1C_20180225T125259_N0206_R052_T24MYV_20180225T131850.SAFE/GRANULE/L1C_T24MYV_A005083_20180225T125259/QI_DATA/MSK_CLOUDS_B00.geojson', 'S2B_MSIL1C_20180225T125259_N0206_R052_T24MYV_20180225T131850.SAFE/GRANULE/L1C_T24MYV_A005083_20180225T125259/QI_DATA/MSK_NODATA_B03.geojson', 'S2B_MSIL1C_20180225T125259_N0206_R052_T24MYV_20180225T131850.SAFE/GRANULE/L1C_T24MYV_A005083_20180225T125259/QI_DATA/MSK_NODATA_B08.geojson']
+pths.s2aIn="/home/delgado/TMP/test_data"
 
 def list_pols(sceneMasks):
     listPolygon = list()
     for fname in sceneMasks:
-#        fname=sceneMasks[0]
+        fname=sceneMasks[0]
         print("opening masks:\n--- ",fname,"---\n")
         if(os.path.getsize(pths.s2aIn + '/' + fname)>0) :
             with open(pths.s2aIn + '/' + fname) as geojson1:
@@ -29,10 +27,12 @@ def list_pols(sceneMasks):
                 listPolygon.append(feat['geometry'])
         else:
             print("   Mask is empty!\n")
+
     return(listPolygon)
 
 def merge_pols(sceneMasks):
     mergedPolygon = shapely.geometry.Polygon()
+    fname=sceneMasks[0]
     for fname in sceneMasks:
 #        fname=sceneMasks[0]
         with open(pths.s2aIn + '/' + fname) as geojson1:
@@ -41,6 +41,7 @@ def merge_pols(sceneMasks):
         for feat in poly_geojson['features']:
             poly = shapely.geometry.asShape(feat['geometry'])
             mergedPolygon = mergedPolygon.union(poly)
+
     # using geojson module to convert from WKT back into GeoJSON format
     geojson_out = geojson.Feature(geometry=mergedPolygon,properties={})
     return(geojson_out)
@@ -49,6 +50,7 @@ def merge_pols(sceneMasks):
 def rmfmask():
     print("Executing rmclouds():")
     items=os.listdir(pths.s2aIn)
+    item=items[0]
     for item in items:
         if re.search('^.*\.zip$', item) :
             print('unzipping' + item + '\n')

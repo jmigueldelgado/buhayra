@@ -32,7 +32,7 @@ from buhayra.getpaths import *
 # Some definitions
 
 def sar2w():
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger('root')
     t0=datetime.datetime.now()
 
     logger.info("importing functions from snappy")
