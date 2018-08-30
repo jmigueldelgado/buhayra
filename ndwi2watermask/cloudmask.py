@@ -125,8 +125,8 @@ def runGdalbuildvrt(sceneJp2):
         "-resolution",
         "user",
         "-tr",
-        "10",
-        "10",
+        "50",
+        "50",
         "-separate",
         banddir + "/" + "allbands.vrt"] + bandpth
     cmd=" ".join(cmd)

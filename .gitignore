@@ -5,7 +5,9 @@ buhayra/jobs/7_ogr2ogr.sh
 info.log
 
 
-# Sentinel data
+# Sentinel data and test data
+
+test_data/
 
 s1a_scenes/
 *.img

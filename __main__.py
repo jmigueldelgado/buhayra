@@ -75,6 +75,9 @@ def main():
     elif sys.argv[1]=="test logging":
         import buhayra.testlog as tl
         tl.testing_logging()
+    elif sys.argv[1]=="test idepix":
+        import idepix.classification as ide
+        ide.test()
     else:
         logger.error("an argument is needed, for example: get_scenes, rmclouds, sar, ndwi, polygonize, insert, recent polys, 1 month old polys, 2 months old polys, update validation")
 

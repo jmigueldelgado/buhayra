@@ -1,0 +1,7 @@
+<parameters>
+    <referenceBand>B8</referenceBand>
+    <upsampling>Nearest</upsampling>
+    <downsampling>Median</downsampling>
+    <flagDownsampling>First</flagDownsampling>
+    <resampleOnPyramidLevels>true</resampleOnPyramidLevels>
+</parameters>
