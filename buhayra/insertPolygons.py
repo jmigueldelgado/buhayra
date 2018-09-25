@@ -59,7 +59,7 @@ def insertPolygons():
         logger.info('inserted %d features',count)
         logger.info('there were %d Nones',countNone)
         logger.info('moving away ' + in_file)
-        shutil.move(polOut + '/' + in_file,procOut)
+        shutil.move(polOut + '/' + in_file,procOut + '/' + in_file)
 
 #    server.stop()
 
