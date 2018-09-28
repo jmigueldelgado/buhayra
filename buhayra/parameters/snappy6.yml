@@ -1,4 +1,4 @@
-name: snappy
+name: snappy6
 channels:
   - terradue
   - conda-forge
@@ -52,5 +52,5 @@ dependencies:
   - zeromq=4.2.5=hfc679d8_5
   - zlib=1.2.11=h470a237_3
   - jpy=0.7.5=py27_0
-prefix: /home/delgado/local/miniconda3/envs/snappy
+prefix: /home/delgado/local/miniconda3/envs/snappy6
 
