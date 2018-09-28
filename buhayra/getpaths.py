@@ -2,7 +2,7 @@ from os.path import expanduser
 import sys
 import socket
 
-if socket.gethostname()=='mondego':
+if socket.gethostname()=='vouga':
     home = {
         'home' : expanduser("~"),
         'scratch' : expanduser("~") + '/scratch',
