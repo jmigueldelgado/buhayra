@@ -26,7 +26,11 @@ def test():
     WKTReader = snappy.jpy.get_type('com.vividsolutions.jts.io.WKTReader')
     HashMap = snappy.jpy.get_type('java.util.HashMap')
     f='S2A_MSIL1C_20180424T130251_N0206_R095_T24MTT_20180424T181045.zip'
+    s2aIn = scratch+'/s2a_scenes/in'
     product = ProductIO.readProduct(s2aIn+"/"+f)
+    logger.info('path: '+s2aIn + "/"+f)
+    logger.info('product name:')
+    logger.info(product.getName())
     band_names = product.getBandNames()
     logger.debug('example of band names:')
     logger.debug(band_names[0])
