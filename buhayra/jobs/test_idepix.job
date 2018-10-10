@@ -8,7 +8,7 @@
 #PBS -l mem=20gb
 cd /users/stud09/martinsd/proj/buhayra
 
-source activate snappy
+source activate snappy6
 
 export JAVA_TOOL_OPTIONS="-Xmx16g"
 export _JAVA_OPTIONS="-Xmx18g -Xss2m"
