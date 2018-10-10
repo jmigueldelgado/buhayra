@@ -56,6 +56,16 @@ def test():
         params.put(child.tag,child.text)
     logger.info('apply idepix classification')
     product_classif = GPF.createProduct('Idepix.Sentinel2', params, product_resampled)
+
     current_bands = product_classif.getBandNames()
-    current_bands[0]
+
+    for bname in current_bands:
+        if str(bname) != 'pixel_classif_flags':
+            b=product_classif.getBand(str(bname))
+            if product_classif.removeBand(b):
+                logger.info('removed band ' + str(bname))
+            else:
+                logger.info('could not remove band '+ str(bname)+'. Please check for bug.')
+                sys.exit('could not remove band '+ str(bname))
+
     ProductIO.writeProduct(product_classif,s2aOut + "/" + product_classif.getName() + '_classified',outForm)
