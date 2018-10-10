@@ -14,6 +14,12 @@ elif socket.gethostname()=='ubuntuserver':
         'scratch' : 'None',
         'proj' : expanduser("~") + '/proj/buhayra',
         'parameters' : expanduser("~") + '/proj/buhayra/buhayra/parameters'}
+elif socket.gethostname()=='MEKONG':
+    home = {
+        'home' : expanduser("~"),
+        'scratch' : expanduser("~") + '/scratch',
+        'proj' : expanduser("~") + '/proj/buhayra',
+        'parameters' : expanduser("~") + '/proj/buhayra/buhayra/parameters'}
 else:
     home = {
         'home' : expanduser("~"),
