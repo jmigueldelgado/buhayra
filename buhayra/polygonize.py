@@ -42,10 +42,14 @@ def polygonize():
     logger.info("... now polygonize S2A")
 
     items=os.listdir(s2aOut)
+    newlist = []
+    for names in items:
+        if names.endswith("watermask.tif"):
+            newlist.append(names[:-4])
 
     for scene in items:
         logger.info("\n polygonizing " + scene)
-        out_gml = scene[:-4] + "_watermask.gml"
+        out_gml = scene[:-4] + ".gml"
         subprocess.call([pyt,gdalPol,s2aOut + "/" + scene,"-f","GML",polOut + "/" + out_gml])
         os.remove(s2aOut + "/" + scene)
 
