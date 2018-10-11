@@ -4,7 +4,7 @@ buhayra/jobs/7_ogr2ogr.sh
 [#]*[#]
 info.log
 
-
+*.qgs
 # Sentinel data and test data
 
 test_data/
