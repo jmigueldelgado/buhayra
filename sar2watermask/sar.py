@@ -4,7 +4,7 @@ import datetime
 import sys
 import numpy
 import logging
-
+import json
 from buhayra.getpaths import *
 
 
@@ -19,6 +19,35 @@ from buhayra.getpaths import *
 # ##########################################
 
 # Some definitions
+def loadStaticWM():
+    with open('/home/delgado/proj/buhayra/buhayra/auxdata/funceme.geojson') as fp:
+        js = json.load(fp)
+    return(js)
+
+#jsgeom=js['features'][0]['geometry']
+
+def geojson2wkt(jsgeom):
+    from shapely.geometry import shape,polygon
+    polygon=shape(jsgeom)
+    return(polygon.wkt)
+
+
+
+
+    # js['features'][20]['properties']
+    # polygon=shape(js['features'][0]['geometry'])
+    # polygon.wkt
+    # geom = WKTReader().read(wkt)
+    # # construct point based on lat/long returned by geocoder
+    #
+    # point = Point(45.4519896, -122.7924463)
+    #
+    # # check each polygon to see if it contains the point
+    # for feature in js['features']:
+    #     polygon = shape(feature['geometry'])
+    #     if polygon.contains(point):
+    #         print 'Found containing polygon:', feature
+
 
 
 def sar2w():
@@ -29,7 +58,6 @@ def sar2w():
         return None
 
     import xml.etree.ElementTree
-    import snappy
     from snappy import Product
     from snappy import ProductData
     from snappy import ProductUtils
@@ -39,6 +67,8 @@ def sar2w():
     from snappy import jpy
     from snappy import HashMap
     from snappy import Rectangle
+    from snappy import PixelPos
+    from snappy import GeoPos
 
     logger = logging.getLogger('root')
     t0=datetime.datetime.now()
@@ -60,6 +90,21 @@ def sar2w():
 
     f=listdir(sarIn)[0]
     product = ProductIO.readProduct(sarIn+"/"+f)
+    gc=product.getSceneGeoCoding()
+    rsize=product.getSceneRasterSize()
+    h=rsize.getHeight()
+    w=rsize.getWidth()
+
+    p1=gc.getGeoPos(PixelPos(0,0),None)
+    p2=gc.getGeoPos(PixelPos(0,h),None)
+    p3=gc.getGeoPos(PixelPos(w,h),None)
+    p4=gc.getGeoPos(PixelPos(w,0),None)
+
+    p1.getLat()
+    p2.getLat()
+    p3.getLat()
+    p4.getLat()
+
     logger.info("processing " + f)
 
     # Obtain some attributes
