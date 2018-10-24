@@ -1,15 +1,10 @@
 from os import listdir
-#import os
 import datetime
 import sys
 import numpy
 import logging
 import json
 from buhayra.getpaths import *
-
-
-#############################
-
 
 #############################################
 # MAKE SURE YOU SET THE NECESSARY RAM
@@ -18,44 +13,10 @@ from buhayra.getpaths import *
 # JAVA_TOOL_OPTIONS
 # ##########################################
 
-# Some definitions
-def loadStaticWM():
-    with open('/home/delgado/proj/buhayra/buhayra/auxdata/funceme.geojson') as fp:
-        js = json.load(fp)
-    return(js)
 
-#jsgeom=js['features'][0]['geometry']
-
-def geojson2wkt(jsgeom):
-    from shapely.geometry import shape,polygon
-    polygon=shape(jsgeom)
-    return(polygon.wkt)
-
-
-
-
-    # js['features'][20]['properties']
-    # polygon=shape(js['features'][0]['geometry'])
-    # polygon.wkt
-    # geom = WKTReader().read(wkt)
-    # # construct point based on lat/long returned by geocoder
-    #
-    # point = Point(45.4519896, -122.7924463)
-    #
-    # # check each polygon to see if it contains the point
-    # for feature in js['features']:
-    #     polygon = shape(feature['geometry'])
-    #     if polygon.contains(point):
-    #         print 'Found containing polygon:', feature
-
-
-
-def sar2w():
+def sar2w(f):
     logger = logging.getLogger('root')
 
-    if(len(listdir(sarIn))<1):
-        logger.info(sarIn+" is empty! Nothing to do. Exiting and returning None.")
-        return None
 
     import xml.etree.ElementTree
     from snappy import Product
@@ -67,90 +28,33 @@ def sar2w():
     from snappy import jpy
     from snappy import HashMap
     from snappy import Rectangle
-    from snappy import PixelPos
-    from snappy import GeoPos
 
-    logger = logging.getLogger('root')
-    t0=datetime.datetime.now()
 
     logger.info("importing functions from snappy")
 
     outForm='GeoTIFF+XML'
-    WKTReader = snappy.jpy.get_type('com.vividsolutions.jts.io.WKTReader')
     HashMap = snappy.jpy.get_type('java.util.HashMap')
-    SubsetOp = snappy.jpy.get_type('org.esa.snap.core.gpf.common.SubsetOp')
-    Point = snappy.jpy.get_type('java.awt.Point')
-    Dimension = snappy.jpy.get_type('java.awt.Dimension')
     System = jpy.get_type('java.lang.System')
     BandDescriptor = jpy.get_type('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor')
-    logger.debug(WKTReader)
     logger.debug(HashMap)
     logger.debug(BandDescriptor)
     logger.debug(System)
 
-    f=listdir(sarIn)[0]
+
+    f=selectScene()
     product = ProductIO.readProduct(sarIn+"/"+f)
-    gc=product.getSceneGeoCoding()
-    rsize=product.getSceneRasterSize()
-    h=rsize.getHeight()
-    w=rsize.getWidth()
+    rect_utm=getBoundingBoxScene(product)
+    wm_in_scene=getWMinScene(rect_utm)
 
-    p1=gc.getGeoPos(PixelPos(0,0),None)
-    p2=gc.getGeoPos(PixelPos(0,h),None)
-    p3=gc.getGeoPos(PixelPos(w,h),None)
-    p4=gc.getGeoPos(PixelPos(w,0),None)
-
-    p1.getLat()
-    p2.getLat()
-    p3.getLat()
-    p4.getLat()
 
     logger.info("processing " + f)
 
-    # Obtain some attributes
-
-    height = product.getSceneRasterHeight()
-    width = product.getSceneRasterWidth()
-    name = product.getName()
-    description = product.getDescription()
-    band_names = product.getBandNames()
-
-    # Initiate processing
-    logger.info("start processing")
+    logger.info("starting loop on reservoirs")
 
     GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
 
-    # Subset into 4 pieces
-
-    size = product.getSceneRasterSize()
-
-    p_ul = Point(1000,0)
-    p_ur = Point(size.width/2,0)
-    p_ll = Point(1000,size.height/2)
-    p_lr = Point(size.width/2,size.height/2)
-
-    subsetDim = Dimension(size.width/2-1000,size.height/2)
-
-    r_ul = Rectangle(p_ul,subsetDim)
-    r_ur = Rectangle(p_ur,subsetDim)
-    r_ll = Rectangle(p_ll,subsetDim)
-    r_lr = Rectangle(p_lr,subsetDim)
-
-    rect=[r_ul,r_ur,r_ll,r_lr]
-    r=r_ul
-    for r in rect:
-        ##### process upper left only as an example
-        #params = HashMap()
-        #params.put('copyMetadata', True)
-        #params.put('Region', r_ul)
-        #product_subset = GPF.createProduct('Subset',params,product)
-
-        op = SubsetOp()
-        op.setSourceProduct(product)
-        op.setCopyMetadata(True)
-        op.setRegion(r)
-        product_subset = op.getTargetProduct()
-        labelSubset = "x" + r.x.__str__() + "_y" + r.y.__str__()
+    for pol in wm_in_scene:
+        product_subset=subsetProduct(product,pol)
 
 
         ## Calibration
@@ -172,27 +76,6 @@ def sar2w():
 
         CalSf = GPF.createProduct('Speckle-Filter',params,Cal)
 
-        ## Band Arithmetics 1
-
-        expression = open(home['parameters'] +'/band_maths1.txt',"r").read()
-
-        targetBand1 = BandDescriptor()
-        targetBand1.name = 'watermask'
-        targetBand1.type = 'float32'
-        targetBand1.expression = expression
-
-        targetBands = jpy.array('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor', 1)
-        targetBands[0] = targetBand1
-
-        parameters = HashMap()
-        parameters.put('targetBands', targetBands)
-
-        CalSfWater = GPF.createProduct('BandMaths', parameters, CalSf)
-
-        current_bands = CalSfWater.getBandNames()
-        logger.debug("Current Bands after Band Arithmetics 2:   %s" % (list(current_bands)))
-
-
         ## Geometric correction
 
         params = HashMap()
@@ -205,45 +88,124 @@ def sar2w():
         current_bands = CalSfWaterCorr1.getBandNames()
         logger.debug("Current Bands after Terrain Correction:   %s" % (list(current_bands)))
 
-        ## Band Arithmetics 2
 
-        expression = open(home['parameters']+'/band_maths2.txt',"r").read()
-        #band_names = CalSfWaterCorr1.getBandNames()
-        #print("Bands:   %s" % (list(band_names)))
-
-
-        targetBand1 = BandDescriptor()
-        targetBand1.name = 'watermask_corr'
-        targetBand1.type = 'int8'
-        targetBand1.expression = expression
-
-        targetBands = jpy.array('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor', 1)
-        targetBands[0] = targetBand1
-
-        parameters = HashMap()
-        parameters.put('targetBands', targetBands)
-
-        CalSfWaterCorr2 = GPF.createProduct('BandMaths', parameters, CalSfWaterCorr1)
-
-        current_bands = CalSfWaterCorr2.getBandNames()
-        logger.debug("Current Bands after Band Arithmetics 2:   %s" % (list(current_bands)))
-
-
-        ### write output
-        ProductIO.writeProduct(CalSfWaterCorr2,sarOut+"/"+product.getName() + "_" + labelSubset + "_watermask",outForm)
 
         ### release products from memory
         product_subset.dispose()
         CalSf.dispose()
-        CalSfWater.dispose()
         CalSfWaterCorr1.dispose()
-        CalSfWaterCorr2.dispose()
-        product.dispose()
-        System.gc()
 
-        ### remove scene from folder
-        logger.info("REMOVING " + f)
+    product.dispose()
+    System.gc()
 
-        os.remove(sarIn+"/"+f)
+    ### remove scene from folder
+    logger.info("REMOVING " + f)
 
-    logger.info("**** sar2watermask completed!" + f  + " processed\n********** Elapsed time: " + str(datetime.datetime.now()-t0) + "****")
+    os.remove(sarIn+"/"+f)
+
+    logger.info("**** sar2watermask completed!" + f  + " processed**********")
+
+
+
+
+
+# Some definitions
+def loadStaticWM():
+    with open(home['home']+'/proj/buhayra/buhayra/auxdata/funceme.geojson') as fp:
+        js = json.load(fp)
+    return(js)
+
+#jsgeom=js['features'][0]['geometry']
+
+def geojson2wkt(jsgeom):
+    from shapely.geometry import shape,polygon
+    polygon=shape(jsgeom)
+    return(polygon.wkt)
+
+def geojson2shapely(jsgeom):
+    from shapely.geometry import shape,polygon
+    polygon=shape(jsgeom)
+    return(polygon)
+
+def selectScene():
+    if(len(listdir(sarIn))<1):
+        logger.info(sarIn+" is empty! Nothing to do. Exiting and returning None.")
+        return None
+    f=listdir(sarIn)[0]
+    return(f)
+
+def getBoundingBoxScene(product):
+    import xml.etree.ElementTree
+    from snappy import PixelPos
+    from snappy import GeoPos
+    from snappy import ProductIO
+    from shapely.geometry import Polygon
+    from shapely.ops import transform
+    import pyproj
+    from functools import partial
+
+    gc=product.getSceneGeoCoding()
+    rsize=product.getSceneRasterSize()
+    h=rsize.getHeight()
+    w=rsize.getWidth()
+
+    p1=gc.getGeoPos(PixelPos(0,0),None)
+    p2=gc.getGeoPos(PixelPos(0,h),None)
+    p3=gc.getGeoPos(PixelPos(w,h),None)
+    p4=gc.getGeoPos(PixelPos(w,0),None)
+
+    rect=Polygon([(p1.getLon(),p1.getLat()),(p2.getLon(),p2.getLat()),(p3.getLon(),p3.getLat()),(p4.getLon(),p4.getLat())])
+    project = partial(
+        pyproj.transform,
+        pyproj.Proj(init='epsg:4326'),
+        pyproj.Proj(init='epsg:32724'))
+    rect_utm=transform(project,rect)
+    return(rect_utm)
+
+
+def getBoundingBoxWM(pol):
+    from shapely.geometry import Polygon
+    coords=pol.bounds
+    bb=Polygon([(coords[0],coords[1]),(coords[0],coords[3]),(coords[2],coords[3]),(coords[2],coords[1])])
+    return(bb)
+
+def getWMinScene(rect):
+    wm=loadStaticWM()
+    wm_in_scene=list()
+    id=list()
+    for feat in wm['features']:
+        pol=geojson2shapely(feat['geometry'])
+        if rect.contains(pol):
+            wm_in_scene.append(pol)
+            id.append(feat['properties']['id'])
+    return(wm_in_scene)
+
+def subsetProduct(product,pol):
+    from shapely.ops import transform
+    import pyproj
+    from functools import partial
+    from snappy import jpy
+    from snappy import GPF
+
+    rect=getBoundingBoxScene(product)
+#    pol=pols[0]
+    buff=pol.buffer(0.2*(pol.area)**0.5)
+    bb=getBoundingBoxWM(buff)
+
+    project = partial(
+        pyproj.transform,
+        pyproj.Proj(init='epsg:32724'),
+        pyproj.Proj(init='epsg:4326'))
+    bb_ll=transform(project,bb)
+
+    WKTReader = jpy.get_type('com.vividsolutions.jts.io.WKTReader')
+    geom = WKTReader().read(bb_ll.wkt)
+
+    HashMap = jpy.get_type('java.util.HashMap')
+    #GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
+
+    parameters = HashMap()
+    parameters.put('copyMetadata', True)
+    parameters.put('geoRegion', geom)
+    product_subset = GPF.createProduct('Subset', parameters, product)
+    return(product_subset)

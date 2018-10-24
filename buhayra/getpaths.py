@@ -42,7 +42,7 @@ proj = home['proj']
 scratch= home['scratch']
 
 
-sardir=scratch+"/s1a_scenes"
+sardir=scratch+"/test_dataset/s1a_scenes"
 s2adir=scratch+"/s2a_scenes"
 
 s2aIn=s2adir+"/in"
