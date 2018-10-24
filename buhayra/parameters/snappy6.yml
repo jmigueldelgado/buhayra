@@ -14,6 +14,8 @@ dependencies:
   - decorator=4.3.0=py_0
   - enum34=1.1.6=py27_1
   - futures=3.2.0=py27_0
+  - geojson=2.4.1=py_0
+  - geos=3.6.2=hfc679d8_3
   - ipykernel=4.8.2=py27_0
   - ipython=5.8.0=py27_0
   - ipython_genutils=0.2.0=py_1
@@ -40,6 +42,7 @@ dependencies:
   - readline=7.0=haf1bffa_1
   - scandir=1.9.0=py27h470a237_0
   - setuptools=40.2.0=py27_0
+  - shapely=1.6.4=py27h164cb2d_1
   - simplegeneric=0.8.1=py_1
   - singledispatch=3.4.0.3=py27_0
   - six=1.11.0=py27_1
