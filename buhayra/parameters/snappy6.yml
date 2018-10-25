@@ -33,9 +33,11 @@ dependencies:
   - pexpect=4.6.0=py27_0
   - pickleshare=0.7.4=py27_0
   - pip=18.0=py27_1
+  - proj4=4.9.3=h470a237_8
   - prompt_toolkit=1.0.15=py_1
   - ptyprocess=0.6.0=py27_0
   - pygments=2.2.0=py_1
+  - pyproj=1.9.5.1=py27h508ed2a_5
   - python=2.7.15=h9fef7bc_0
   - python-dateutil=2.7.3=py_0
   - pyzmq=17.1.2=py27hae99301_0

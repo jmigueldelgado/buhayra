@@ -6,34 +6,24 @@ import logging
 import json
 from buhayra.getpaths import *
 
-#############################################
-# MAKE SURE YOU SET THE NECESSARY RAM
-# MEMORY (MORE THAN 10G) IN THE FOLLOWING VARIABLES BEFORE CALLING THIS SCRIPT
-# _JAVA_OPTIONS
-# JAVA_TOOL_OPTIONS
-# ##########################################
 
 
-def sar2w(f):
+def sar2sigma(f):
     logger = logging.getLogger('root')
 
 
     import xml.etree.ElementTree
     from snappy import Product
-    from snappy import ProductData
-    from snappy import ProductUtils
-    from snappy import FlagCoding
     from snappy import GPF
     from snappy import ProductIO
     from snappy import jpy
     from snappy import HashMap
-    from snappy import Rectangle
 
 
     logger.info("importing functions from snappy")
 
     outForm='GeoTIFF+XML'
-    HashMap = snappy.jpy.get_type('java.util.HashMap')
+    HashMap = jpy.get_type('java.util.HashMap')
     System = jpy.get_type('java.lang.System')
     BandDescriptor = jpy.get_type('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor')
     logger.debug(HashMap)
@@ -51,10 +41,14 @@ def sar2w(f):
 
     logger.info("starting loop on reservoirs")
 
-    GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
+#### not yet necessary!    GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
+
+    pol=wm_in_scene[0]
+    labelSubset=0
 
     for pol in wm_in_scene:
         product_subset=subsetProduct(product,pol)
+        ### have to define labelSubset
 
 
         ## Calibration
@@ -83,17 +77,18 @@ def sar2w(f):
         for child in root:
             params.put(child.tag,child.text)
 
-        CalSfWaterCorr1 = GPF.createProduct('Terrain-Correction',params,CalSfWater)
+        CalSfCorr = GPF.createProduct('Terrain-Correction',params,CalSf)
 
-        current_bands = CalSfWaterCorr1.getBandNames()
+        current_bands = CalSfCorr.getBandNames()
         logger.debug("Current Bands after Terrain Correction:   %s" % (list(current_bands)))
-
-
+        #GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
+        ProductIO.writeProduct(CalSfCorr,sarOut+"/"+product.getName() + "_" + str(labelSubset) + "_CalSfCorr",outForm)
 
         ### release products from memory
         product_subset.dispose()
+        Cal.dispose()
         CalSf.dispose()
-        CalSfWaterCorr1.dispose()
+        CalSfCorr.dispose()
 
     product.dispose()
     System.gc()
@@ -107,9 +102,13 @@ def sar2w(f):
 
 
 
+def selectScene():
+    if(len(listdir(sarIn))<1):
+        logger.info(sarIn+" is empty! Nothing to do. Exiting and returning None.")
+        return None
+    f=listdir(sarIn)[0]
+    return(f)
 
-
-# Some definitions
 def loadStaticWM():
     with open(home['home']+'/proj/buhayra/buhayra/auxdata/funceme.geojson') as fp:
         js = json.load(fp)
@@ -127,12 +126,7 @@ def geojson2shapely(jsgeom):
     polygon=shape(jsgeom)
     return(polygon)
 
-def selectScene():
-    if(len(listdir(sarIn))<1):
-        logger.info(sarIn+" is empty! Nothing to do. Exiting and returning None.")
-        return None
-    f=listdir(sarIn)[0]
-    return(f)
+
 
 def getBoundingBoxScene(product):
     import xml.etree.ElementTree
@@ -188,7 +182,6 @@ def subsetProduct(product,pol):
     from snappy import GPF
 
     rect=getBoundingBoxScene(product)
-#    pol=pols[0]
     buff=pol.buffer(0.2*(pol.area)**0.5)
     bb=getBoundingBoxWM(buff)
 

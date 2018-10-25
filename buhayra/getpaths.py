@@ -1,11 +1,11 @@
-from os.path import expanduser
+from os.path import expanduser,exists
 import sys
 import socket
 
 if socket.gethostname()=='vouga':
     home = {
         'home' : expanduser("~"),
-        'scratch' : expanduser("~") + '/scratch',
+        'scratch' : expanduser("~") + '/scratch/test_dataset',
         'proj' : expanduser("~") + '/proj/buhayra',
         'parameters' : expanduser("~") + '/proj/buhayra/buhayra/parameters'}
 elif socket.gethostname()=='ubuntuserver':
@@ -42,7 +42,7 @@ proj = home['proj']
 scratch= home['scratch']
 
 
-sardir=scratch+"/test_dataset/s1a_scenes"
+sardir=scratch+"/s1a_scenes"
 s2adir=scratch+"/s2a_scenes"
 
 s2aIn=s2adir+"/in"
@@ -60,4 +60,6 @@ MONGO_DB = "sar2watermask"
 MONGO_PORT = 27017
 
 sys.path.insert(0, home['parameters'])
-from buhayra.credentials import *
+
+if exists(home['proj']+'/buhayra/credentials.py'):
+    from buhayra.credentials import *
