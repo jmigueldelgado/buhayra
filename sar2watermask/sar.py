@@ -5,19 +5,21 @@ import numpy
 import logging
 import json
 from buhayra.getpaths import *
+import xml.etree.ElementTree
+from snappy import Product
+from snappy import GPF
+from snappy import ProductIO
+from snappy import jpy
+from snappy import HashMap
+from snappy import PixelPos
+from snappy import GeoPos
+from shapely.geometry import Polygon
+from shapely.ops import transform
+import pyproj
+from functools import partial
 
-
-
-def sar2sigma(f):
+def sar2sigma():
     logger = logging.getLogger('root')
-
-
-    import xml.etree.ElementTree
-    from snappy import Product
-    from snappy import GPF
-    from snappy import ProductIO
-    from snappy import jpy
-    from snappy import HashMap
 
 
     logger.info("importing functions from snappy")
@@ -34,21 +36,16 @@ def sar2sigma(f):
     f=selectScene()
     product = ProductIO.readProduct(sarIn+"/"+f)
     rect_utm=getBoundingBoxScene(product)
-    wm_in_scene=getWMinScene(rect_utm)
+    wm_in_scene,id_in_scene = getWMinScene(rect_utm)
 
     logger.info("processing " + f)
 
     logger.info("starting loop on reservoirs")
-
 #### not yet necessary!    GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
-
-    #pol=wm_in_scene[0]
-    #labelSubset=0
-
-    for pol in wm_in_scene:
-        product_subset=subsetProduct(product,pol)
-        ### have to define labelSubset
-
+    i=5
+    for i in range(0,30):
+        product_subset=subsetProduct(product,wm_in_scene[i])
+        labelSubset = id_in_scene[i]
 
         ## Calibration
 
@@ -77,7 +74,7 @@ def sar2sigma(f):
             params.put(child.tag,child.text)
 
         CalSfCorr = GPF.createProduct('Terrain-Correction',params,CalSf)
-        current_bands = CalSfCorrInt.getBandNames()
+        current_bands = CalSfCorr.getBandNames()
         logger.debug("Current Bands after Terrain Correction:   %s" % (list(current_bands)))
 
         CalSfCorrInt=float2int(CalSfCorr)
@@ -99,7 +96,7 @@ def sar2sigma(f):
     ### remove scene from folder
     logger.info("REMOVING " + f)
 
-    os.remove(sarIn+"/"+f)
+    #os.remove(sarIn+"/"+f)
 
     logger.info("**** sar2watermask completed!" + f  + " processed**********")
 
@@ -132,15 +129,6 @@ def geojson2shapely(jsgeom):
 
 
 def getBoundingBoxScene(product):
-    import xml.etree.ElementTree
-    from snappy import PixelPos
-    from snappy import GeoPos
-    from snappy import ProductIO
-    from shapely.geometry import Polygon
-    from shapely.ops import transform
-    import pyproj
-    from functools import partial
-
     gc=product.getSceneGeoCoding()
     rsize=product.getSceneRasterSize()
     h=rsize.getHeight()
@@ -161,7 +149,6 @@ def getBoundingBoxScene(product):
 
 
 def getBoundingBoxWM(pol):
-    from shapely.geometry import Polygon
     coords=pol.bounds
     bb=Polygon([(coords[0],coords[1]),(coords[0],coords[3]),(coords[2],coords[3]),(coords[2],coords[1])])
     return(bb)
@@ -175,25 +162,17 @@ def getWMinScene(rect):
         if rect.contains(pol):
             wm_in_scene.append(pol)
             id.append(feat['properties']['id'])
-    return(wm_in_scene)
+    return(wm_in_scene,id)
 
 def subsetProduct(product,pol):
-    from shapely.ops import transform
-    import pyproj
-    from functools import partial
-    from snappy import jpy
-    from snappy import GPF
-
     rect=getBoundingBoxScene(product)
     buff=pol.buffer(0.2*(pol.area)**0.5)
     bb=getBoundingBoxWM(buff)
-
     project = partial(
         pyproj.transform,
         pyproj.Proj(init='epsg:32724'),
         pyproj.Proj(init='epsg:4326'))
     bb_ll=transform(project,bb)
-
     WKTReader = jpy.get_type('com.vividsolutions.jts.io.WKTReader')
     geom = WKTReader().read(bb_ll.wkt)
 
