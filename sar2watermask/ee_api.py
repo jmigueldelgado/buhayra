@@ -17,7 +17,6 @@ geometry = geometry['coordinates'][0]
 
 task_config = {
     'description': 'GlobalSurfaceWater',
-    'scale':30,
     'region':geometry}
 
 
