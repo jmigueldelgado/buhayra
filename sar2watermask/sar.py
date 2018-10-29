@@ -36,15 +36,14 @@ def sar2sigma(f):
     rect_utm=getBoundingBoxScene(product)
     wm_in_scene=getWMinScene(rect_utm)
 
-
     logger.info("processing " + f)
 
     logger.info("starting loop on reservoirs")
 
 #### not yet necessary!    GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
 
-    pol=wm_in_scene[0]
-    labelSubset=0
+    #pol=wm_in_scene[0]
+    #labelSubset=0
 
     for pol in wm_in_scene:
         product_subset=subsetProduct(product,pol)
@@ -78,11 +77,15 @@ def sar2sigma(f):
             params.put(child.tag,child.text)
 
         CalSfCorr = GPF.createProduct('Terrain-Correction',params,CalSf)
-
-        current_bands = CalSfCorr.getBandNames()
+        current_bands = CalSfCorrInt.getBandNames()
         logger.debug("Current Bands after Terrain Correction:   %s" % (list(current_bands)))
+
+        CalSfCorrInt=float2int(CalSfCorr)
+        current_bands = CalSfCorrInt.getBandNames()
+        logger.debug("Current Bands after converting to UInt8:   %s" % (list(current_bands)))
+
         #GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
-        ProductIO.writeProduct(CalSfCorr,sarOut+"/"+product.getName() + "_" + str(labelSubset) + "_CalSfCorr",outForm)
+        ProductIO.writeProduct(CalSfCorrInt,sarOut+"/"+product.getName() + "_" + str(labelSubset) + "_CalSfCorr",outForm)
 
         ### release products from memory
         product_subset.dispose()
@@ -202,3 +205,21 @@ def subsetProduct(product,pol):
     parameters.put('geoRegion', geom)
     product_subset = GPF.createProduct('Subset', parameters, product)
     return(product_subset)
+
+
+def float2int(product):
+    BandDescriptor = jpy.get_type('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor')
+
+    targetBand1 = BandDescriptor()
+    targetBand1.name = 'sigma_int'
+    targetBand1.type = 'UInt32'
+    targetBand1.expression = 'round(Sigma0_VV*1000000)'
+
+    targetBands = jpy.array('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor',1)
+    targetBands[0] = targetBand1
+
+    parameters = HashMap()
+    parameters.put('targetBands', targetBands)
+
+    result = GPF.createProduct('BandMaths', parameters, product)
+    return(result)

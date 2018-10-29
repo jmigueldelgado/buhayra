@@ -11,11 +11,11 @@ ds = rasterio.open(sarOut+'/'+f)
 
 r=ds.read(1)
 
-rmsk=ma.array(r*100000,mask= r<=0)
-thr=kittler(rmsk.astype(int))
+rmsk=ma.array(r,mask= r==0)
 
-msk = rmsk>=thr
-wm=ma.array(rmsk,mask=msk)
+thr=kittler(rmsk)
+
+wm=ma.array(rmsk,mask=rmsk>=thr)
 
 plt.imshow(wm)
 
