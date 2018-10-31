@@ -18,6 +18,8 @@ s1a_scenes/
 *.tif.aux.xml
 *.gml
 *.xsd
+*.gpkg
+
 # auxdata
 
 # auxdata

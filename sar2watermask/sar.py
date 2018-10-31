@@ -17,6 +17,8 @@ from shapely.geometry import Polygon
 from shapely.ops import transform
 import pyproj
 from functools import partial
+import fiona
+
 
 def sar2sigma():
     logger = logging.getLogger('root')
@@ -109,11 +111,6 @@ def selectScene():
     f=listdir(sarIn)[0]
     return(f)
 
-def loadStaticWM():
-    with open(home['home']+'/proj/buhayra/buhayra/auxdata/funceme.geojson') as fp:
-        js = json.load(fp)
-    return(js)
-
 #jsgeom=js['features'][0]['geometry']
 
 def geojson2wkt(jsgeom):
@@ -154,14 +151,15 @@ def getBoundingBoxWM(pol):
     return(bb)
 
 def getWMinScene(rect):
-    wm=loadStaticWM()
+    wm=fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r')
     wm_in_scene=list()
     id=list()
-    for feat in wm['features']:
+    for feat in wm:
         pol=geojson2shapely(feat['geometry'])
         if rect.contains(pol):
             wm_in_scene.append(pol)
             id.append(feat['properties']['id'])
+    c.close()
     return(wm_in_scene,id)
 
 def subsetProduct(product,pol):
