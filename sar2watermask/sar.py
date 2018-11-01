@@ -3,7 +3,6 @@ import datetime
 import sys
 import numpy
 import logging
-import json
 from buhayra.getpaths import *
 import xml.etree.ElementTree
 from snappy import Product
@@ -18,89 +17,6 @@ from shapely.ops import transform
 import pyproj
 from functools import partial
 import fiona
-
-
-def sar2sigma():
-    logger = logging.getLogger('root')
-
-
-    logger.info("importing functions from snappy")
-
-    outForm='GeoTIFF+XML'
-    HashMap = jpy.get_type('java.util.HashMap')
-    System = jpy.get_type('java.lang.System')
-    BandDescriptor = jpy.get_type('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor')
-    logger.debug(HashMap)
-    logger.debug(BandDescriptor)
-    logger.debug(System)
-
-
-    f=selectScene()
-    product = ProductIO.readProduct(sarIn+"/"+f)
-    rect_utm=getBoundingBoxScene(product)
-    wm_in_scene,id_in_scene = getWMinScene(rect_utm)
-
-    logger.info("processing " + f)
-
-    logger.info("starting loop on reservoirs")
-#### not yet necessary!    GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
-    i=5
-    for i in range(0,30):
-        product_subset=subsetProduct(product,wm_in_scene[i])
-        labelSubset = id_in_scene[i]
-
-        ## Calibration
-
-        params = HashMap()
-
-        root = xml.etree.ElementTree.parse(home['parameters']+'/calibration.xml').getroot()
-        for child in root:
-            params.put(child.tag,child.text)
-
-        Cal = GPF.createProduct('Calibration',params,product_subset)
-
-        ## Speckle filtering
-
-        params = HashMap()
-        root = xml.etree.ElementTree.parse(home['parameters']+'/speckle_filtering.xml').getroot()
-        for child in root:
-            params.put(child.tag,child.text)
-
-        CalSf = GPF.createProduct('Speckle-Filter',params,Cal)
-
-        ## Geometric correction
-
-        params = HashMap()
-        root = xml.etree.ElementTree.parse(home['parameters']+'/terrain_correction.xml').getroot()
-        for child in root:
-            params.put(child.tag,child.text)
-
-        CalSfCorr = GPF.createProduct('Terrain-Correction',params,CalSf)
-        current_bands = CalSfCorr.getBandNames()
-        logger.debug("Current Bands after Terrain Correction:   %s" % (list(current_bands)))
-
-        CalSfCorrInt=float2int(CalSfCorr)
-        current_bands = CalSfCorrInt.getBandNames()
-        logger.debug("Current Bands after converting to UInt8:   %s" % (list(current_bands)))
-
-        #GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
-        ProductIO.writeProduct(CalSfCorrInt,sarOut+"/"+product.getName() + "_" + str(labelSubset) + "_CalSfCorr",outForm)
-
-        ### release products from memory
-        product_subset.dispose()
-        Cal.dispose()
-        CalSf.dispose()
-        CalSfCorr.dispose()
-
-    product.dispose()
-    System.gc()
-
-    ### remove scene from folder
-    logger.info("REMOVING " + f)
-
-    #os.remove(sarIn+"/"+f)
-
-    logger.info("**** sar2watermask completed!" + f  + " processed**********")
 
 
 
@@ -156,15 +72,27 @@ def getWMinScene(rect):
     id=list()
     for feat in wm:
         pol=geojson2shapely(feat['geometry'])
+        pol=checknclean(pol)
         if rect.contains(pol):
             wm_in_scene.append(pol)
             id.append(feat['properties']['id'])
-    c.close()
+    wm.close()
     return(wm_in_scene,id)
+
+def checknclean(pol):
+    if not pol.is_valid:
+        clean=pol.buffer(0)
+        return(clean)
+    else:
+        return(pol)
 
 def subsetProduct(product,pol):
     rect=getBoundingBoxScene(product)
-    buff=pol.buffer(0.2*(pol.area)**0.5)
+    if pol.area<1000:
+        buff=pol.buffer(10*(pol.area)**0.5)
+    else:
+        buff=pol.buffer((pol.area)**0.5)
+
     bb=getBoundingBoxWM(buff)
     project = partial(
         pyproj.transform,
@@ -200,3 +128,110 @@ def float2int(product):
 
     result = GPF.createProduct('BandMaths', parameters, product)
     return(result)
+
+
+def calibration(product):
+    params = HashMap()
+
+    root = xml.etree.ElementTree.parse(home['parameters']+'/calibration.xml').getroot()
+    for child in root:
+        params.put(child.tag,child.text)
+
+    Cal = GPF.createProduct('Calibration',params,product)
+    return(Cal)
+
+def speckle_filtering(product):
+    ## Speckle filtering
+
+    params = HashMap()
+    root = xml.etree.ElementTree.parse(home['parameters']+'/speckle_filtering.xml').getroot()
+    for child in root:
+        params.put(child.tag,child.text)
+
+    CalSf = GPF.createProduct('Speckle-Filter',params,product)
+    return(CalSf)
+
+def geom_correction(product):
+    ## Geometric correction
+
+    params = HashMap()
+    root = xml.etree.ElementTree.parse(home['parameters']+'/terrain_correction.xml').getroot()
+    for child in root:
+        params.put(child.tag,child.text)
+
+    CalSfCorr = GPF.createProduct('Terrain-Correction',params,product)
+    current_bands = CalSfCorr.getBandNames()
+    logger.debug("Current Bands after Terrain Correction:   %s" % (list(current_bands)))
+    return(CalSfCorr)
+
+
+        # w=CalSfCorr.getSceneRasterWidth()
+        # h=CalSfCorr.getSceneRasterHeight()
+        # array = numpy.zeros((w,h),dtype=numpy.float32)  # Empty array
+        # currentband=CalSfCorr.getBand('Sigma0_VV')
+        # bandraster = currentband.readPixels(0, 0, w, h, array)
+
+        # numpy.amax(bandraster)
+
+
+
+
+def sar2sigma():
+    logger = logging.getLogger('root')
+
+
+    logger.info("importing functions from snappy")
+
+    outForm='GeoTIFF+XML'
+    HashMap = jpy.get_type('java.util.HashMap')
+    System = jpy.get_type('java.lang.System')
+    BandDescriptor = jpy.get_type('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor')
+    logger.debug(HashMap)
+    logger.debug(BandDescriptor)
+    logger.debug(System)
+
+
+    f=selectScene()
+    product = ProductIO.readProduct(sarIn+"/"+f)
+    rect_utm=getBoundingBoxScene(product)
+    wm_in_scene,id_in_scene = getWMinScene(rect_utm)
+
+    logger.info("processing " + f)
+
+    Cal=calibration(product)
+    CalSf=speckle_filtering(Cal)
+    CalSfCorr=geom_correction(CalSf)
+    CalSfCorrInt=float2int(CalSfCorr)
+
+    current_bands = CalSfCorrInt.getBandNames()
+    logger.debug("Current Bands after converting to UInt8:   %s" % (list(current_bands)))
+
+    product.dispose()
+    Cal.dispose()
+    CalSf.dispose()
+    CalSfCorr.dispose()
+
+    logger.info("starting loop on reservoirs")
+#### not yet necessary!    GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
+
+    for i in range(1000,1010):
+        product_subset=subsetProduct(CalSfCorrInt,wm_in_scene[i])
+        labelSubset = id_in_scene[i]
+
+
+        #GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
+        ProductIO.writeProduct(product_subset,sarOut+"/"+product.getName() + "_" + str(labelSubset) + "_CalSfCorr",outForm)
+
+        ### release products from memory
+        product_subset.dispose()
+
+
+    CalSfCorrInt.dispose()
+    System.gc()
+
+    ### remove scene from folder
+    logger.info("REMOVING " + f)
+
+    #os.remove(sarIn+"/"+f)
+
+    logger.info("**** sar2watermask completed!" + f  + " processed**********")
