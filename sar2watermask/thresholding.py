@@ -3,6 +3,7 @@ from os import listdir
 import numpy as np
 import numpy.ma as ma
 import rasterio
+from rasterio.features import shapes
 import matplotlib.pyplot as plt
 
 
@@ -20,8 +21,12 @@ def apply_thresh():
 
     if(thr<40000)
         wm=ma.array(rmsk,mask=rmsk>=thr)
-        
-    # plt.imshow(wm)
+
+        wm.fill(1)
+        wm.mask.fill(0)
+        wm
+        list(shapes(wm))
+    plt.imshow(wm)
 
 ### polygonize, calc area and clean small features
 
