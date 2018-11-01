@@ -87,7 +87,6 @@ def checknclean(pol):
         return(pol)
 
 def subsetProduct(product,pol):
-    rect=getBoundingBoxScene(product)
     if pol.area<1000:
         buff=pol.buffer(10*(pol.area)**0.5)
     else:
@@ -131,14 +130,14 @@ def float2int(product):
 
 
 def calibration(product):
-    params = HashMap()
 
+    params = HashMap()
     root = xml.etree.ElementTree.parse(home['parameters']+'/calibration.xml').getroot()
     for child in root:
         params.put(child.tag,child.text)
 
-    Cal = GPF.createProduct('Calibration',params,product)
-    return(Cal)
+    result = GPF.createProduct('Calibration',params,product)
+    return(result)
 
 def speckle_filtering(product):
     ## Speckle filtering
@@ -148,8 +147,8 @@ def speckle_filtering(product):
     for child in root:
         params.put(child.tag,child.text)
 
-    CalSf = GPF.createProduct('Speckle-Filter',params,product)
-    return(CalSf)
+    result = GPF.createProduct('Speckle-Filter',params,product)
+    return(result)
 
 def geom_correction(product):
     ## Geometric correction
@@ -159,10 +158,10 @@ def geom_correction(product):
     for child in root:
         params.put(child.tag,child.text)
 
-    CalSfCorr = GPF.createProduct('Terrain-Correction',params,product)
-    current_bands = CalSfCorr.getBandNames()
-    logger.debug("Current Bands after Terrain Correction:   %s" % (list(current_bands)))
-    return(CalSfCorr)
+    result = GPF.createProduct('Terrain-Correction',params,product)
+    # current_bands = CalSfCorr.getBandNames()
+    # logger.debug("Current Bands after Terrain Correction:   %s" % (list(current_bands)))
+    return(result)
 
 
         # w=CalSfCorr.getSceneRasterWidth()
@@ -203,29 +202,33 @@ def sar2sigma():
     CalSfCorr=geom_correction(CalSf)
     CalSfCorrInt=float2int(CalSfCorr)
 
-    current_bands = CalSfCorrInt.getBandNames()
-    logger.debug("Current Bands after converting to UInt8:   %s" % (list(current_bands)))
+    # current_bands = CalSfCorr.getBandNames()
+    # logger.debug("Current Bands after converting to UInt8:   %s" % (list(current_bands)))
+
+
+    logger.info("starting loop on reservoirs")
+#### not yet necessary!    GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
+    for i in range(0,len(id_in_scene)):
+        product_subset=subsetProduct(CalSfCorrInt,wm_in_scene[i])
+        labelSubset = id_in_scene[i]
+
+        #GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
+        ProductIO.writeProduct(product_subset,sarOut+"/"+product.getName() + "_" + str(labelSubset) + "_CalSfCorr",outForm)
+
+        # w=product_subset.getSceneRasterWidth()
+        # h=product_subset.getSceneRasterHeight()
+        # array = numpy.zeros((w,h),dtype=numpy.int32)  # Empty array
+        # currentband=product_subset.getBand('sigma_int')
+        # bandraster = currentband.readPixels(0, 0, w, h, array)
+        # numpy.amax(bandraster)
+
+        ### release products from memory
+        product_subset.dispose()
 
     product.dispose()
     Cal.dispose()
     CalSf.dispose()
     CalSfCorr.dispose()
-
-    logger.info("starting loop on reservoirs")
-#### not yet necessary!    GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
-
-    for i in range(1000,1010):
-        product_subset=subsetProduct(CalSfCorrInt,wm_in_scene[i])
-        labelSubset = id_in_scene[i]
-
-
-        #GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
-        ProductIO.writeProduct(product_subset,sarOut+"/"+product.getName() + "_" + str(labelSubset) + "_CalSfCorr",outForm)
-
-        ### release products from memory
-        product_subset.dispose()
-
-
     CalSfCorrInt.dispose()
     System.gc()
 
