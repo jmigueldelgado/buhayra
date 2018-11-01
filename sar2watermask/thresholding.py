@@ -5,19 +5,23 @@ import numpy.ma as ma
 import rasterio
 import matplotlib.pyplot as plt
 
-f=selectTiff()
 
-ds = rasterio.open(sarOut+'/'+f)
 
-r=ds.read(1)
+def apply_thresh():
+    f=selectTiff()
+    ds = rasterio.open(sarOut+'/'+f)
+    r=ds.read(1)
 
-rmsk=ma.array(r,mask= r==0)
+    rmsk=ma.array(r,mask= (r==0))
 
-thr=kittler(rmsk)
+    thr=kittler(rmsk)
+    while(thr>60000):
+        thr=kittler(ma.array(r,mask= (r>thr)))
 
-wm=ma.array(rmsk,mask=rmsk>=thr)
-
-plt.imshow(wm)
+    if(thr<40000)
+        wm=ma.array(rmsk,mask=rmsk>=thr)
+        
+    # plt.imshow(wm)
 
 ### polygonize, calc area and clean small features
 
@@ -35,7 +39,6 @@ def selectTiff():
         if re.search('.tif$',s):
             return(s)
     return(s)
-
 
 
 
