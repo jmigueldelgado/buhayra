@@ -5,29 +5,32 @@ import numpy.ma as ma
 import rasterio
 from rasterio.features import shapes
 import matplotlib.pyplot as plt
+import time
 
 
 
-def apply_thresh():
-    f=selectTiff()
-    ds = rasterio.open(sarOut+'/'+f)
-    r=ds.read(1)
 
-    rmsk=ma.array(r,mask= (r==0))
+wm=apply_thresh()
+plt.imshow(wm)
 
-    thr=kittler(rmsk)
-    while(thr>60000):
-        thr=kittler(ma.array(r,mask= (r>thr)))
 
-    if(thr<40000)
-        wm=ma.array(rmsk,mask=rmsk>=thr)
+import copy
+r=copy.deepcopy(wm)
 
-        wm.fill(1)
-        wm.mask.fill(0)
-        wm
-        list(shapes(wm))
-    plt.imshow(wm)
+r.fill(1)
 
+r.dtype
+
+list(shapes(r))
+
+np.amax(r)
+
+
+np.amax(r.mask)
+
+plt.imshow(r)
+
+list(shapes(wm))
 ### polygonize, calc area and clean small features
 
 
@@ -47,7 +50,22 @@ def selectTiff():
 
 
 
+def apply_thresh():
+    f=selectTiff()
+    ds = rasterio.open(sarOut+'/'+f)
+    r=ds.read(1)
 
+    rmsk=ma.array(r,mask= (r==0))
+
+    thr=kittler(rmsk)
+
+    while(thr>60000):
+        thr=kittler(ma.array(r,mask= (rmsk>thr)))
+        if(thr is None):
+            break
+    if(thr<40000):
+        wm=ma.array(r,mask= ((r>=thr) | (r==0)))
+        return(wm)
 
 def kittler(nparray):
     """

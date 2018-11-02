@@ -116,7 +116,7 @@ def float2int(product):
 
     targetBand1 = BandDescriptor()
     targetBand1.name = 'sigma_int'
-    targetBand1.type = 'UInt32'
+    targetBand1.type = 'Int32'
     targetBand1.expression = 'round(Sigma0_VV*1000000)'
 
     targetBands = jpy.array('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor',1)
@@ -208,7 +208,8 @@ def sar2sigma():
 
     logger.info("starting loop on reservoirs")
 #### not yet necessary!    GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
-    for i in range(0,len(id_in_scene)):
+    # for i in range(0,len(id_in_scene)):
+    for i in range(2000,2004):
         product_subset=subsetProduct(CalSfCorrInt,wm_in_scene[i])
         labelSubset = id_in_scene[i]
 
