@@ -20,12 +20,7 @@ import fiona
 
 
 
-def selectScene():
-    if(len(listdir(sarIn))<1):
-        logger.info(sarIn+" is empty! Nothing to do. Exiting and returning None.")
-        return None
-    f=listdir(sarIn)[0]
-    return(f)
+
 
 #jsgeom=js['features'][0]['geometry']
 

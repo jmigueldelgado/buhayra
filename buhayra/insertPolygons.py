@@ -1,13 +1,39 @@
 from pymongo import MongoClient
-import geojson
 import os
 import sys
 from datetime import datetime
-from sshtunnel import SSHTunnelForwarder
 import logging
-import shutil
-
+from buhayra.polygonize import *
 from buhayra.getpaths import *
+
+f=selectTiff(polOut)
+poly=tif2shapely(f)
+props=getProperties(f)
+feat=prepareJSON(poly,props)
+logger.info('moving away ' + f)
+os.rename(polOut + '/' + f,procOut + '/' + f)
+
+def insertNEB(feat):
+    logger = logging.getLogger('root')
+
+    logger.info("logger start")
+    # client = MongoClient('127.0.0.1', server.local_bind_port) # server.local_bind_port is assigned local port
+    client = MongoClient('mongodb://'+ MONGO_USER + ':' + MONGO_PASS + '@' + MONGO_HOST + '/' + MONGO_DB)
+    logger.info("%s",client)
+    ## in case you want the local host:
+    #client = MongoClient('mongodb://localhost:27017/')
+
+    db = client.sar2watermask
+    s2w = db.sar2watermask ##  collection
+    # print(db.collection_names())
+    logger.info("Connected to mongodb:")
+    logger.info("%s",s2w)
+    logger.debug('id - ' + str(feat['properties']['jrc']) + ' - type' + feat['geometry']['type'])
+    logger.debug("Ingestion Date:%s",feat["properties"]["ingestion_time"])
+    feat_id = s2w.update_one({'properties.id_funceme':feat["properties"]["id_jrc"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True).upserted_id
+    logger.debug('Inserted feature ID: %s',feat_id)
+
+
 
 def insertPolygons():
     logger = logging.getLogger('root')

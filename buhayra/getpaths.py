@@ -1,6 +1,7 @@
 from os.path import expanduser,exists
 import sys
 import socket
+from os import listdir
 
 if socket.gethostname()=='vouga':
     home = {
@@ -56,10 +57,29 @@ polOut=scratch + "/watermasks"
 procOut=scratch + "/processed_watermasks"
 
 MONGO_HOST = "141.89.96.184"
-MONGO_DB = "sar2watermask"
+MONGO_DB = "neb"
 MONGO_PORT = 27017
 
 sys.path.insert(0, home['parameters'])
 
 if exists(home['proj']+'/buhayra/credentials.py'):
     from buhayra.credentials import *
+
+
+def selectTiff(dir):
+    if(len(listdir(dir))<1):
+        logger.info(dir+" is empty! Nothing to do. Exiting and returning None.")
+        return None
+    l=listdir(dir)
+    import re
+    for s in l:
+        if re.search('.tif$',s):
+            return(s)
+    return(s)
+
+def selectScene():
+    if(len(listdir(sarIn))<1):
+        logger.info(sarIn+" is empty! Nothing to do. Exiting and returning None.")
+        return None
+    f=listdir(sarIn)[0]
+    return(f)
