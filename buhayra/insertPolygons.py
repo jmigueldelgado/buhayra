@@ -5,6 +5,7 @@ from datetime import datetime
 import logging
 from buhayra.polygonize import *
 from buhayra.getpaths import *
+from buhayra.credentials import *
 
 f=selectTiff(polOut)
 poly=tif2shapely(f)
@@ -23,16 +24,17 @@ def insertNEB(feat):
     ## in case you want the local host:
     #client = MongoClient('mongodb://localhost:27017/')
 
-    db = client.sar2watermask
-    s2w = db.sar2watermask ##  collection
+    db = client.neb
+    neb = db.neb ##  collection
     # print(db.collection_names())
     logger.info("Connected to mongodb:")
     logger.info("%s",s2w)
-    logger.debug('id - ' + str(feat['properties']['jrc']) + ' - type' + feat['geometry']['type'])
+    logger.debug('id - ' + str(feat['properties']['id_jrc']) + ' - type' + feat['geometry']['type'])
     logger.debug("Ingestion Date:%s",feat["properties"]["ingestion_time"])
-    feat_id = s2w.update_one({'properties.id_funceme':feat["properties"]["id_jrc"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True).upserted_id
+    feat_id = neb.update_one({'properties.id_jrc':feat["properties"]["id_jrc"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True).upserted_id
     logger.debug('Inserted feature ID: %s',feat_id)
 
+    feat_id = neb.insert(feat).inserted_id
 
 
 def insertPolygons():
