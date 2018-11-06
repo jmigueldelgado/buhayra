@@ -10,14 +10,14 @@ from buhayra.credentials import *
 
 
 def insertLoop():
-    while (len(listdir(dir))>1):
+    while (len(listdir(polOut))>1):
         f=selectTiff(polOut)
         poly=tif2shapely(f)
         props=getProperties(f)
         feat=prepareJSON(poly,props)
         feat_id=insertNEB(feat)
         logger.debug('Inserted feature ID: %s',feat_id)
-        
+
 
 
 
