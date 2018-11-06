@@ -2,6 +2,7 @@ from os.path import expanduser,exists
 import sys
 import socket
 from os import listdir
+import re
 
 if socket.gethostname()=='vouga':
     home = {
@@ -69,13 +70,12 @@ if exists(home['proj']+'/buhayra/credentials.py'):
 def selectTiff(dir):
     if(len(listdir(dir))<1):
         logger.info(dir+" is empty! Nothing to do. Exiting and returning None.")
-        return None
+        return False
     l=listdir(dir)
-    import re
     for s in l:
         if re.search('.tif$',s):
             return(s)
-    return(s)
+    return False
 
 def selectScene():
     if(len(listdir(sarIn))<1):
