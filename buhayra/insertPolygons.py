@@ -10,6 +10,7 @@ from buhayra.credentials import *
 
 
 def insertLoop():
+    logger = logging.getLogger('root')
     while (len(listdir(polOut))>1):
         f=selectTiff(polOut)
         poly=tif2shapely(f)
