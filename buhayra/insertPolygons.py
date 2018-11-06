@@ -18,12 +18,6 @@ def insertLoop():
         feat_id=insertNEB(feat)
         logger.debug('Inserted feature ID: %s',feat_id)
 
-client = MongoClient('mongodb://'+ MONGO_USER + ':' + MONGO_PASS + '@' + MONGO_HOST + '/' + MONGO_DB)
-
-db = client.sar2watermask
-neb = db.neb ##  collection
-print(db.collection_names())
-
 def insertNEB(feat):
     logger = logging.getLogger('root')
 
@@ -34,7 +28,7 @@ def insertNEB(feat):
     ## in case you want the local host:
     #client = MongoClient('mongodb://localhost:27017/')
 
-    db = client.neb
+    db = client.sar2watermask
     neb = db.neb ##  collection
     # print(db.collection_names())
     logger.info("Connected to mongodb:")
