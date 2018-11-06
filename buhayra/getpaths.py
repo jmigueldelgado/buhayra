@@ -57,7 +57,7 @@ polOut=scratch + "/watermasks"
 procOut=scratch + "/processed_watermasks"
 
 MONGO_HOST = "141.89.96.184"
-MONGO_DB = "neb"
+MONGO_DB = "sar2watermask"
 MONGO_PORT = 27017
 
 sys.path.insert(0, home['parameters'])
