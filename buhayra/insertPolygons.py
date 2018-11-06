@@ -38,7 +38,8 @@ def insertNEB(feat):
     #feat_id = neb.update_one({'properties.id_jrc':feat["properties"]["id_jrc"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True).upserted_id
     #logger.debug('Inserted feature ID: %s',feat_id)
 
-    feat_id = neb.insert(feat).inserted_id
+    result = neb.insert_one(feat)
+    logger.debug("%s",result.inserted_id)
     logger.info('moving away ' + f)
     os.rename(polOut + '/' + f,procOut + '/' + f)
     return(feat_id)
