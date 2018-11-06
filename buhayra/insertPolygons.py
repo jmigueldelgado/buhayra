@@ -7,12 +7,20 @@ from buhayra.polygonize import *
 from buhayra.getpaths import *
 from buhayra.credentials import *
 
-f=selectTiff(polOut)
-poly=tif2shapely(f)
-props=getProperties(f)
-feat=prepareJSON(poly,props)
-logger.info('moving away ' + f)
-os.rename(polOut + '/' + f,procOut + '/' + f)
+
+
+def insertLoop():
+    while (len(listdir(dir))>1):
+        f=selectTiff(polOut)
+        poly=tif2shapely(f)
+        props=getProperties(f)
+        feat=prepareJSON(poly,props)
+        feat_id=insertNEB(feat)
+        logger.debug('Inserted feature ID: %s',feat_id)
+        
+
+
+
 
 def insertNEB(feat):
     logger = logging.getLogger('root')
@@ -31,11 +39,13 @@ def insertNEB(feat):
     logger.info("%s",s2w)
     logger.debug('id - ' + str(feat['properties']['id_jrc']) + ' - type' + feat['geometry']['type'])
     logger.debug("Ingestion Date:%s",feat["properties"]["ingestion_time"])
-    feat_id = neb.update_one({'properties.id_jrc':feat["properties"]["id_jrc"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True).upserted_id
-    logger.debug('Inserted feature ID: %s',feat_id)
+    #feat_id = neb.update_one({'properties.id_jrc':feat["properties"]["id_jrc"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True).upserted_id
+    #logger.debug('Inserted feature ID: %s',feat_id)
 
     feat_id = neb.insert(feat).inserted_id
-
+    logger.info('moving away ' + f)
+    os.rename(polOut + '/' + f,procOut + '/' + f)
+    return(feat_id)
 
 def insertPolygons():
     logger = logging.getLogger('root')
