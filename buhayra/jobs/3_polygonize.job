@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -N 3_polygonize
+#PBS -N polygonize
 #PBS -M martinsd@uni-potsdam.de
 #PBS -j oe
 #PBS -l ncpus=1
@@ -8,4 +8,6 @@
 #PBS -l mem=20gb
 
 source activate gdal
-python /users/stud09/martinsd/proj/buhayra "polygonize"
+
+gdal_polygonize.py /mnt/scratch/martinsd/auxdata/wm_utm_sieved_compresse.tif -f GPKG /mnt/scratch/stud09/martinsd/auxdata/wm_utm.gpkg wm_utm water
+

@@ -44,3 +44,31 @@ def getscenes():
         # download all results from the search
     api.download_all(products_s1a,directory_path=sarIn)
     api.download_all(products_s2a,directory_path=s2aIn)
+
+
+def getscenes_test_dataset():
+    logger = logging.getLogger('root')
+
+    api = SentinelAPI(username, password, 'https://scihub.copernicus.eu/dhus')
+    logging.info(api.api_url)
+    # download single scene by known product id
+    #api.download(<product_id>)
+    t0 = datetime.now() - timedelta(months=8)
+    tf = datetime.now()
+    # search by polygon, time, and SciHub query keywords
+    footprint = geojson_to_wkt(read_geojson(home['parameters'] + '/madalena.geojson'))
+
+    products_s1a = api.query(footprint,
+                         date=(
+                             date(t0.year,t0.month,t0.day),
+                             date(tf.year,tf.month,tf.day)
+                         ),
+                         producttype="GRD",
+                         platformname='Sentinel-1')
+    for item in products_s1a:
+        logging.info(products_s1a[item]['title'])
+
+    tests1In = scratch + "/test_dataset/s1a_scenes/in"
+
+        # download all results from the search
+    api.download_all(products_s1a,directory_path=tests1In)
