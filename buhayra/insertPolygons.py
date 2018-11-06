@@ -17,6 +17,8 @@ def insertLoop():
         feat=prepareJSON(poly,props)
         feat_id=insertNEB(feat)
         logger.debug('Inserted feature ID: %s',feat_id)
+        logger.info('moving away ' + f)
+        os.rename(polOut + '/' + f,procOut + '/' + f)
 
 def insertNEB(feat):
     logger = logging.getLogger('root')
@@ -39,10 +41,7 @@ def insertNEB(feat):
     #logger.debug('Inserted feature ID: %s',feat_id)
 
     result = neb.insert_one(feat)
-    logger.debug("%s",result.inserted_id)
-    logger.info('moving away ' + f)
-    os.rename(polOut + '/' + f,procOut + '/' + f)
-    return(feat_id)
+    return(result.inserted_id)
 
 def insertPolygons():
     logger = logging.getLogger('root')
