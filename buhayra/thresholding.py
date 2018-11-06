@@ -4,10 +4,16 @@ import numpy.ma as ma
 import rasterio
 import logging
 
-f=selectTiff(sarOut)
+# f=selectTiff(sarOut)
+#
+# apply_thresh(f) ## applies threshold to tiff in scratch
 
-apply_thresh(f) ## applies threshold to tiff in scratch
-
+def thresholdLoop():
+    logger = logging.getLogger('root')
+    while(selectTiff(sarOut)):
+        f=selectTiff(sarOut)
+        thr=apply_thresh(f)
+        logger.debug('Threshold for '+f + ' is ' + str(thr))
 
 
 def apply_thresh(f):

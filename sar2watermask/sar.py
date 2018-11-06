@@ -203,8 +203,8 @@ def sar2sigma():
 
     logger.info("starting loop on reservoirs")
 #### not yet necessary!    GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
-    # for i in range(0,len(id_in_scene)):
-    for i in range(2000,2004):
+    for i in range(0,len(id_in_scene)):
+    # for i in range(2000,2004):
         product_subset=subsetProduct(CalSfCorrInt,wm_in_scene[i])
         labelSubset = id_in_scene[i]
 

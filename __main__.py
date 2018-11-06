@@ -19,24 +19,15 @@ def main():
         logger.info("starting scenes.getscenes(): downloading scenes from sentinel API")
         scenes.getscenes()
         logger.info("finished downloading scenes. Check info.log in home folder and inside package folder")
-    elif sys.argv[1]=="rmclouds":
-        logger.info("starting clouds.rmclouds(): cloud removing")
-        import ndwi2watermask.cloudmask as clouds
-        clouds.rmclouds()
-        logger.info("finished cloud removing")
     elif sys.argv[1]=="sar":
-        logger.info("starting sar.sar2w(): processing sar scene and thresholding")
+        logger.info("starting sar.sar2sigma(): processing sar scene ans subsetting")
         import sar2watermask.sar as sar
-        sar.sar2w()
+        sar.sar2sigma()
         logger.info("finished sar2wm")
-    elif sys.argv[1]=="ndwi":
-        logger.info("processing scene and computing ndwi")
-        import ndwi2watermask.ndwi as n2w
-        n2w.ndwi2watermask()
-    elif sys.argv[1]=="polygonize":
-        logger.info("polygonizing water rasters")
-        import buhayra.polygonize as polly
-        polly.polygonize()
+    elif sys.argv[1]=="threshold":
+        logger.info("computing thresholds for each subset")
+        import buhayra.thresholding as thresh
+        thresh.thresholdLoop()
     elif sys.argv[1]=="insert":
         logger.info("inserting into mongodb")
         import buhayra.insertPolygons as ipol
@@ -74,7 +65,7 @@ def main():
         import idepix.classification as ide
         ide.test()
     else:
-        logger.error("an argument is needed, for example: get_scenes, rmclouds, sar, ndwi, polygonize, insert, recent polys, 1 month old polys, 2 months old polys, update validation")
+        logger.error("an argument is needed, for example: get_scenes, sar, threshold, insert, recent polys, 1 month old polys, 2 months old polys, update validation")
 
 
 if __name__ == "__main__":
