@@ -36,7 +36,7 @@ def insertNEB(feat):
     neb = db.neb ##  collection
     # print(db.collection_names())
     logger.info("Connected to mongodb:")
-    logger.info("%s",s2w)
+    logger.info("%s",neb)
     logger.debug('id - ' + str(feat['properties']['id_jrc']) + ' - type' + feat['geometry']['type'])
     logger.debug("Ingestion Date:%s",feat["properties"]["ingestion_time"])
     #feat_id = neb.update_one({'properties.id_jrc':feat["properties"]["id_jrc"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True).upserted_id
