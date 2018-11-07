@@ -204,6 +204,7 @@ def sar2sigma():
     # current_bands = CalSfCorr.getBandNames()
     # logger.debug("Current Bands after converting to UInt8:   %s" % (list(current_bands)))
 
+    GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
 
     logger.info("starting loop on reservoirs")
 #### not yet necessary!    GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
