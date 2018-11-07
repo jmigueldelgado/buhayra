@@ -64,6 +64,9 @@ def main():
     elif sys.argv[1]=="test idepix":
         import idepix.classification as ide
         ide.test()
+    elif sys.argv[1]=="test parallel":
+        import tests.test_parallel as par
+        par.test()
     else:
         logger.error("an argument is needed, for example: get_scenes, sar, threshold, insert, recent polys, 1 month old polys, 2 months old polys, update validation")
 

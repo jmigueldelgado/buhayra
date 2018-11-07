@@ -3,6 +3,7 @@ import sys
 import socket
 from os import listdir
 import re
+import logging
 
 if socket.gethostname()=='vouga':
     home = {
