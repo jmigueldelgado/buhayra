@@ -3,6 +3,7 @@ import numpy as np
 import numpy.ma as ma
 import rasterio
 import logging
+import os
 
 # f=selectTiff(sarOut)
 #
@@ -13,28 +14,40 @@ def thresholdLoop():
     while(selectTiff(sarOut)):
         f=selectTiff(sarOut)
         thr=apply_thresh(f)
-        logger.debug('Threshold for '+f + ' is ' + str(thr))
+        if thr is None:
+            logger.debug('deleting '+f)
+            os.remove(sarOut+'/'+f)
+        else:
+            logger.debug('moving '+f+'  to watermasks')
+            os.rename(sarOut+'/'+f,polOut + '/' + f)
+            logger.debug('Threshold for '+f + ' is ' + str(thr))
 
 
 def apply_thresh(f):
     with rasterio.open(sarOut+'/'+f,'r+') as ds:
         r=ds.read(1)
-
         rmsk=ma.array(r,mask= (r==0))
         thr=kittler(rmsk)
+
+        if thr is None:
+            ds.close()
+            return None
+
         while(thr>60000):
             thr=kittler(ma.array(r,mask= (rmsk>thr)))
-            if(thr is None):
-                break
+            if thr is None:
+                ds.close()
+                return None
+
         wm=ma.array(r,mask= ((r>=thr) | (r==0)))
-        wm.fill(1) # not useful
+        wm.fill(1)
         if(thr<40000):
             rshape=(wm.mask*-1+1)*wm.data
         else:
-            rshape=wm.data-1
+            ds.close()
+            return None
         ds.write(rshape.astype(rasterio.int32),1)
         ds.close()
-        os.rename(sarOut+'/'+f,polOut + '/' + f)
         return(thr)
 
 
@@ -46,6 +59,7 @@ def kittler(nparray):
     """
     # get indices of missing values
     # and mask them
+    logger = logging.getLogger('root')
 
     n = np.isnan(nparray)
     band = np.ma.masked_array(nparray, mask=n)
@@ -53,7 +67,8 @@ def kittler(nparray):
 
     # count entries in array
     if band.count() < 50:
-        print("The size of the population is smaller than 50!\n")
+        logger.info("The size of the population is smaller than 50! Returning None")
+        return None
     else:
         # calculate minimum and maximum as histogram breaks
         breaks = [band.min(), np.ceil(band.max()) + 1]
