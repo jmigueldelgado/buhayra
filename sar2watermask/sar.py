@@ -210,14 +210,13 @@ def sar2sigma():
     # for i in range(2000,2004):
     for i in range(0,len(id_in_scene)):
 
-        fname=product.getName() + "_" + str(labelSubset) + "_CalSfCorr"
+        fname=product.getName() + "_" + str(id_in_scene[i]) + "_CalSfCorr"
         if (fname+".tif") in listdir(sarOut):
             logger.debug("product "+fname+".tif already exists: skipping")
             continue
 
         logger.debug("subsetting product "+ str(id_in_scene[i]))
         product_subset=subsetProduct(CalSfCorrInt,wm_in_scene[i])
-        labelSubset = id_in_scene[i]
 
         logger.debug("writing product "+ str(id_in_scene[i]))
         # GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
