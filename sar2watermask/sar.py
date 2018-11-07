@@ -186,6 +186,10 @@ def sar2sigma():
 
 
     f=selectScene()
+    if f is None:
+        logger.info("There are no scenes to process in "+sarIn+". Exiting")
+        raise SystemExit()
+    
     product = ProductIO.readProduct(sarIn+"/"+f)
     rect_utm=getBoundingBoxScene(product)
     wm_in_scene,id_in_scene = getWMinScene(rect_utm)
