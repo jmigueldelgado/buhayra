@@ -207,16 +207,21 @@ def sar2sigma():
     GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
 
     logger.info("starting loop on reservoirs")
-#### not yet necessary!    GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
-    for i in range(0,len(id_in_scene)):
     # for i in range(2000,2004):
+    for i in range(0,len(id_in_scene)):
+
+        fname=product.getName() + "_" + str(labelSubset) + "_CalSfCorr"
+        if (fname+".tif") in listdir(sarOut):
+            logger.debug("product "+fname+".tif already exists: skipping")
+            continue
+
         logger.debug("subsetting product "+ str(id_in_scene[i]))
         product_subset=subsetProduct(CalSfCorrInt,wm_in_scene[i])
         labelSubset = id_in_scene[i]
 
         logger.debug("writing product "+ str(id_in_scene[i]))
-        GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
-        ProductIO.writeProduct(product_subset,sarOut+"/"+product.getName() + "_" + str(labelSubset) + "_CalSfCorr",outForm)
+        # GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
+        ProductIO.writeProduct(product_subset,sarOut+"/"+fname,outForm)
 
         # w=product_subset.getSceneRasterWidth()
         # h=product_subset.getSceneRasterHeight()
@@ -238,6 +243,6 @@ def sar2sigma():
     ### remove scene from folder
     logger.info("REMOVING " + f)
 
-    #os.remove(sarIn+"/"+f)
+    os.remove(sarIn+"/"+f)
 
     logger.info("**** sar2watermask completed!" + f  + " processed**********")
