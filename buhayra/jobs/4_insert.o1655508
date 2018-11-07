@@ -1,0 +1,25 @@
+Traceback (most recent call last):
+  File "rasterio/_base.pyx", line 72, in rasterio._base.DatasetReader.start
+  File "rasterio/_base.pyx", line 74, in rasterio._base.DatasetReader.start
+  File "rasterio/_err.pyx", line 196, in rasterio._err.CPLErrors.check
+rasterio._err.CPLE_OpenFailed: /mnt/scratch/martinsd/watermasks/S1A_IW_GRDH_1SDV_20181019T081732_20181019T081757_024202_02A5C9_4A4B_5123_CalSfCorr.tif: No such file or directory
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/users/stud09/martinsd/local/miniconda2/envs/fiorio_orson/lib/python3.7/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/users/stud09/martinsd/local/miniconda2/envs/fiorio_orson/lib/python3.7/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/users/stud09/martinsd/proj/buhayra/__main__.py", line 75, in <module>
+    main()
+  File "/users/stud09/martinsd/proj/buhayra/__main__.py", line 34, in main
+    ipol.insertLoop()
+  File "/users/stud09/martinsd/proj/buhayra/buhayra/insertPolygons.py", line 18, in insertLoop
+    poly=tif2shapely(f)
+  File "/users/stud09/martinsd/proj/buhayra/buhayra/polygonize.py", line 20, in tif2shapely
+    ds=rasterio.open(polOut+'/'+f,'r')
+  File "/users/stud09/martinsd/local/miniconda2/envs/fiorio_orson/lib/python3.7/site-packages/rasterio/__init__.py", line 193, in open
+    s.start()
+  File "rasterio/_base.pyx", line 76, in rasterio._base.DatasetReader.start
+rasterio.errors.RasterioIOError: /mnt/scratch/martinsd/watermasks/S1A_IW_GRDH_1SDV_20181019T081732_20181019T081757_024202_02A5C9_4A4B_5123_CalSfCorr.tif: No such file or directory
