@@ -189,7 +189,7 @@ def sar2sigma():
     if f is None:
         logger.info("There are no scenes to process in "+sarIn+". Exiting")
         raise SystemExit()
-    
+
     product = ProductIO.readProduct(sarIn+"/"+f)
     rect_utm=getBoundingBoxScene(product)
     wm_in_scene,id_in_scene = getWMinScene(rect_utm)
@@ -209,10 +209,12 @@ def sar2sigma():
 #### not yet necessary!    GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
     for i in range(0,len(id_in_scene)):
     # for i in range(2000,2004):
+        logger.debug("subsetting product "+ str(id_in_scene[i]))
         product_subset=subsetProduct(CalSfCorrInt,wm_in_scene[i])
         labelSubset = id_in_scene[i]
 
-        #GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
+        logger.debug("writing product "+ str(id_in_scene[i]))
+        GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
         ProductIO.writeProduct(product_subset,sarOut+"/"+product.getName() + "_" + str(labelSubset) + "_CalSfCorr",outForm)
 
         # w=product_subset.getSceneRasterWidth()
