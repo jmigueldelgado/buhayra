@@ -1,11 +1,14 @@
-from os.path import expanduser
+from os.path import expanduser,exists
 import sys
 import socket
+from os import listdir
+import re
+import logging
 
 if socket.gethostname()=='vouga':
     home = {
         'home' : expanduser("~"),
-        'scratch' : expanduser("~") + '/scratch',
+        'scratch' : expanduser("~") + '/scratch/test_dataset',
         'proj' : expanduser("~") + '/proj/buhayra',
         'parameters' : expanduser("~") + '/proj/buhayra/buhayra/parameters'}
 elif socket.gethostname()=='ubuntuserver':
@@ -60,4 +63,26 @@ MONGO_DB = "sar2watermask"
 MONGO_PORT = 27017
 
 sys.path.insert(0, home['parameters'])
-from buhayra.credentials import *
+
+if exists(home['proj']+'/buhayra/credentials.py'):
+    from buhayra.credentials import *
+
+
+def selectTiff(dir):
+    logger = logging.getLogger('root')
+    if(len(listdir(dir))<1):
+        logger.info(dir+" is empty! Nothing to do. Exiting and returning None.")
+        return False
+    l=listdir(dir)
+    for s in l:
+        if re.search('.tif$',s):
+            return(s)
+    return False
+
+def selectScene():
+    logger = logging.getLogger('root')
+    if(len(listdir(sarIn))<1):
+        logger.info(sarIn+" is empty! Nothing to do. Exiting and returning None.")
+        return None
+    f=listdir(sarIn)[0]
+    return(f)

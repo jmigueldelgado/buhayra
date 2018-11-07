@@ -1,21 +1,31 @@
 from pymongo import MongoClient
-import geojson
 import os
 import sys
 from datetime import datetime
-from sshtunnel import SSHTunnelForwarder
 import logging
-import shutil
-
+from buhayra.polygonize import *
 from buhayra.getpaths import *
+from buhayra.credentials import *
 
-def insertPolygons():
+
+
+def insertLoop():
     logger = logging.getLogger('root')
+    logger.debug('Selecting tif %s',selectTiff(polOut))
+    while(selectTiff(polOut)):
+        f=selectTiff(polOut)
+        logger.debug('Selected feature %s',f)
+        poly=tif2shapely(f)
+        props=getProperties(f)
+        logger.debug('Preparing JSON to insert')
+        feat=prepareJSON(poly,props)
+        feat_id=insertNEB(feat)
+        logger.debug('Inserted feature ID: %s',feat_id)
+        logger.info('deleting ' + f)
+        os.remove(polOut + '/' + f)
 
-    ### SSHTunnelForwarder no longer necessary with remote access to mongodb enabled. See:
-#   https://ianlondon.github.io/blog/mongodb-auth/
-#   and
-#   allow port 27017 in firewall with ufw
+def insertNEB(feat):
+    logger = logging.getLogger('root')
 
     logger.info("logger start")
     # client = MongoClient('127.0.0.1', server.local_bind_port) # server.local_bind_port is assigned local port
@@ -25,43 +35,18 @@ def insertPolygons():
     #client = MongoClient('mongodb://localhost:27017/')
 
     db = client.sar2watermask
-    s2w = db.sar2watermask ##  collection
+    neb = db.neb ##  collection
     # print(db.collection_names())
     logger.info("Connected to mongodb:")
-    logger.info("%s",s2w)
+    logger.info("%s",neb)
+    logger.debug('id - ' + str(feat['properties']['id_jrc']) + ' - type' + feat['geometry']['type'])
+    logger.debug("Ingestion Date:%s",feat["properties"]["ingestion_time"])
+    #feat_id = neb.update_one({'properties.id_jrc':feat["properties"]["id_jrc"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True).upserted_id
+    #logger.debug('Inserted feature ID: %s',feat_id)
+    result = neb.update_one({'properties.id_jrc':feat["properties"]["id_jrc"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True)
 
-    newlist = []
-    items=os.listdir(polOut)
-    for names in items:
-        if names.endswith('simplified.geojson'):
-            newlist.append(names)
-
-    for in_file in newlist:
-        logger.info('inserting ' + in_file + ' in mongodb')
-
-        with open(polOut + '/' + in_file) as f:
-            data = geojson.load(f)
-
-        count=0
-        countNone=0
-        for feat in data["features"]:
-            logger.debug('id - ' + str(feat['properties']['id_funceme']) + ' - type' + feat['geometry']['type'])
-            dttm = datetime.strptime(feat["properties"]["ingestion_time"],"%Y/%m/%d %H:%M:%S+00")
-            feat["properties"]["ingestion_time"] = dttm
-            feat["properties"]["source_id"] = int(feat["properties"]["source_id"])
-            logger.debug("Ingestion Date:%s",feat["properties"]["ingestion_time"])
-            feat_id = s2w.update_one({'properties.id_funceme':feat["properties"]["id_funceme"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True).upserted_id
-            logger.debug('Inserted feature ID: %s',feat_id)
-            if feat_id != None:
-                count = count + 1
-            if feat_id == None:
-                countNone = countNone + 1
-        logger.info('inserted %d features',count)
-        logger.info('there were %d Nones',countNone)
-        logger.info('moving away ' + in_file)
-        shutil.move(polOut + '/' + in_file,procOut + '/' + in_file)
-
-#    server.stop()
+    # result = neb.insert_one(feat)
+    return(result.upserted_id)
 
 
 

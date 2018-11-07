@@ -1,5 +1,5 @@
 <parameters>
-    <sourceBands>watermask</sourceBands>
+    <sourceBands>Sigma0_VV</sourceBands>
     <demName>SRTM 3Sec</demName>
     <externalDEMApplyEGM>true</externalDEMApplyEGM>
     <demResamplingMethod>BILINEAR_INTERPOLATION</demResamplingMethod>

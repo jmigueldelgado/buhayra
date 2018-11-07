@@ -1,204 +1,229 @@
 from os import listdir
-#import os
 import datetime
 import sys
 import numpy
 import logging
-
 from buhayra.getpaths import *
+import xml.etree.ElementTree
+from snappy import Product
+from snappy import GPF
+from snappy import ProductIO
+from snappy import jpy
+from snappy import HashMap
+from snappy import PixelPos
+from snappy import GeoPos
+from snappy import WKTReader
+from shapely.geometry import Polygon
+from shapely.ops import transform
+import pyproj
+from functools import partial
+import fiona
+
+System = jpy.get_type('java.lang.System')
+BandDescriptor = jpy.get_type('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor')
 
 
-#############################
+def geojson2wkt(jsgeom):
+    from shapely.geometry import shape,polygon
+    polygon=shape(jsgeom)
+    return(polygon.wkt)
+
+def geojson2shapely(jsgeom):
+    from shapely.geometry import shape,polygon
+    polygon=shape(jsgeom)
+    return(polygon)
 
 
-#############################################
-# MAKE SURE YOU SET THE NECESSARY RAM
-# MEMORY (MORE THAN 10G) IN THE FOLLOWING VARIABLES BEFORE CALLING THIS SCRIPT
-# _JAVA_OPTIONS
-# JAVA_TOOL_OPTIONS
-# ##########################################
 
-# Some definitions
+def getBoundingBoxScene(product):
+    gc=product.getSceneGeoCoding()
+    rsize=product.getSceneRasterSize()
+    h=rsize.getHeight()
+    w=rsize.getWidth()
+
+    p1=gc.getGeoPos(PixelPos(0,0),None)
+    p2=gc.getGeoPos(PixelPos(0,h),None)
+    p3=gc.getGeoPos(PixelPos(w,h),None)
+    p4=gc.getGeoPos(PixelPos(w,0),None)
+
+    rect=Polygon([(p1.getLon(),p1.getLat()),(p2.getLon(),p2.getLat()),(p3.getLon(),p3.getLat()),(p4.getLon(),p4.getLat())])
+    project = partial(
+        pyproj.transform,
+        pyproj.Proj(init='epsg:4326'),
+        pyproj.Proj(init='epsg:32724'))
+    rect_utm=transform(project,rect)
+    return(rect_utm)
 
 
-def sar2w():
+def getBoundingBoxWM(pol):
+    coords=pol.bounds
+    bb=Polygon([(coords[0],coords[1]),(coords[0],coords[3]),(coords[2],coords[3]),(coords[2],coords[1])])
+    return(bb)
+
+def getWMinScene(rect):
+    wm=fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r')
+    wm_in_scene=list()
+    id=list()
+    for feat in wm:
+        pol=geojson2shapely(feat['geometry'])
+        pol=checknclean(pol)
+        if rect.contains(pol):
+            wm_in_scene.append(pol)
+            id.append(feat['properties']['id'])
+    wm.close()
+    return(wm_in_scene,id)
+
+def checknclean(pol):
+    if not pol.is_valid:
+        clean=pol.buffer(0)
+        return(clean)
+    else:
+        return(pol)
+
+def subsetProduct(product,pol):
+    if pol.area<1000:
+        buff=pol.buffer(10*(pol.area)**0.5)
+    else:
+        buff=pol.buffer((pol.area)**0.5)
+
+    bb=getBoundingBoxWM(buff)
+    project = partial(
+        pyproj.transform,
+        pyproj.Proj(init='epsg:32724'),
+        pyproj.Proj(init='epsg:4326'))
+    bb_ll=transform(project,bb)
+    geom = WKTReader().read(bb_ll.wkt)
+
+
+    parameters = HashMap()
+    parameters.put('copyMetadata', True)
+    parameters.put('geoRegion', geom)
+    product_subset = GPF.createProduct('Subset', parameters, product)
+    return(product_subset)
+
+
+def float2int(product):
+    targetBands = jpy.array('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor',1)
+    targetBand1 = BandDescriptor()
+    targetBand1.name = 'sigma_int'
+    targetBand1.type = 'Int32'
+    targetBand1.expression = 'round(Sigma0_VV*1000000)'
+
+    targetBands[0] = targetBand1
+
+    parameters = HashMap()
+    parameters.put('targetBands', targetBands)
+
+    result = GPF.createProduct('BandMaths', parameters, product)
+    return(result)
+
+
+def calibration(product):
+
+    params = HashMap()
+    root = xml.etree.ElementTree.parse(home['parameters']+'/calibration.xml').getroot()
+    for child in root:
+        params.put(child.tag,child.text)
+
+    result = GPF.createProduct('Calibration',params,product)
+    return(result)
+
+def speckle_filtering(product):
+    ## Speckle filtering
+
+    params = HashMap()
+    root = xml.etree.ElementTree.parse(home['parameters']+'/speckle_filtering.xml').getroot()
+    for child in root:
+        params.put(child.tag,child.text)
+
+    result = GPF.createProduct('Speckle-Filter',params,product)
+    return(result)
+
+def geom_correction(product):
+    ## Geometric correction
+
+    params = HashMap()
+    root = xml.etree.ElementTree.parse(home['parameters']+'/terrain_correction.xml').getroot()
+    for child in root:
+        params.put(child.tag,child.text)
+
+    result = GPF.createProduct('Terrain-Correction',params,product)
+    # current_bands = CalSfCorr.getBandNames()
+    # logger.debug("Current Bands after Terrain Correction:   %s" % (list(current_bands)))
+    return(result)
+
+
+        # w=CalSfCorr.getSceneRasterWidth()
+        # h=CalSfCorr.getSceneRasterHeight()
+        # array = numpy.zeros((w,h),dtype=numpy.float32)  # Empty array
+        # currentband=CalSfCorr.getBand('Sigma0_VV')
+        # bandraster = currentband.readPixels(0, 0, w, h, array)
+
+        # numpy.amax(bandraster)
+
+
+
+
+def sar2sigma():
     logger = logging.getLogger('root')
 
-    if(len(listdir(sarIn))<1):
-        logger.info(sarIn+" is empty! Nothing to do. Exiting and returning None.")
-        return None
-
-    import xml.etree.ElementTree
-    import snappy
-    from snappy import Product
-    from snappy import ProductData
-    from snappy import ProductUtils
-    from snappy import FlagCoding
-    from snappy import GPF
-    from snappy import ProductIO
-    from snappy import jpy
-    from snappy import HashMap
-    from snappy import Rectangle
-
-    logger = logging.getLogger('root')
-    t0=datetime.datetime.now()
 
     logger.info("importing functions from snappy")
 
     outForm='GeoTIFF+XML'
-    WKTReader = snappy.jpy.get_type('com.vividsolutions.jts.io.WKTReader')
-    HashMap = snappy.jpy.get_type('java.util.HashMap')
-    SubsetOp = snappy.jpy.get_type('org.esa.snap.core.gpf.common.SubsetOp')
-    Point = snappy.jpy.get_type('java.awt.Point')
-    Dimension = snappy.jpy.get_type('java.awt.Dimension')
-    System = jpy.get_type('java.lang.System')
-    BandDescriptor = jpy.get_type('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor')
-    logger.debug(WKTReader)
     logger.debug(HashMap)
     logger.debug(BandDescriptor)
     logger.debug(System)
 
-    f=listdir(sarIn)[0]
+
+    f=selectScene()
+    if f is None:
+        logger.info("There are no scenes to process in "+sarIn+". Exiting")
+        raise SystemExit()
+
     product = ProductIO.readProduct(sarIn+"/"+f)
+    productName=product.getName()
+    rect_utm=getBoundingBoxScene(product)
+    wm_in_scene,id_in_scene = getWMinScene(rect_utm)
+
     logger.info("processing " + f)
 
-    # Obtain some attributes
+    Cal=calibration(product)
+    CalSf=speckle_filtering(Cal)
+    CalSfCorr=geom_correction(CalSf)
+    CalSfCorrInt=float2int(CalSfCorr)
 
-    height = product.getSceneRasterHeight()
-    width = product.getSceneRasterWidth()
-    name = product.getName()
-    description = product.getDescription()
-    band_names = product.getBandNames()
+    # current_bands = CalSfCorr.getBandNames()
+    # logger.debug("Current Bands after converting to UInt8:   %s" % (list(current_bands)))
 
-    # Initiate processing
-    logger.info("start processing")
+    # GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
 
-    GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
+    logger.info("starting loop on reservoirs")
+    # for i in range(2000,2004):
+    for i in range(0,len(id_in_scene)):
 
-    # Subset into 4 pieces
+        fname=productName + "_" + str(id_in_scene[i]) + "_CalSfCorr"
+        if (fname+".tif") in listdir(sarOut):
+            logger.debug("product "+fname+".tif already exists: skipping")
+            continue
 
-    size = product.getSceneRasterSize()
+        logger.debug("subsetting product "+ str(id_in_scene[i]))
+        product_subset=subsetProduct(CalSfCorrInt,wm_in_scene[i])
 
-    p_ul = Point(1000,0)
-    p_ur = Point(size.width/2,0)
-    p_ll = Point(1000,size.height/2)
-    p_lr = Point(size.width/2,size.height/2)
-
-    subsetDim = Dimension(size.width/2-1000,size.height/2)
-
-    r_ul = Rectangle(p_ul,subsetDim)
-    r_ur = Rectangle(p_ur,subsetDim)
-    r_ll = Rectangle(p_ll,subsetDim)
-    r_lr = Rectangle(p_lr,subsetDim)
-
-    rect=[r_ul,r_ur,r_ll,r_lr]
-    r=r_ul
-    for r in rect:
-        ##### process upper left only as an example
-        #params = HashMap()
-        #params.put('copyMetadata', True)
-        #params.put('Region', r_ul)
-        #product_subset = GPF.createProduct('Subset',params,product)
-
-        op = SubsetOp()
-        op.setSourceProduct(product)
-        op.setCopyMetadata(True)
-        op.setRegion(r)
-        product_subset = op.getTargetProduct()
-        labelSubset = "x" + r.x.__str__() + "_y" + r.y.__str__()
-
-
-        ## Calibration
-
-        params = HashMap()
-
-        root = xml.etree.ElementTree.parse(home['parameters']+'/calibration.xml').getroot()
-        for child in root:
-            params.put(child.tag,child.text)
-
-        Cal = GPF.createProduct('Calibration',params,product_subset)
-
-        ## Speckle filtering
-
-        params = HashMap()
-        root = xml.etree.ElementTree.parse(home['parameters']+'/speckle_filtering.xml').getroot()
-        for child in root:
-            params.put(child.tag,child.text)
-
-        CalSf = GPF.createProduct('Speckle-Filter',params,Cal)
-
-        ## Band Arithmetics 1
-
-        expression = open(home['parameters'] +'/band_maths1.txt',"r").read()
-
-        targetBand1 = BandDescriptor()
-        targetBand1.name = 'watermask'
-        targetBand1.type = 'float32'
-        targetBand1.expression = expression
-
-        targetBands = jpy.array('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor', 1)
-        targetBands[0] = targetBand1
-
-        parameters = HashMap()
-        parameters.put('targetBands', targetBands)
-
-        CalSfWater = GPF.createProduct('BandMaths', parameters, CalSf)
-
-        current_bands = CalSfWater.getBandNames()
-        logger.debug("Current Bands after Band Arithmetics 2:   %s" % (list(current_bands)))
-
-
-        ## Geometric correction
-
-        params = HashMap()
-        root = xml.etree.ElementTree.parse(home['parameters']+'/terrain_correction.xml').getroot()
-        for child in root:
-            params.put(child.tag,child.text)
-
-        CalSfWaterCorr1 = GPF.createProduct('Terrain-Correction',params,CalSfWater)
-
-        current_bands = CalSfWaterCorr1.getBandNames()
-        logger.debug("Current Bands after Terrain Correction:   %s" % (list(current_bands)))
-
-        ## Band Arithmetics 2
-
-        expression = open(home['parameters']+'/band_maths2.txt',"r").read()
-        #band_names = CalSfWaterCorr1.getBandNames()
-        #print("Bands:   %s" % (list(band_names)))
-
-
-        targetBand1 = BandDescriptor()
-        targetBand1.name = 'watermask_corr'
-        targetBand1.type = 'int8'
-        targetBand1.expression = expression
-
-        targetBands = jpy.array('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor', 1)
-        targetBands[0] = targetBand1
-
-        parameters = HashMap()
-        parameters.put('targetBands', targetBands)
-
-        CalSfWaterCorr2 = GPF.createProduct('BandMaths', parameters, CalSfWaterCorr1)
-
-        current_bands = CalSfWaterCorr2.getBandNames()
-        logger.debug("Current Bands after Band Arithmetics 2:   %s" % (list(current_bands)))
-
-
-        ### write output
-        ProductIO.writeProduct(CalSfWaterCorr2,sarOut+"/"+product.getName() + "_" + labelSubset + "_watermask",outForm)
-
-        ### release products from memory
+        logger.debug("writing product "+ str(id_in_scene[i]))
+        ProductIO.writeProduct(product_subset,sarOut+"/"+fname,outForm)
         product_subset.dispose()
-        CalSf.dispose()
-        CalSfWater.dispose()
-        CalSfWaterCorr1.dispose()
-        CalSfWaterCorr2.dispose()
-        product.dispose()
-        System.gc()
 
-        ### remove scene from folder
-        logger.info("REMOVING " + f)
+    product.dispose()
+    Cal.dispose()
+    CalSf.dispose()
+    CalSfCorr.dispose()
+    CalSfCorrInt.dispose()
+    System.gc()
 
-        os.remove(sarIn+"/"+f)
+    ### remove scene from folder
+    logger.info("REMOVING " + f)
 
-    logger.info("**** sar2watermask completed!" + f  + " processed\n********** Elapsed time: " + str(datetime.datetime.now()-t0) + "****")
+    os.remove(sarIn+"/"+f)
+
+    logger.info("**** sar2watermask completed!" + f  + " processed**********")

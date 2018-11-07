@@ -6,7 +6,7 @@ import os
 import json
 import buhayra.log as log
 
-logger = log.setup_custom_logger('root','INFO')
+logger = log.setup_custom_logger('root','DEBUG')
 
 def main():
 
@@ -19,28 +19,19 @@ def main():
         logger.info("starting scenes.getscenes(): downloading scenes from sentinel API")
         scenes.getscenes()
         logger.info("finished downloading scenes. Check info.log in home folder and inside package folder")
-    elif sys.argv[1]=="rmclouds":
-        logger.info("starting clouds.rmclouds(): cloud removing")
-        import ndwi2watermask.cloudmask as clouds
-        clouds.rmclouds()
-        logger.info("finished cloud removing")
     elif sys.argv[1]=="sar":
-        logger.info("starting sar.sar2w(): processing sar scene and thresholding")
+        logger.info("starting sar.sar2sigma(): processing sar scene ans subsetting")
         import sar2watermask.sar as sar
-        sar.sar2w()
+        sar.sar2sigma()
         logger.info("finished sar2wm")
-    elif sys.argv[1]=="ndwi":
-        logger.info("processing scene and computing ndwi")
-        import ndwi2watermask.ndwi as n2w
-        n2w.ndwi2watermask()
-    elif sys.argv[1]=="polygonize":
-        logger.info("polygonizing water rasters")
-        import buhayra.polygonize as polly
-        polly.polygonize()
+    elif sys.argv[1]=="threshold":
+        logger.info("computing thresholds for each subset")
+        import buhayra.thresholding as thresh
+        thresh.thresholdLoop()
     elif sys.argv[1]=="insert":
         logger.info("inserting into mongodb")
         import buhayra.insertPolygons as ipol
-        ipol.insertPolygons()
+        ipol.insertLoop()
     elif sys.argv[1]=="recent polys":
         logger.info("obtain most recent polygons from mongodb")
         import buhayra.getLatestPolygons as gLP
@@ -65,16 +56,19 @@ def main():
         import ndwi2watermask.ndwi as n2w
         n2w.test_one_ndwi()
     elif sys.argv[1]=="test insert":
-        import buhayra.insertPolygons as insPol
-        insPol.testMongoConnect()
+        import buhayra.tests as tests
+        tests.testMongoConnect()
     elif sys.argv[1]=="test logging":
         import buhayra.testlog as tl
         tl.testing_logging()
     elif sys.argv[1]=="test idepix":
         import idepix.classification as ide
         ide.test()
+    elif sys.argv[1]=="test parallel":
+        import tests.test_parallel as par
+        par.test()
     else:
-        logger.error("an argument is needed, for example: get_scenes, rmclouds, sar, ndwi, polygonize, insert, recent polys, 1 month old polys, 2 months old polys, update validation")
+        logger.error("an argument is needed, for example: get_scenes, sar, threshold, insert, recent polys, 1 month old polys, 2 months old polys, update validation")
 
 
 if __name__ == "__main__":

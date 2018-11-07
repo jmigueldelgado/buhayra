@@ -1,58 +1,74 @@
 import os
-import subprocess
-import glob
-import datetime
 from buhayra.getpaths import *
 import logging
-
-def polygonize():
-    logger = logging.getLogger('root')
-
-    t0=datetime.datetime.now()
-
-    logger.info("polygonize SAR")
-
-    items=os.listdir(sarOut)
-    newlist = []
-    for names in items:
-        if names.endswith("watermask.tif"):
-            newlist.append(names[:-4])
-
-    #newlist = list(set(newlist))
-    #newlist
-    #scene=newlist[0]
-
-    for scene in newlist:
-
-        logger.info("\n polygonizing " + scene + "\n")
-        out_gml = scene + ".gml"
-        subprocess.call([pyt,gdalPol,sarOut + "/" + scene + ".tif","-f","GML",polOut + "/" + out_gml])
-        os.remove(sarOut + "/" + scene + ".tif")
-
-    logger.info("sentinel-1 polygonize completed!" + str(len(newlist))  + " watermasks processed")
-    logger.info("Elapsed time: " + str(datetime.datetime.now()-t0))
+import rasterio
+from rasterio import features
+import shapely
+from shapely.geometry import shape
+from shapely.geometry import mapping
+from shapely.ops import cascaded_union, transform
+import fiona
+import datetime
+import json
+from functools import partial
+import pyproj
 
 
 
 
-    ####################################################################################
-    ######### polygonize S2A
+def tif2shapely(f):
+    ds=rasterio.open(polOut+'/'+f,'r')
+    ds.profile.update(dtype=rasterio.int32)
 
+    t=ds.transform
+    r=ds.read(1)
+    ds.close()
 
-    logger.info("... now polygonize S2A")
+    polys=list()
+    for pol, value in features.shapes(r, transform=t):
+        if value>0:
+            polys.append(shape(pol))
+            # print("Image value:")
+            # print(value)
+        # print("Geometry:")
+        # pprint.pprint(shape)
+    if len(polys)>1:
+        poly = cascaded_union(polys)
+    else:
+        poly=polys[0]
 
-    items=os.listdir(s2aOut)
-    newlist = []
-    for names in items:
-        if names.endswith("watermask.tif"):
-            newlist.append(names[:-4])
+    return(poly)
 
-    for scene in items:
-        logger.info("\n polygonizing " + scene)
-        out_gml = scene[:-4] + ".gml"
-        subprocess.call([pyt,gdalPol,s2aOut + "/" + scene,"-f","GML",polOut + "/" + out_gml])
-        os.remove(s2aOut + "/" + scene)
+def prepareJSON(poly,props):
+    s=json.dumps(mapping(poly))
+    geom=json.loads(s)
 
-    logger.info("sentinel-2 polygonize completed!" + str(len(items))  + " watermasks processed")
-    logger.info("Elapsed time: " + str(datetime.datetime.now()-t0))
-    logger.info("End of poligonize")
+    poly_utm=wgs2utm(poly)
+
+    feat={
+        'type':'Feature',
+        'properties':props,
+        'geometry':geom
+        }
+
+    feat['properties']['area']=poly_utm.area
+    return(feat)
+
+def wgs2utm(geom):
+    project = partial(
+        pyproj.transform,
+        pyproj.Proj(init='epsg:4326'),
+        pyproj.Proj(init='epsg:32724'))
+    geom_utm=transform(project,geom)
+    return(geom_utm)
+
+def getProperties(f):
+    metalist=f.split('_')
+    sentx=metalist[0]
+    meta={
+        # 'source_id':metalist[0],
+        'ingestion_time':datetime.datetime.strptime(metalist[4],'%Y%m%dT%H%M%S'),
+        'id_jrc':int(metalist[9]),}
+    if sentx.startswith('S1'):
+        meta['source_id']=1
+    return(meta)
