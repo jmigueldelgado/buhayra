@@ -12,17 +12,15 @@ from snappy import jpy
 from snappy import HashMap
 from snappy import PixelPos
 from snappy import GeoPos
+from snappy import System
+from snappy import BandDescriptor
+from snappy import WKTReader
 from shapely.geometry import Polygon
 from shapely.ops import transform
 import pyproj
 from functools import partial
 import fiona
 
-
-
-
-
-#jsgeom=js['features'][0]['geometry']
 
 def geojson2wkt(jsgeom):
     from shapely.geometry import shape,polygon
@@ -93,11 +91,8 @@ def subsetProduct(product,pol):
         pyproj.Proj(init='epsg:32724'),
         pyproj.Proj(init='epsg:4326'))
     bb_ll=transform(project,bb)
-    WKTReader = jpy.get_type('com.vividsolutions.jts.io.WKTReader')
     geom = WKTReader().read(bb_ll.wkt)
 
-    HashMap = jpy.get_type('java.util.HashMap')
-    #GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
 
     parameters = HashMap()
     parameters.put('copyMetadata', True)
@@ -107,14 +102,12 @@ def subsetProduct(product,pol):
 
 
 def float2int(product):
-    BandDescriptor = jpy.get_type('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor')
-
+    targetBands = jpy.array('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor',1)
     targetBand1 = BandDescriptor()
     targetBand1.name = 'sigma_int'
     targetBand1.type = 'Int32'
     targetBand1.expression = 'round(Sigma0_VV*1000000)'
 
-    targetBands = jpy.array('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor',1)
     targetBands[0] = targetBand1
 
     parameters = HashMap()
@@ -177,9 +170,6 @@ def sar2sigma():
     logger.info("importing functions from snappy")
 
     outForm='GeoTIFF+XML'
-    HashMap = jpy.get_type('java.util.HashMap')
-    System = jpy.get_type('java.lang.System')
-    BandDescriptor = jpy.get_type('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor')
     logger.debug(HashMap)
     logger.debug(BandDescriptor)
     logger.debug(System)
@@ -191,6 +181,7 @@ def sar2sigma():
         raise SystemExit()
 
     product = ProductIO.readProduct(sarIn+"/"+f)
+    productName=product.getName()
     rect_utm=getBoundingBoxScene(product)
     wm_in_scene,id_in_scene = getWMinScene(rect_utm)
 
@@ -204,13 +195,13 @@ def sar2sigma():
     # current_bands = CalSfCorr.getBandNames()
     # logger.debug("Current Bands after converting to UInt8:   %s" % (list(current_bands)))
 
-    GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
+    # GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
 
     logger.info("starting loop on reservoirs")
     # for i in range(2000,2004):
     for i in range(0,len(id_in_scene)):
 
-        fname=product.getName() + "_" + str(id_in_scene[i]) + "_CalSfCorr"
+        fname=productName + "_" + str(id_in_scene[i]) + "_CalSfCorr"
         if (fname+".tif") in listdir(sarOut):
             logger.debug("product "+fname+".tif already exists: skipping")
             continue
@@ -219,17 +210,7 @@ def sar2sigma():
         product_subset=subsetProduct(CalSfCorrInt,wm_in_scene[i])
 
         logger.debug("writing product "+ str(id_in_scene[i]))
-        # GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
         ProductIO.writeProduct(product_subset,sarOut+"/"+fname,outForm)
-
-        # w=product_subset.getSceneRasterWidth()
-        # h=product_subset.getSceneRasterHeight()
-        # array = numpy.zeros((w,h),dtype=numpy.int32)  # Empty array
-        # currentband=product_subset.getBand('sigma_int')
-        # bandraster = currentband.readPixels(0, 0, w, h, array)
-        # numpy.amax(bandraster)
-
-        ### release products from memory
         product_subset.dispose()
 
     product.dispose()
