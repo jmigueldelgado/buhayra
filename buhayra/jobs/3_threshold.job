@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -N 3_polygonize
+#PBS -N 3_threshold
 #PBS -M martinsd@uni-potsdam.de
 #PBS -j oe
 #PBS -l ncpus=1
@@ -7,5 +7,5 @@
 #PBS -l walltime=23:00:00
 #PBS -l mem=20gb
 
-source activate gdal
-python /users/stud09/martinsd/proj/buhayra "polygonize"
+source activate fiorio_orson
+python /users/stud09/martinsd/proj/buhayra "threshold"

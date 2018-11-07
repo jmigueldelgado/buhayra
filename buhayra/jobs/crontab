@@ -4,7 +4,7 @@ MAILTO="martinsd@uni-potsdam.de"
 
 ### acquire test scenes from ESA
 
-0 12 30 8 * /users/stud09/martinsd/local/miniconda2/envs/snappy/bin/python2 /users/stud09/martinsd/proj/buhayra "get test scenes"
+# 0 12 30 8 * /users/stud09/martinsd/local/miniconda2/envs/snappy/bin/python2 /users/stud09/martinsd/proj/buhayra "get test scenes"
 
 ### acquire scenes from ESA
 
