@@ -68,6 +68,7 @@ if exists(home['proj']+'/buhayra/credentials.py'):
 
 
 def selectTiff(dir):
+    logger = logging.getLogger('root')
     if(len(listdir(dir))<1):
         logger.info(dir+" is empty! Nothing to do. Exiting and returning None.")
         return False
@@ -78,6 +79,7 @@ def selectTiff(dir):
     return False
 
 def selectScene():
+    logger = logging.getLogger('root')
     if(len(listdir(sarIn))<1):
         logger.info(sarIn+" is empty! Nothing to do. Exiting and returning None.")
         return None
