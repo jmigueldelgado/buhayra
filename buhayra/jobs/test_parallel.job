@@ -7,9 +7,6 @@
 #PBS -l walltime=00:05:00
 cd /users/stud09/martinsd/proj/buhayra
 
-source activate snappy6
+source activate parallel
 
-export JAVA_TOOL_OPTIONS="-Xmx16g"
-export _JAVA_OPTIONS="-Xmx18g -Xss2m"
-
-python /users/stud09/martinsd/proj/buhayra "test idepix"
+python /users/stud09/martinsd/proj/buhayra "test parallel"
