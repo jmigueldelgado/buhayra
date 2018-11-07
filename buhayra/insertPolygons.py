@@ -11,18 +11,15 @@ from buhayra.credentials import *
 
 def insertLoop():
     logger = logging.getLogger('root')
-    logger.debug('Selecting tif %s',selectTiff(polOut))
     while(selectTiff(polOut)):
         f=selectTiff(polOut)
-        logger.debug('Selected feature %s',f)
         poly=tif2shapely(f)
         props=getProperties(f)
-        logger.debug('Preparing JSON to insert')
         feat=prepareJSON(poly,props)
         feat_id=insertNEB(feat)
         logger.debug('Inserted feature ID: %s',feat_id)
-        logger.info('deleting ' + f)
-        os.remove(polOut + '/' + f)
+        logger.info('moving away ' + f)
+        os.rename(polOut + '/' + f,procOut + '/' + f)
 
 def insertNEB(feat):
     logger = logging.getLogger('root')
