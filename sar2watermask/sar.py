@@ -12,14 +12,15 @@ from snappy import jpy
 from snappy import HashMap
 from snappy import PixelPos
 from snappy import GeoPos
-from snappy import System
-from snappy import BandDescriptor
 from snappy import WKTReader
 from shapely.geometry import Polygon
 from shapely.ops import transform
 import pyproj
 from functools import partial
 import fiona
+
+System = jpy.get_type('java.lang.System')
+BandDescriptor = jpy.get_type('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor')
 
 
 def geojson2wkt(jsgeom):
