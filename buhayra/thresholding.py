@@ -19,8 +19,8 @@ def thresholdLoop():
             logger.debug('deleting '+f)
             os.remove(sarOut+'/'+f)
         else:
-            logger.debug('moving '+f+'  to watermasks')
-            os.rename(sarOut+'/'+f,polOut + '/' + f)
+            logger.debug('deleting '+f+'')
+            os.remove(sarOut+'/'+f)
             logger.debug('Threshold for '+f + ' is ' + str(thr))
 
 def apply_thresh(f):
