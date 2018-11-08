@@ -52,9 +52,6 @@ def main():
         logger.info("obtain validation dataset from funceme api")
         import buhayra.funceme as fcm
         fcm.insert_insitu_monitoring()
-    elif sys.argv[1]=="test":
-        import ndwi2watermask.ndwi as n2w
-        n2w.test_one_ndwi()
     elif sys.argv[1]=="test insert":
         import buhayra.tests as tests
         tests.testMongoConnect()
