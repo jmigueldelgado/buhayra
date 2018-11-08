@@ -16,7 +16,7 @@ In short, the following steps are done sequentially:
 
 - calibrate, speckle-filter, correct geometry with [snappy](http://step.esa.int/main/toolboxes/snap/) (for SAR data)
 
-- subset based on a [global surface water database](https://global-surface-water.appspot.com/faq)
+- subset based on a [global surface water database](https://global-surface-water.appspot.com/faq) from JRC using google's [earth engine code editor](https://code.earthengine.google.com/)
 
 - apply [minimum error thresholding(https://www.sciencedirect.com/science/article/abs/pii/0031320386900300)
 
