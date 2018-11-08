@@ -4,6 +4,7 @@ import numpy.ma as ma
 import rasterio
 import logging
 import os
+import json
 
 # f=selectTiff(sarOut)
 #
@@ -22,21 +23,19 @@ def thresholdLoop():
             os.rename(sarOut+'/'+f,polOut + '/' + f)
             logger.debug('Threshold for '+f + ' is ' + str(thr))
 
-
 def apply_thresh(f):
     with rasterio.open(sarOut+'/'+f,'r+') as ds:
         r=ds.read(1)
+        gdalParam=ds.transform.to_gdal()
+
         rmsk=ma.array(r,mask= (r==0))
         thr=kittler(rmsk)
-
         if thr is None:
-            ds.close()
             return None
 
         while(thr>60000):
             thr=kittler(ma.array(r,mask= (rmsk>thr)))
             if thr is None:
-                ds.close()
                 return None
 
         wm=ma.array(r,mask= ((r>=thr) | (r==0)))
@@ -44,12 +43,15 @@ def apply_thresh(f):
         if(thr<40000):
             rshape=(wm.mask*-1+1)*wm.data
         else:
-            ds.close()
             return None
-        ds.write(rshape.astype(rasterio.int32),1)
-        ds.close()
-        return(thr)
 
+        with rasterio.open(polOut+'/'+f,'w',driver=ds.driver,height=ds.height,width=ds.width,count=1,dtype=rasterio.uint8) as dsout:
+            dsout.write(rshape.astype(rasterio.uint8),1)
+
+
+    with open(polOut+'/'+f[:-3]+'json', 'w') as fjson:
+        json.dump(gdalParam, fjson)
+    return(thr)
 
 def kittler(nparray):
     """

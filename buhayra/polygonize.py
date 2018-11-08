@@ -14,18 +14,17 @@ from functools import partial
 import pyproj
 
 
-
-
 def tif2shapely(f):
     ds=rasterio.open(polOut+'/'+f,'r')
-    ds.profile.update(dtype=rasterio.int32)
-
-    t=ds.transform
+    # ds.profile.update(dtype=rasterio.int32)
+    with open(polOut+'/'+f[:-3]+'json', 'r') as fjson:
+        gdalParam = json.load(fjson)
+    affParam=rasterio.Affine.from_gdal(gdalParam[0],gdalParam[1],gdalParam[2],gdalParam[3],gdalParam[4],gdalParam[5])
     r=ds.read(1)
     ds.close()
 
     polys=list()
-    for pol, value in features.shapes(r, transform=t):
+    for pol, value in features.shapes(r, transform=affParam):
         if value>0:
             polys.append(shape(pol))
             # print("Image value:")
