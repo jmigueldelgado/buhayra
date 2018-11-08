@@ -5,7 +5,7 @@ import rasterio
 import logging
 import os
 import json
-
+from shutil import copyfile
 # f=selectTiff(sarOut)
 #
 # apply_thresh(f) ## applies threshold to tiff in scratch
@@ -16,17 +16,19 @@ def thresholdLoop():
         f=selectTiff(sarOut)
         thr=apply_thresh(f)
         if thr is None:
-            logger.debug('deleting '+f)
-            os.remove(sarOut+'/'+f)
+            logger.debug('moving away '+f)
+            os.rename(sarOut+'/'+f,procOut+'/'+f)
+            os.rename(sarOut+'/'+f[:-3]+'json',procOut+'/'+f[:-3]+'json')
         else:
-            logger.debug('deleting '+f+'')
-            os.remove(sarOut+'/'+f)
+            logger.debug('moving away '+f+'')
+            os.rename(sarOut+'/'+f,procOut+'/'+f)
+            os.rename(sarOut+'/'+f[:-3]+'json',procOut+'/'+f[:-3]+'json')
             logger.debug('Threshold for '+f + ' is ' + str(thr))
 
 def apply_thresh(f):
-    with rasterio.open(sarOut+'/'+f,'r+') as ds:
+    with rasterio.open(sarOut+'/'+f,'r') as ds:
         r=ds.read(1)
-        gdalParam=ds.transform.to_gdal()
+        # gdalParam=ds.transform.to_gdal()
 
         rmsk=ma.array(r,mask= (r==0))
         thr=kittler(rmsk)
@@ -44,13 +46,10 @@ def apply_thresh(f):
             rshape=(wm.mask*-1+1)*wm.data
         else:
             return None
-
         with rasterio.open(polOut+'/'+f,'w',driver=ds.driver,height=ds.height,width=ds.width,count=1,dtype=rasterio.uint8) as dsout:
             dsout.write(rshape.astype(rasterio.uint8),1)
 
-
-    with open(polOut+'/'+f[:-3]+'json', 'w') as fjson:
-        json.dump(gdalParam, fjson)
+    copyfile(sarOut+'/'+f[:-3]+'json',polOut+'/'+f[:-3]+'json')
     return(thr)
 
 def kittler(nparray):
