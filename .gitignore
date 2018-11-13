@@ -3,6 +3,12 @@
 buhayra/jobs/7_ogr2ogr.sh
 [#]*[#]
 info.log
+2_sar2watermask.o*
+3_threshold.o*
+4_insert_polys_mongo.sh.*
+4_insert.o*
+poly+mongo.o*
+test*.o*
 
 *.qgs
 # Sentinel data and test data

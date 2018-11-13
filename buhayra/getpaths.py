@@ -67,7 +67,6 @@ sys.path.insert(0, home['parameters'])
 if exists(home['proj']+'/buhayra/credentials.py'):
     from buhayra.credentials import *
 
-
 def selectTiff(dir):
     logger = logging.getLogger('root')
     if(len(listdir(dir))<1):
