@@ -4,8 +4,8 @@ MAILTO="martinsd@uni-potsdam.de"
 
 ### acquire scenes from ESA
 
-0 20 * * 1 /users/stud09/martinsd/local/miniconda2/envs/snappy/bin/python2 /users/stud09/martinsd/proj/buhayra "getscenes"
-0 20 * * 5 /users/stud09/martinsd/local/miniconda2/envs/snappy/bin/python2 /users/stud09/martinsd/proj/buhayra "getscenes"
+0 20 * * 1 /users/stud09/martinsd/local/miniconda2/envs/snappy/bin/python2 /users/stud09/martinsd/proj/buhayra "get scenes"
+0 20 * * 5 /users/stud09/martinsd/local/miniconda2/envs/snappy/bin/python2 /users/stud09/martinsd/proj/buhayra "get scenes"
 
 ### process acquired scenes
 0 2 * * * qsub /users/stud09/martinsd/proj/buhayra/buhayra/jobs/2_sar2watermask.job
@@ -18,4 +18,3 @@ MAILTO="martinsd@uni-potsdam.de"
 0 23 * * 3 /users/stud09/martinsd/proj/buhayra/buhayra/jobs/4_insert_polys_mongo.sh
 0 23 * * 5 /users/stud09/martinsd/proj/buhayra/buhayra/jobs/4_insert_polys_mongo.sh
 0 23 * * 7 /users/stud09/martinsd/proj/buhayra/buhayra/jobs/4_insert_polys_mongo.sh
-

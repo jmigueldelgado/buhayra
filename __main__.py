@@ -6,7 +6,7 @@ import os
 import json
 import buhayra.log as log
 
-logger = log.setup_custom_logger('root','DEBUG')
+logger = log.setup_custom_logger('root','INFO')
 
 def main():
 
@@ -14,7 +14,7 @@ def main():
 
     if sys.argv[1] is None:
         logger.error("an argument is needed, for example: get_scenes, rmclouds, sar, ndwi, polygonize, insert, recent polys, 1 month old polys, 2 months old polys, update validation")
-    elif sys.argv[1]=="getscenes":
+    elif sys.argv[1]=="get scenes":
         import buhayra.scenes as scenes
         logger.info("starting scenes.getscenes(): downloading scenes from sentinel API")
         scenes.getscenes()
