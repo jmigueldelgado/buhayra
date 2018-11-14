@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import numpy as np
 from os import listdir
 import datetime
