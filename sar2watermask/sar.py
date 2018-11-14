@@ -1,5 +1,6 @@
 import numpy as np
 from os import listdir
+import os
 import datetime
 import sys
 import numpy
@@ -20,6 +21,7 @@ import pyproj
 from functools import partial
 import fiona
 import rasterio
+import json
 
 System = jpy.get_type('java.lang.System')
 BandDescriptor = jpy.get_type('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor')
@@ -167,7 +169,7 @@ def compressTiff(path):
     with rasterio.open(path,'r') as ds:
         r=ds.read(1)
         gdalParam=ds.transform.to_gdal()
-        with rasterio.open(path[:-8]+'.tif','w',driver=ds.driver,height=ds.height,width=ds.width,count=1,dtype=ds.dtype) as dsout:
+        with rasterio.open(path[:-8]+'.tif','w',driver=ds.driver,height=ds.height,width=ds.width,count=1,dtype=r.dtype) as dsout:
             dsout.write(r,1)
 
     with open(path[:-3]+'json', 'w') as fjson:
@@ -208,7 +210,6 @@ def sar2sigma():
     # logger.debug("Current Bands after converting to UInt8:   %s" % (list(current_bands)))
 
     # GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
-
     logger.info("starting loop on reservoirs")
     for i in range(0,len(id_in_scene)):
 
