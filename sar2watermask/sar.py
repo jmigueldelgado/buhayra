@@ -225,5 +225,5 @@ def sar2sigma():
     logger.info("REMOVING " + f)
 
     os.remove(sarIn+"/"+f)
-
+    os.remove(sarIn+"/"+f[:-3]+".xml")
     logger.info("**** sar2watermask completed!" + f  + " processed**********")
