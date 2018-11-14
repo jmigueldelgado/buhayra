@@ -17,8 +17,8 @@ def thresholdLoop():
         thr=apply_thresh(f)
         if thr is None:
             logger.debug('moving away '+f)
-            os.rename(sarOut+'/'+f,procOut+'/'+f)
-            os.rename(sarOut+'/'+f[:-3]+'json',procOut+'/'+f[:-3]+'json')
+            os.remove(sarOut+'/'+f)
+            os.remove(sarOut+'/'+f[:-3]+'json')
         else:
             logger.debug('moving away '+f+'')
             os.rename(sarOut+'/'+f,procOut+'/'+f)

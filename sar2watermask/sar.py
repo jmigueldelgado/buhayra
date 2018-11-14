@@ -175,6 +175,7 @@ def compressTiff(path):
         json.dump(gdalParam, fjson)
 
     os.remove(path)
+    os.remove(path[:-3]+'xml')
 
 def sar2sigma():
     logger = logging.getLogger('root')
