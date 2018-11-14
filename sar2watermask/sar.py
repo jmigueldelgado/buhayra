@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+import numpy as np
 from os import listdir
 import datetime
 import sys
@@ -18,6 +20,7 @@ from shapely.ops import transform
 import pyproj
 from functools import partial
 import fiona
+import rasterio
 
 System = jpy.get_type('java.lang.System')
 BandDescriptor = jpy.get_type('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor')
@@ -161,8 +164,17 @@ def geom_correction(product):
 
         # numpy.amax(bandraster)
 
+def compressTiff(path):
+    with rasterio.open(path,'r') as ds:
+        r=ds.read(1)
+        gdalParam=ds.transform.to_gdal()
+        with rasterio.open(path[:-8]+'.tif','w',driver=ds.driver,height=ds.height,width=ds.width,count=1,dtype=ds.dtype) as dsout:
+            dsout.write(r,1)
 
+    with open(path[:-3]+'json', 'w') as fjson:
+        json.dump(gdalParam, fjson)
 
+    os.remove(path)
 
 def sar2sigma():
     logger = logging.getLogger('root')
@@ -174,7 +186,6 @@ def sar2sigma():
     logger.debug(HashMap)
     logger.debug(BandDescriptor)
     logger.debug(System)
-
 
     f=selectScene()
     if f is None:
@@ -199,7 +210,6 @@ def sar2sigma():
     # GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
 
     logger.info("starting loop on reservoirs")
-    # for i in range(2000,2004):
     for i in range(0,len(id_in_scene)):
 
         fname=productName + "_" + str(id_in_scene[i]) + "_CalSfCorr"
@@ -210,9 +220,28 @@ def sar2sigma():
         logger.debug("subsetting product "+ str(id_in_scene[i]))
         product_subset=subsetProduct(CalSfCorrInt,wm_in_scene[i])
 
+        # # Get bandnames
+        # im_bands = list(product_subset.getBandNames())
+        #
+        # # Get height and width
+        # h = product_subset.getSceneRasterHeight()
+        # w = product_subset.getSceneRasterWidth()
+        # arr = np.zeros((h,w),dtype=np.float32)  # Empty array
+        #
+        # # Get the 1st band of the product for example
+        # currentband = product_subset.getBand( im_bands[0])
+        #
+        # # Read the pixels from the band to the empty array
+        # bandraster = currentband.readPixels(0, 0, w, h, arr)
+        #
+        # c=product_subset.getSceneGeoCoding()
+        #
+        # plt.imshow(bandraster)
+
         logger.debug("writing product "+ str(id_in_scene[i]))
-        ProductIO.writeProduct(product_subset,sarOut+"/"+fname,outForm)
+        ProductIO.writeProduct(product_subset,sarOut+"/"+fname+'_big',outForm)
         product_subset.dispose()
+        compressTiff(sarOut+"/"+fname+'_big'+'.tif')
 
     product.dispose()
     Cal.dispose()
@@ -225,5 +254,6 @@ def sar2sigma():
     logger.info("REMOVING " + f)
 
     os.remove(sarIn+"/"+f)
-    os.remove(sarIn+"/"+f[:-3]+".xml")
+
+
     logger.info("**** sar2watermask completed!" + f  + " processed**********")
