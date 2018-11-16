@@ -1,4 +1,4 @@
 #!/bin/bash
 
-source activate fiorio_orson
+source activate buhayra
 python /users/stud09/martinsd/proj/buhayra "insert"
