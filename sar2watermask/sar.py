@@ -172,7 +172,7 @@ def compressTiff(path):
         with rasterio.open(path[:-8]+'.tif','w',driver=ds.driver,height=ds.height,width=ds.width,count=1,dtype=r.dtype) as dsout:
             dsout.write(r,1)
 
-    with open(path[:-8]+'json', 'w') as fjson:
+    with open(path[:-8]+'.json', 'w') as fjson:
         json.dump(gdalParam, fjson)
 
     os.remove(path)
