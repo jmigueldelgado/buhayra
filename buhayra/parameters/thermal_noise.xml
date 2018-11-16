@@ -1,0 +1,5 @@
+<parameters>
+    <selectedPolarisations>VV</selectedPolarisations>
+    <removeThermalNoise>true</removeThermalNoise>
+    <reIntroduceThermalNoise>false</reIntroduceThermalNoise>
+</parameters>

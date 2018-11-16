@@ -105,6 +105,24 @@ def subsetProduct(product,pol):
     product_subset = GPF.createProduct('Subset', parameters, product)
     return(product_subset)
 
+def orbit_correction(product):
+    params = HashMap()
+    root = xml.etree.ElementTree.parse(home['parameters']+'/orbit_correction.xml').getroot()
+    for child in root:
+        params.put(child.tag,child.text)
+
+    result = GPF.createProduct('Apply-Orbit-File',params,product)
+    return(result)
+
+def thermal_noise_removal(product):
+    params = HashMap()
+    root = xml.etree.ElementTree.parse(home['parameters']+'/thermal_noise.xml').getroot()
+    for child in root:
+        params.put(child.tag,child.text)
+    
+    result = GPF.createProduct('ThermalNoiseRemoval',params,product)
+    return(result)
+
 
 def float2int(product):
     targetBands = jpy.array('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor',1)

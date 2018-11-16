@@ -31,7 +31,9 @@ def apply_thresh(f):
         # gdalParam=ds.transform.to_gdal()
 
         rmsk=ma.array(r,mask= (r==0))
-        thr=kittler(rmsk)
+        rmsk_db=10*log10(rmsk)
+        thr=kittler(rmsk_db)
+        
         if thr is None:
             return None
 
