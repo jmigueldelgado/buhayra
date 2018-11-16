@@ -62,8 +62,11 @@ def main():
         import idepix.classification as ide
         ide.test()
     elif sys.argv[1]=="test parallel":
-        import tests.test_parallel as par
+        import maintenance.test_parallel as par
         par.test()
+    elif sys.argv[1]=="run maintenance":
+        import maintenance.run_rename as rnm
+        rnm.rename_json()
     else:
         logger.error("an argument is needed, for example: get_scenes, sar, threshold, insert, recent polys, 1 month old polys, 2 months old polys, update validation")
 

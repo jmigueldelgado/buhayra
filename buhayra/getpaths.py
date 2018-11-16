@@ -78,6 +78,18 @@ def selectTiff(dir):
             return(s)
     return False
 
+def selectPattern(dir,pattern):
+    logger = logging.getLogger('root')
+    if(len(listdir(dir))<1):
+        logger.info(dir+" is empty! Nothing to do. Exiting and returning None.")
+        return False
+    l=listdir(dir)
+    for s in l:
+        if re.search(pattern,s):
+            return(s)
+    return False
+
+
 def selectScene():
     logger = logging.getLogger('root')
     if(len(listdir(sarIn))<1):
