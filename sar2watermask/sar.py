@@ -172,7 +172,7 @@ def compressTiff(path):
         with rasterio.open(path[:-8]+'.tif','w',driver=ds.driver,height=ds.height,width=ds.width,count=1,dtype=r.dtype) as dsout:
             dsout.write(r,1)
 
-    with open(path[:-3]+'json', 'w') as fjson:
+    with open(path[:-8]+'json', 'w') as fjson:
         json.dump(gdalParam, fjson)
 
     os.remove(path)
@@ -242,6 +242,7 @@ def sar2sigma():
         logger.debug("writing product "+ str(id_in_scene[i]))
         ProductIO.writeProduct(product_subset,sarOut+"/"+fname+'_big',outForm)
         product_subset.dispose()
+        logger.info("Compressing and saving " + sarOut+"/"+fname+'_big'+'.tif')
         compressTiff(sarOut+"/"+fname+'_big'+'.tif')
 
     product.dispose()
