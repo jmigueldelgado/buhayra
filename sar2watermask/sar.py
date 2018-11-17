@@ -3,7 +3,6 @@ from os import listdir
 import os
 import datetime
 import sys
-import numpy
 import logging
 from buhayra.getpaths import *
 import xml.etree.ElementTree
@@ -119,7 +118,7 @@ def thermal_noise_removal(product):
     root = xml.etree.ElementTree.parse(home['parameters']+'/thermal_noise.xml').getroot()
     for child in root:
         params.put(child.tag,child.text)
-    
+
     result = GPF.createProduct('ThermalNoiseRemoval',params,product)
     return(result)
 
@@ -177,22 +176,33 @@ def geom_correction(product):
 
         # w=CalSfCorr.getSceneRasterWidth()
         # h=CalSfCorr.getSceneRasterHeight()
-        # array = numpy.zeros((w,h),dtype=numpy.float32)  # Empty array
+        # array = np.zeros((w,h),dtype=np.float32)  # Empty array
         # currentband=CalSfCorr.getBand('Sigma0_VV')
         # bandraster = currentband.readPixels(0, 0, w, h, array)
 
-        # numpy.amax(bandraster)
+        # np.amax(bandraster)
 
-def compressTiff(path):
+
+def compress_tiff(path):
     with rasterio.open(path,'r') as ds:
         r=ds.read(1)
+        r[r==0]=np.nan
+
+        r_db=10*np.log10(r)*100
+
+        if (np.nanmax(r_db)< np.iinfo(np.int16).max) and (np.nanmin(r_db) > (np.iinfo(np.int16).min+1)):
+            r_db[np.isnan(r_db)]=np.iinfo(np.int16).min
+            r_db=np.int16(r_db)
+        else:
+            r_db[np.isnan(r_db)]=np.iinfo(np.int32).min
+            r_db=np.int32(r_db)
+
         gdalParam=ds.transform.to_gdal()
-        with rasterio.open(path[:-8]+'.tif','w',driver=ds.driver,height=ds.height,width=ds.width,count=1,dtype=r.dtype) as dsout:
-            dsout.write(r,1)
+        with rasterio.open(path[:-8]+'.tif','w',driver=ds.driver,height=ds.height,width=ds.width,count=1,dtype=r_db.dtype) as dsout:
+            dsout.write(r_db,1)
 
     with open(path[:-8]+'.json', 'w') as fjson:
         json.dump(gdalParam, fjson)
-
     os.remove(path)
     os.remove(path[:-3]+'xml')
 
@@ -222,13 +232,14 @@ def sar2sigma():
     Cal=calibration(product)
     CalSf=speckle_filtering(Cal)
     CalSfCorr=geom_correction(CalSf)
-    CalSfCorrInt=float2int(CalSfCorr)
+    # CalSfCorrInt=float2int(CalSfCorr)
 
     # current_bands = CalSfCorr.getBandNames()
     # logger.debug("Current Bands after converting to UInt8:   %s" % (list(current_bands)))
 
     # GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
     logger.info("starting loop on reservoirs")
+    i=0
     for i in range(0,len(id_in_scene)):
 
         fname=productName + "_" + str(id_in_scene[i]) + "_CalSfCorr"
@@ -237,7 +248,7 @@ def sar2sigma():
             continue
 
         logger.debug("subsetting product "+ str(id_in_scene[i]))
-        product_subset=subsetProduct(CalSfCorrInt,wm_in_scene[i])
+        product_subset=subsetProduct(CalSfCorr,wm_in_scene[i])
 
         # # Get bandnames
         # im_bands = list(product_subset.getBandNames())
@@ -261,7 +272,8 @@ def sar2sigma():
         ProductIO.writeProduct(product_subset,sarOut+"/"+fname+'_big',outForm)
         product_subset.dispose()
         logger.info("Compressing and saving " + sarOut+"/"+fname+'_big'+'.tif')
-        compressTiff(sarOut+"/"+fname+'_big'+'.tif')
+        compress_tiff(sarOut+"/"+fname+'_big'+'.tif')
+        path=sarOut+"/"+fname+'_big'+'.tif'
 
     product.dispose()
     Cal.dispose()

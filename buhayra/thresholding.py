@@ -6,11 +6,8 @@ import logging
 import os
 import json
 from shutil import copyfile
-# f=selectTiff(sarOut)
-#
-# apply_thresh(f) ## applies threshold to tiff in scratch
 
-def thresholdLoop():
+def threshold_loop():
     logger = logging.getLogger('root')
     while(selectTiff(sarOut)):
         f=selectTiff(sarOut)
@@ -27,32 +24,51 @@ def thresholdLoop():
 
 def apply_thresh(f):
     with rasterio.open(sarOut+'/'+f,'r') as ds:
-        r=ds.read(1)
-        # gdalParam=ds.transform.to_gdal()
+        r_db=ds.read(1)
 
-        rmsk=ma.array(r,mask= (r==0))
-        rmsk_db=10*log10(rmsk)
-        thr=kittler(rmsk_db)
-        
+        # subset into 200x200 m approx.
+
+        splt=subset_200x200(r_db)
+
+        # loop through subsets
+
+        ### STILL NEEDS A FOR LOOP
+
+        thr=kittler(r_db)
         if thr is None:
             return None
 
-        while(thr>60000):
-            thr=kittler(ma.array(r,mask= (rmsk>thr)))
-            if thr is None:
-                return None
-
-        wm=ma.array(r,mask= ((r>=thr) | (r==0)))
+        wm=ma.array(r_db,mask= (r_db>=thr))
         wm.fill(1)
-        if(thr<40000):
+        if(thr<-10):
             rshape=(wm.mask*-1+1)*wm.data
         else:
-            return None
-        with rasterio.open(polOut+'/'+f,'w',driver=ds.driver,height=ds.height,width=ds.width,count=1,dtype=rasterio.uint8) as dsout:
-            dsout.write(rshape.astype(rasterio.uint8),1)
+            rshape=wm.data-1
+
+
+        ### stitch raster back together with a for loop before writing!!!
+        ### try np.concatenate(splt[1])
+
+
+        with rasterio.open(polOut+'/'+f,'w',driver=ds.driver,height=ds.height,width=ds.width,count=1,dtype=rasterio.int8) as dsout:
+            dsout.write(rshape.astype(rasterio.int8),1)
 
     copyfile(sarOut+'/'+f[:-3]+'json',polOut+'/'+f[:-3]+'json')
     return(thr)
+
+
+def subset_200x200(nparray):
+
+    splt=list()
+    n=round(nparray.shape[0]/20)
+    splt0=np.array_split(nparray,n,0)
+    for chunk in splt0:
+        m=round(chunk.shape[1]/20)
+        splt1=np.array_split(chunk,m,1)
+        splt.append(splt1)
+    return splt
+
+
 
 def kittler(nparray):
     """
@@ -60,11 +76,12 @@ def kittler(nparray):
     nparray: numpy array
     return: threshold
     """
-    # get indices of missing values
-    # and mask them
     logger = logging.getLogger('root')
 
-    n = np.isnan(nparray)
+    # get indices of missing values
+    # missing value is np.iinfo(np.int16).min or np.iinfo(np.int32).min depending on dtype
+    # and mask them
+    n = nparray==np.iinfo(nparray.dtype).min
     band = np.ma.masked_array(nparray, mask=n)
 
 

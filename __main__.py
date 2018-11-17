@@ -27,7 +27,7 @@ def main():
     elif sys.argv[1]=="threshold":
         logger.info("computing thresholds for each subset")
         import buhayra.thresholding as thresh
-        thresh.thresholdLoop()
+        thresh.threshold_loop()
     elif sys.argv[1]=="insert":
         logger.info("inserting into mongodb")
         import buhayra.insertPolygons as ipol
