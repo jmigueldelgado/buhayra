@@ -25,36 +25,31 @@ def threshold_loop():
 def apply_thresh(f):
     with rasterio.open(sarOut+'/'+f,'r') as ds:
         r_db=ds.read(1)
+        # r_db=np.random.rand(20,20)
 
         # subset into 200x200 m approx.
 
+
         splt=subset_200x200(r_db)
 
-        # loop through subsets
 
-        ### STILL NEEDS A FOR LOOP
+        ### loop through subsets
+        res=list()
+        for i in range(len(splt)):
+            subres=list()
+            for j in range(len(splt[i])):
+                # subres.append(splt[i][j])
+                subres.append(threshold(splt[i][j]))
+            res.append(subres)
 
-        thr=kittler(r_db)
-        if thr is None:
-            return None
-
-        wm=ma.array(r_db,mask= (r_db>=thr))
-        wm.fill(1)
-        if(thr<-10):
-            rshape=(wm.mask*-1+1)*wm.data
-        else:
-            rshape=wm.data-1
-
-
-        ### stitch raster back together with a for loop before writing!!!
-        ### try np.concatenate(splt[1])
-
+        ### stitch raster back together
+        for i in range(len(res)):
+            res[i]=np.concatenate(res[i],1)
+        openwater=np.concatenate(res,0)
 
         with rasterio.open(polOut+'/'+f,'w',driver=ds.driver,height=ds.height,width=ds.width,count=1,dtype=rasterio.int8) as dsout:
-            dsout.write(rshape.astype(rasterio.int8),1)
-
+            dsout.write(openwater.astype(rasterio.int8),1)
     copyfile(sarOut+'/'+f[:-3]+'json',polOut+'/'+f[:-3]+'json')
-    return(thr)
 
 
 def subset_200x200(nparray):
@@ -67,6 +62,17 @@ def subset_200x200(nparray):
         splt1=np.array_split(chunk,m,1)
         splt.append(splt1)
     return splt
+
+
+def threshold(nparray):
+    thr=kittler(nparray)
+    wm=ma.array(nparray,mask= (nparray>=thr))
+    wm.fill(1)
+    if(thr<-10):
+        rshape=(wm.mask*-1+1)*wm.data
+    else:
+        rshape=wm.data-1
+    return rshape
 
 
 
