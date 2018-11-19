@@ -14,7 +14,7 @@ def list_url(url, ext=''):
     page = requests.get(url).text
     # print(page)
     soup = BeautifulSoup(page, 'html.parser')
-    return [url + '/' + node.get('href') for node in soup.find_all('a') if node.get('href').endswith(ext)]
+    return [url + node.get('href') for node in soup.find_all('a') if node.get('href').endswith(ext)]
 
 def getscenes():
     logger = logging.getLogger('root')
@@ -32,9 +32,12 @@ def getscenes():
     while t>=t0:
         url=orbits_url+datetime.strftime(t,'%Y/%m/%d')+'/'
         for file in list_url(url, 'EOF'):
-            urllib.request.urlopen(file)
-            eof_urls.append(file)
-            # print(file)
+            urllib.request.urlretrieve(file,home['home']+
+                '/.snap/auxdata/Orbits/Sentinel-1/RESORB/S1A/'+
+                year+
+                '/'+
+                month+
+                '/'+file.split('/')[-1])
         t=t-timedelta(days=1)
 
 
