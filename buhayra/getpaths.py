@@ -62,6 +62,9 @@ MONGO_HOST = "141.89.96.184"
 MONGO_DB = "sar2watermask"
 MONGO_PORT = 27017
 
+orbits_url = 'http://aux.sentinel1.eo.esa.int/RESORB/'
+
+
 sys.path.insert(0, home['parameters'])
 
 if exists(home['proj']+'/buhayra/credentials.py'):

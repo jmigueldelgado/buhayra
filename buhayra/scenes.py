@@ -5,6 +5,16 @@ import sys
 import os
 from buhayra.getpaths import *
 import logging
+from bs4 import BeautifulSoup
+import requests
+import urllib
+
+
+def list_url(url, ext=''):
+    page = requests.get(url).text
+    # print(page)
+    soup = BeautifulSoup(page, 'html.parser')
+    return [url + '/' + node.get('href') for node in soup.find_all('a') if node.get('href').endswith(ext)]
 
 def getscenes():
     logger = logging.getLogger('root')
@@ -15,6 +25,20 @@ def getscenes():
     #api.download(<product_id>)
     t0 = datetime.now() - timedelta(days=7)
     tf = datetime.now()
+
+    # first get orbit files
+    t=tf
+    eof_urls=list()
+    while t>=t0:
+        url=orbits_url+datetime.strftime(t,'%Y/%m/%d')+'/'
+        for file in list_url(url, 'EOF'):
+            urllib.request.urlopen(file)
+            eof_urls.append(file)
+            # print(file)
+        t=t-timedelta(days=1)
+
+
+
     # search by polygon, time, and SciHub query keywords
     footprint = geojson_to_wkt(read_geojson(home['parameters'] + '/extent_ce.geojson'))
     products_s2a = api.query(footprint,

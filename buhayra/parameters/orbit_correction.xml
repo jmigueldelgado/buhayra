@@ -1,5 +1,5 @@
 <parameters>
     <orbitType>Sentinel Restituted (Auto Download)</orbitType>
     <polyDegree>3</polyDegree>
-    <continueOnFail>false</continueOnFail>
+    <continueOnFail>true</continueOnFail>
 </parameters>
