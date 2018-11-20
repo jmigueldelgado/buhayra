@@ -144,7 +144,46 @@ def subsetProduct(product,pol):
     product_subset = GPF.createProduct('Subset', parameters, product)
     return(product_subset)
 
+
+def check_orbit(product):
+    fname=product.getName()
+
+    # check if orbit was downloaded
+    startdt=datetime.datetime.strptime(fname.split('_')[4],'%Y%m%dT%H%M%S')
+    stopdt=datetime.datetime.strptime(fname.split('_')[5],'%Y%m%dT%H%M%S')
+
+    startdir=home['home']+\
+                '/.snap/auxdata/Orbits/Sentinel-1/RESORB/'+fname[0:3]+'/'+\
+                str(startdt.year)+\
+                '/'+\
+                str(startdt.month)+\
+                '/'
+    stopdir=home['home']+\
+                '/.snap/auxdata/Orbits/Sentinel-1/RESORB/'+fname[0:3]+'/'+\
+                str(stopdt.year)+\
+                '/'+\
+                str(stopdt.month)+\
+                '/'
+
+    orbits=list()
+    if os.path.isdir(startdir):
+        for orbit in os.listdir(startdir):
+            orbits.append(orbit)
+
+    if os.path.isdir(stopdir):
+        for orbit in os.listdir(stopdir):
+            orbits.append(orbit)
+    check=False
+    for orbit in orbits:
+        orbit0=datetime.datetime.strptime(orbit.split('_')[6],'V%Y%m%dT%H%M%S')
+        orbitf=datetime.datetime.strptime(orbit.split('_')[7],'%Y%m%dT%H%M%S.EOF')
+        if ((orbit0<startdt) and (orbitf>stopdt)):
+            check=True
+
+    return check
+
 def orbit_correction(product):
+
     params = HashMap()
     root = xml.etree.ElementTree.parse(home['parameters']+'/orbit_correction.xml').getroot()
     for child in root:
@@ -249,7 +288,11 @@ def sar2sigma(f):
 
     logger.info("processing " + f)
 
-    product_oc=orbit_correction(product)
+    if check_orbit(product):
+        product_oc=orbit_correction(product)
+    else:
+        logger.info("skipping orbital correction for " + f+". Please download the relevant orbit files with `python buhayra get ``past scenes`` year month`")
+        product_oc=product
     product_oc_tn=thermal_noise_removal(product_oc)
     Cal=calibration(product_oc_tn)
     CalSf=speckle_filtering(Cal)
