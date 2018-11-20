@@ -74,7 +74,7 @@ def get_scenes():
     # already downloaded files are skipped
     api.download_all(products_s1a,directory_path=sarIn)
 
-def get_scenes_past(Y,M):
+def get_past_scenes(Y,M):
     logger = logging.getLogger('root')
 
     api = SentinelAPI(username, password, 'https://scihub.copernicus.eu/dhus')

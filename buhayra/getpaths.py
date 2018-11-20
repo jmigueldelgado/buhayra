@@ -91,12 +91,3 @@ def selectPattern(dir,pattern):
         if re.search(pattern,s):
             return(s)
     return False
-
-
-def selectScene():
-    logger = logging.getLogger('root')
-    if(len(listdir(sarIn))<1):
-        logger.info(sarIn+" is empty! Nothing to do. Exiting and returning None.")
-        return None
-    f=listdir(sarIn)[0]
-    return(f)

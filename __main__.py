@@ -20,15 +20,34 @@ def main():
         scenes.get_scenes()
         logger.info("finished downloading scenes. Check info.log in home folder and inside package folder")
     elif sys.argv[1]=="get past scenes":
+
         import buhayra.scenes as scenes
         logger.info("starting scenes.getscenes(): downloading scenes from sentinel API")
         scenes.get_past_scenes(sys.argv[2],sys.argv[3])
         logger.info("finished downloading scenes. Check info.log in home folder and inside package folder")
+
     elif sys.argv[1]=="sar":
-        logger.info("starting sar.sar2sigma(): processing sar scene ans subsetting")
+
+        logger.info("starting sar.sar2sigma(): processing sar scenes and subsetting")
         import sar2watermask.sar as sar
-        sar.sar2sigma()
+        f=sar.select_last_scene()
+        if f is None:
+            logger.info("There are no scenes to process in "+sarIn+". Exiting")
+            raise SystemExit()
+        sar.sar2sigma(f)
         logger.info("finished sar2wm")
+
+    elif sys.argv[1]=="past sar":
+
+        logger.info("starting sar.sar2sigma(): processing past sar scenes and subsetting")
+        import sar2watermask.sar as sar
+        f=sar.select_past_scene(sys.argv[2],sys.argv[3])
+        if f is None:
+            logger.info("There are no past scenes for year "+sys.argv[2]+" and month "+sys.argv[3]+" available to process in "+sarIn+". Exiting")
+            raise SystemExit()
+        sar.sar2sigma(f)
+        logger.info("finished sar2wm")
+
     elif sys.argv[1]=="threshold":
         logger.info("computing thresholds for each subset")
         import buhayra.thresholding as thresh
