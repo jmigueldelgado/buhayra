@@ -10,93 +10,54 @@ import requests
 import urllib
 
 
-def list_url(url, ext=''):
-    page = requests.get(url).text
-    # print(page)
-    soup = BeautifulSoup(page, 'html.parser')
-    return [url + node.get('href') for node in soup.find_all('a') if node.get('href').endswith(ext)]
 
-def getscenes():
+def get_s1_orbits(t0,tf):
+    def list_url(url, ext=''):
+        page = requests.get(url).text
+        # print(page)
+        soup = BeautifulSoup(page, 'html.parser')
+        return [url + node.get('href') for node in soup.find_all('a') if node.get('href').endswith(ext)]
+
     logger = logging.getLogger('root')
-
-    api = SentinelAPI(username, password, 'https://scihub.copernicus.eu/dhus')
-    logging.info(api.api_url)
-    # download single scene by known product id
-    #api.download(<product_id>)
-    t0 = datetime.now() - timedelta(days=7)
-    tf = datetime.now()
-
     # first get orbit files
     t=tf
-    eof_urls=list()
+    # eof_urls=list()
+    # file_url=list_url(url, 'EOF')[0]
     while t>=t0:
         url=orbits_url+datetime.strftime(t,'%Y/%m/%d')+'/'
-        for file in list_url(url, 'EOF'):
-            urllib.request.urlretrieve(file,home['home']+
-                '/.snap/auxdata/Orbits/Sentinel-1/RESORB/S1A/'+
-                year+
-                '/'+
-                month+
-                '/'+file.split('/')[-1])
+        for file_url in list_url(url, 'EOF'):
+            fname=file_url.split('/')[-1]
+            directory=home['home']+\
+                '/.snap/auxdata/Orbits/Sentinel-1/RESORB/'+fname[0:3]+'/'+\
+                datetime.strftime(t,'%Y')+\
+                '/'+\
+                datetime.strftime(t,'%m')+\
+                '/'
+            if not os.path.isdir(directory):
+                logging.info(directory+' not found. Making')
+                os.makedirs(directory)
+            logging.info('Retrieving '+fname)
+            if not os.path.isfile(directory+fname):
+                urllib.request.urlretrieve(file_url,directory+fname)
         t=t-timedelta(days=1)
 
 
-
-    # search by polygon, time, and SciHub query keywords
-    footprint = geojson_to_wkt(read_geojson(home['parameters'] + '/extent_ce.geojson'))
-    products_s2a = api.query(footprint,
-                        date=(
-                            date(t0.year,t0.month,t0.day),
-                            date(tf.year,tf.month,tf.day)
-                            ),
-                            platformname='Sentinel-2',
-                            cloudcoverpercentage = (0, 20))
-
-
-    # download all results from the search
-    #s2aIn = '/home/delgado/Documents/tmp' # in case you are just testing
-    for item in products_s2a:
-        logging.info(products_s2a[item]['title'])
-
-    products_s1a = api.query(footprint,
-                         date=(
-                             date(t0.year,t0.month,t0.day),
-                             date(tf.year,tf.month,tf.day)
-                         ),
-                         producttype="GRD",
-                         platformname='Sentinel-1')
-    for item in products_s1a:
-        logging.info(products_s1a[item]['title'])
-
-        # download all results from the search
-    api.download_all(products_s1a,directory_path=sarIn)
-    api.download_all(products_s2a,directory_path=s2aIn)
-
-def getscenes_past(nmonths):
+def get_scenes():
     logger = logging.getLogger('root')
 
     api = SentinelAPI(username, password, 'https://scihub.copernicus.eu/dhus')
     logging.info(api.api_url)
     # download single scene by known product id
     #api.download(<product_id>)
-    t0 = datetime(2018,1,1,0,0,0)
-    tf = t0 + timedelta(days=nmonths*30)
+    tf = datetime.now()
+    # tf=datetime(2018,1,10)
+    t0 = tf - timedelta(days=7)
+
+    get_s1_orbits(t0,tf)
+
 
     # search by polygon, time, and SciHub query keywords
     footprint = geojson_to_wkt(read_geojson(home['parameters'] + '/extent_ce.geojson'))
-    # products_s2a = api.query(footprint,
-    #                     date=(
-    #                         date(t0.year,t0.month,t0.day),
-    #                         date(tf.year,tf.month,tf.day)
-    #                         ),
-    #                         platformname='Sentinel-2',
-    #                         cloudcoverpercentage = (0, 20))
-    #
-    #
-    # # download all results from the search
-    # #s2aIn = '/home/delgado/Documents/tmp' # in case you are just testing
-    # for item in products_s2a:
-    #     logging.info(products_s2a[item]['title'])
 
     products_s1a = api.query(footprint,
                          date=(
@@ -109,9 +70,41 @@ def getscenes_past(nmonths):
     for item in products_s1a:
         logging.info(products_s1a[item]['title'])
 
-        # download all results from the search
+    # download all results from the search
+    # already downloaded files are skipped
     api.download_all(products_s1a,directory_path=sarIn)
-    # api.download_all(products_s2a,directory_path=s2aIn)
+
+def get_scenes_past(Y,M):
+    logger = logging.getLogger('root')
+
+    api = SentinelAPI(username, password, 'https://scihub.copernicus.eu/dhus')
+
+    logging.info(api.api_url)
+
+    t0 = datetime(Y,M,1,0,0,0)
+    tf = t0 + timedelta(days=30)
+
+    get_s1_orbits(t0,tf)
+
+
+    # search by polygon, time, and SciHub query keywords
+    footprint = geojson_to_wkt(read_geojson(home['parameters'] + '/extent_ce.geojson'))
+
+    products_s1a = api.query(footprint,
+                         date=(
+                             date(t0.year,t0.month,t0.day),
+                             date(tf.year,tf.month,tf.day)
+                         ),
+                         producttype="GRD",
+                         platformname='Sentinel-1')
+
+    for item in products_s1a:
+        logging.info(products_s1a[item]['title'])
+
+    # download all results from the search
+    # already downloaded files are skipped
+    api.download_all(products_s1a,directory_path=sarIn)
+
 
 def getscenes_test_dataset():
     logger = logging.getLogger('root')

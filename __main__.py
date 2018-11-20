@@ -17,7 +17,12 @@ def main():
     elif sys.argv[1]=="get scenes":
         import buhayra.scenes as scenes
         logger.info("starting scenes.getscenes(): downloading scenes from sentinel API")
-        scenes.getscenes()
+        scenes.get_scenes()
+        logger.info("finished downloading scenes. Check info.log in home folder and inside package folder")
+    elif sys.argv[1]=="get past scenes":
+        import buhayra.scenes as scenes
+        logger.info("starting scenes.getscenes(): downloading scenes from sentinel API")
+        scenes.get_past_scenes(sys.argv[2],sys.argv[3])
         logger.info("finished downloading scenes. Check info.log in home folder and inside package folder")
     elif sys.argv[1]=="sar":
         logger.info("starting sar.sar2sigma(): processing sar scene ans subsetting")

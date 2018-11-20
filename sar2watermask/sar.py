@@ -122,23 +122,6 @@ def thermal_noise_removal(product):
     result = GPF.createProduct('ThermalNoiseRemoval',params,product)
     return(result)
 
-
-def float2int(product):
-    targetBands = jpy.array('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor',1)
-    targetBand1 = BandDescriptor()
-    targetBand1.name = 'sigma_int'
-    targetBand1.type = 'Int32'
-    targetBand1.expression = 'round(Sigma0_VV*1000000)'
-
-    targetBands[0] = targetBand1
-
-    parameters = HashMap()
-    parameters.put('targetBands', targetBands)
-
-    result = GPF.createProduct('BandMaths', parameters, product)
-    return(result)
-
-
 def calibration(product):
 
     params = HashMap()
@@ -229,17 +212,15 @@ def sar2sigma():
 
     logger.info("processing " + f)
 
-    Cal=calibration(product)
+    product_oc=orbit_correction(product)
+    product_oc_tn=thermal_noise_removal(product_oc)
+    Cal=calibration(product_oc_tn)
     CalSf=speckle_filtering(Cal)
     CalSfCorr=geom_correction(CalSf)
-    # CalSfCorrInt=float2int(CalSfCorr)
-
-    # current_bands = CalSfCorr.getBandNames()
-    # logger.debug("Current Bands after converting to UInt8:   %s" % (list(current_bands)))
 
     # GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
     logger.info("starting loop on reservoirs")
-    i=0
+     # i=0
     for i in range(0,len(id_in_scene)):
 
         fname=productName + "_" + str(id_in_scene[i]) + "_CalSfCorr"
@@ -250,24 +231,6 @@ def sar2sigma():
         logger.debug("subsetting product "+ str(id_in_scene[i]))
         product_subset=subsetProduct(CalSfCorr,wm_in_scene[i])
 
-        # # Get bandnames
-        # im_bands = list(product_subset.getBandNames())
-        #
-        # # Get height and width
-        # h = product_subset.getSceneRasterHeight()
-        # w = product_subset.getSceneRasterWidth()
-        # arr = np.zeros((h,w),dtype=np.float32)  # Empty array
-        #
-        # # Get the 1st band of the product for example
-        # currentband = product_subset.getBand( im_bands[0])
-        #
-        # # Read the pixels from the band to the empty array
-        # bandraster = currentband.readPixels(0, 0, w, h, arr)
-        #
-        # c=product_subset.getSceneGeoCoding()
-        #
-        # plt.imshow(bandraster)
-
         logger.debug("writing product "+ str(id_in_scene[i]))
         ProductIO.writeProduct(product_subset,sarOut+"/"+fname+'_big',outForm)
         product_subset.dispose()
@@ -276,10 +239,11 @@ def sar2sigma():
         path=sarOut+"/"+fname+'_big'+'.tif'
 
     product.dispose()
+    product_oc.dispose()
+    product_oc_tn.dispose()
     Cal.dispose()
     CalSf.dispose()
     CalSfCorr.dispose()
-    CalSfCorrInt.dispose()
     System.gc()
 
     ### remove scene from folder
