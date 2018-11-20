@@ -1,5 +1,5 @@
 #!/bin/bash
-#PBS -N past_sar
+#PBS -N 2_sar2watermask
 #PBS -M martinsd@uni-potsdam.de
 #PBS -j oe
 #PBS -l ncpus=1
@@ -13,4 +13,4 @@ source activate buhayra
 export JAVA_TOOL_OPTIONS="-Xmx16g"
 export _JAVA_OPTIONS="-Xmx18g -Xss2m"
 
-python /users/stud09/martinsd/proj/buhayra "past sar" 2018 5
+python /users/stud09/martinsd/proj/buhayra "sar"
