@@ -7,6 +7,7 @@ dependencies:
 - affine=2.2.1=py_0
 - asn1crypto=0.24.0=py36_1003
 - attrs=18.2.0=py_0
+- beautifulsoup4=4.6.3=py36_1000
 - boost-cpp=1.67.0=h3a22d5f_0
 - boto3=1.9.45=py_0
 - botocore=1.12.45=py_0
@@ -15,6 +16,7 @@ dependencies:
 - cairo=1.14.12=he6fea26_5
 - certifi=2018.10.15=py36_1000
 - cffi=1.11.5=py36h5e8e0c9_1
+- chardet=3.0.4=py36_1003
 - click=7.0=py_0
 - click-plugins=1.0.4=py_0
 - cligj=0.5.0=py_0
@@ -86,6 +88,7 @@ dependencies:
 - python-dateutil=2.7.5=py_0
 - rasterio=1.0.9=py36h54a03ab_1
 - readline=7.0=haf1bffa_1
+- requests=2.20.1=py36_1000
 - s3transfer=0.1.13=py36_1001
 - setuptools=40.6.2=py36_0
 - shapely=1.6.4=py36h164cb2d_1
@@ -93,7 +96,7 @@ dependencies:
 - snuggs=1.4.1=py_1
 - sqlite=3.25.3=hb1c47c0_0
 - tk=8.6.8=ha92aebf_0
-- urllib3=1.24.1=py36_1000
+- urllib3=1.23=py36_1001
 - wheel=0.32.2=py36_0
 - xerces-c=3.2.0=h5d6a6da_2
 - xorg-kbproto=1.0.7=h470a237_2
