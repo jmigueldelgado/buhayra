@@ -1,6 +1,7 @@
 import numpy as np
 from os import listdir
 import os
+import shutil
 import datetime
 import sys
 import logging
@@ -193,7 +194,28 @@ def orbit_correction(product):
     return(result)
 
 ### currently being performed with gpt
+def thermal_noise_removal_gpt(product):
+    fname=product.getName()
+    ProductIO.writeProduct(product,sarIn+"/"+fname+'.dim',"BEAM-DIMAP")
+    product.dispose()
+    os.remove(sarIn+"/"+fname+'.zip')
+
+    subprocess.call('/users/stud09/martinsd/local/snap/bin/gpt',
+        'ThermalNoiseRemoval',
+        '-SsourceProduct='+sarIn+'/'+fname+'.dim',
+        '-PselectedPolarisations=VV',
+        '-PremoveThermalNoise=true',
+        '-t',
+        'sarIn'+'/'+fname+'.dim')
+
+    product = ProductIO.readProduct(sarIn+"/"+fname + '.dim')
+    return(product)
+
+
+
+
 def thermal_noise_removal(product):
+
     params = HashMap()
     root = xml.etree.ElementTree.parse(home['parameters']+'/thermal_noise.xml').getroot()
     for child in root:
@@ -201,6 +223,9 @@ def thermal_noise_removal(product):
 
     result = GPF.createProduct('ThermalNoiseRemoval',params,product)
     return(result)
+
+
+
 
 def calibration(product):
     params = HashMap()
@@ -329,7 +354,11 @@ def sar2sigma(f):
     ### remove scene from folder
     logger.info("REMOVING " + f)
 
-    os.remove(sarIn+"/"+f)
-
+    if os.path.isfile(sarIn+"/"+f):
+        os.remove(sarIn+"/"+f)
+    if os.path.isfile(sarIn+"/"+productName+'.dim'):
+        os.remove(sarIn+"/"+productName+'.dim')
+    if os.path.isdir(sarIn+"/"+productName+'.data'):
+        shutil.rmtree(sarIn+"/"+productName+'.data')
 
     logger.info("**** sar2watermask completed!" + f  + " processed**********")
