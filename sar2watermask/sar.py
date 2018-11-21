@@ -208,8 +208,8 @@ def thermal_noise_removal_gpt(product):
         '-t',
         'sarIn'+'/'+fname+'.dim')
 
-    product = ProductIO.readProduct(sarIn+"/"+fname + '.dim')
-    return(product)
+    result = ProductIO.readProduct(sarIn+"/"+fname + '.dim')
+    return(result)
 
 
 
@@ -319,7 +319,8 @@ def sar2sigma(f):
     else:
         logger.info("skipping orbital correction for " + f+". Please download the relevant orbit files with `python buhayra get ``past scenes`` year month`")
         product_oc=product
-    Cal=calibration(product_oc)
+    product_oc_tnr=thermal_noise_removal_gpt(product_oc)
+    Cal=calibration(product_oc_tnr)
     # Cal=calibration(product)
     CalSf=speckle_filtering(Cal)
     CalSfCorr=geom_correction(CalSf)
@@ -346,6 +347,7 @@ def sar2sigma(f):
 
     product.dispose()
     product_oc.dispose()
+    product_oc_tnr.dispose()
     Cal.dispose()
     CalSf.dispose()
     CalSfCorr.dispose()
