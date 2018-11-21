@@ -22,6 +22,7 @@ import fiona
 import rasterio
 import json
 import datetime
+import subprocess
 
 System = jpy.get_type('java.lang.System')
 BandDescriptor = jpy.get_type('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor')
@@ -191,6 +192,7 @@ def orbit_correction(product):
     result = GPF.createProduct('Apply-Orbit-File',params,product)
     return(result)
 
+### currently being performed with gpt
 def thermal_noise_removal(product):
     params = HashMap()
     root = xml.etree.ElementTree.parse(home['parameters']+'/thermal_noise.xml').getroot()
@@ -201,7 +203,6 @@ def thermal_noise_removal(product):
     return(result)
 
 def calibration(product):
-
     params = HashMap()
     root = xml.etree.ElementTree.parse(home['parameters']+'/calibration.xml').getroot()
     for child in root:
@@ -293,8 +294,7 @@ def sar2sigma(f):
     else:
         logger.info("skipping orbital correction for " + f+". Please download the relevant orbit files with `python buhayra get ``past scenes`` year month`")
         product_oc=product
-    product_oc_tn=thermal_noise_removal(product_oc)
-    Cal=calibration(product_oc_tn)
+    Cal=calibration(product_oc)
     # Cal=calibration(product)
     CalSf=speckle_filtering(Cal)
     CalSfCorr=geom_correction(CalSf)
@@ -321,7 +321,6 @@ def sar2sigma(f):
 
     product.dispose()
     product_oc.dispose()
-    product_oc_tn.dispose()
     Cal.dispose()
     CalSf.dispose()
     CalSfCorr.dispose()
