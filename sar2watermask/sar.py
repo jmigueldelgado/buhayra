@@ -24,6 +24,7 @@ import rasterio
 import json
 import datetime
 import subprocess
+import re
 
 System = jpy.get_type('java.lang.System')
 BandDescriptor = jpy.get_type('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor')
@@ -34,11 +35,13 @@ def select_last_scene():
         logger.info(sarIn+" is empty! Nothing to do. Exiting and returning None.")
         f=None
     else:
-        tstamp=list()
-        scenes=listdir(sarIn)
-        for scn in scenes:
-            tstamp.append(datetime.datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S'))
-        f=scenes[tstamp.index(max(tstamp))]
+        timestamp=list()
+        scenes=list()
+        for scn in listdir(sarIn):
+            if re.search('.zip$',scn):
+                scenes.append(scn)
+                timestamp.append(datetime.datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S'))
+        f=scenes[timestamp.index(max(timestamp))]
     return(f)
 
 def select_past_scene(Y,M):
@@ -48,24 +51,19 @@ def select_past_scene(Y,M):
         logger.info(sarIn+" is empty! Nothing to do. Exiting and returning None.")
         f=None
     else:
-        scenes=listdir(sarIn)
-
-        tstamp=list()
+        timestamp=list()
         scenes_in_ym=list()
-        for scn in scenes:
-            tstamp=datetime.datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S')
-            if tstamp.year==Y and tstamp.month==M:
+        for scn in listdir(sarIn):
+            stamp=datetime.datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S')
+            if re.search('.zip$',scn) and stamp.year==Y and stamp.month==M:
                 scenes_in_ym.append(scn)
+                timestamp.append(stamp)
 
-        tstamp=list()
-        for scn in scenes_in_ym:
-            tstamp.append(datetime.datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S'))
-
-        if(len(tstamp)<1):
+        if(len(timestamp)<1):
             logger.info(sarIn+" has no scene for year "+Y+" and month "+M+"Exiting and returning None.")
             f=None
         else:
-            f=scenes_in_ym[tstamp.index(max(tstamp))]
+            f=scenes_in_ym[timestamp.index(max(timestamp))]
     return(f)
 
 def geojson2wkt(jsgeom):
@@ -198,15 +196,14 @@ def thermal_noise_removal_gpt(product):
     fname=product.getName()
     ProductIO.writeProduct(product,sarIn+"/"+fname+'.dim',"BEAM-DIMAP")
     product.dispose()
-    os.remove(sarIn+"/"+fname+'.zip')
 
-    subprocess.call('/users/stud09/martinsd/local/snap/bin/gpt',
+    subprocess.call(['/users/stud09/martinsd/local/snap/bin/gpt',
         'ThermalNoiseRemoval',
         '-SsourceProduct='+sarIn+'/'+fname+'.dim',
         '-PselectedPolarisations=VV',
         '-PremoveThermalNoise=true',
         '-t',
-        'sarIn'+'/'+fname+'.dim')
+        sarIn+'/'+fname+'.dim'])
 
     result = ProductIO.readProduct(sarIn+"/"+fname + '.dim')
     return(result)
