@@ -145,8 +145,7 @@ def subsetProduct(product,pol):
     return(product_subset)
 
 
-def check_orbit(product):
-    fname=product.getName()
+def check_orbit(fname):
 
     # check if orbit was downloaded
     startdt=datetime.datetime.strptime(fname.split('_')[4],'%Y%m%dT%H%M%S')
@@ -288,13 +287,15 @@ def sar2sigma(f):
 
     logger.info("processing " + f)
 
-    if check_orbit(product):
+
+    if check_orbit(product.getName()):
         product_oc=orbit_correction(product)
     else:
         logger.info("skipping orbital correction for " + f+". Please download the relevant orbit files with `python buhayra get ``past scenes`` year month`")
         product_oc=product
     product_oc_tn=thermal_noise_removal(product_oc)
     Cal=calibration(product_oc_tn)
+    # Cal=calibration(product)
     CalSf=speckle_filtering(Cal)
     CalSfCorr=geom_correction(CalSf)
 
