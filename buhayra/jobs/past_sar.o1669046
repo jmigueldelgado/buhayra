@@ -1,0 +1,21 @@
+Picked up JAVA_TOOL_OPTIONS: -Xmx16g
+Picked up _JAVA_OPTIONS: -Xmx18g -Xss2m
+INFO: org.esa.snap.core.gpf.operators.tooladapter.ToolAdapterIO: Initializing external tool adapters
+SEVERE: org.esa.s2tbx.dataio.gdal.activator.GDALDistributionInstaller: The environment variable LD_LIBRARY_PATH does not contain the current folder '.'. Its value is '/users/stud09/martinsd/local/jdk1.8.0_191/lib/lserver/:'.
+INFO: org.hsqldb.persist.Logger: dataFileCache open start
+Picked up JAVA_TOOL_OPTIONS: -Xmx16g
+Picked up _JAVA_OPTIONS: -Xmx18g -Xss2m
+INFO: org.esa.snap.core.gpf.operators.tooladapter.ToolAdapterIO: Initializing external tool adapters
+SEVERE: org.esa.s2tbx.dataio.gdal.activator.GDALDistributionInstaller: The environment variable LD_LIBRARY_PATH does not contain the current folder '.'. Its value is '/users/stud09/martinsd/local/jdk1.8.0_191/lib/lserver/:'.
+INFO: org.hsqldb.persist.Logger: dataFileCache open start
+INFO: org.esa.snap.core.gpf.common.WriteOp: Start writing product S1A_IW_GRDH_1SDV_20180128T081812_20180128T081837_020352_022C43_C7ED to /mnt/scratch/martinsd/s1a_scenes/in/S1A_IW_GRDH_1SDV_20180128T081812_20180128T081837_020352_022C43_C7ED.dim
+Writing...
+....10%....20%....30%....40%....50%....60%....70%....80%INFO: org.hsqldb.persist.Logger: Database closed
+....90%.... done.
+INFO: org.esa.snap.core.gpf.common.WriteOp: End writing product S1A_IW_GRDH_1SDV_20180128T081812_20180128T081837_020352_022C43_C7ED to /mnt/scratch/martinsd/s1a_scenes/in/S1A_IW_GRDH_1SDV_20180128T081812_20180128T081837_020352_022C43_C7ED.dim
+INFO: org.esa.snap.core.gpf.common.WriteOp: Time: 3039.160 s total, 180.355 ms per line, 0.007033 ms per pixel
+INFO: org.hsqldb.persist.Logger: dataFileCache open start
+/users/stud09/martinsd/local/miniconda2/envs/buhayra/lib/python3.6/site-packages/rasterio/__init__.py:226: NotGeoreferencedWarning: Dataset has no geotransform set. The identity matrix may be returned.
+  **kwargs)
+/users/stud09/martinsd/proj/buhayra/sar2watermask/sar.py:277: RuntimeWarning: All-NaN slice encountered
+  if (np.nanmax(r_db)< np.iinfo(np.int16).max) and (np.nanmin(r_db) > (np.iinfo(np.int16).min+1)):

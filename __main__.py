@@ -63,7 +63,7 @@ def main():
 
         logger.info("computing thresholds for last "+sys.argv[2]+" tiffs")
         import buhayra.thresholding as thresh
-        tiffs=thresh.select_past_tiffs(int(sys.argv[2]))
+        tiffs=thresh.select_n_last_tiffs(int(sys.argv[2]))
         thresh.threshold_loop(tiffs)
 
     elif sys.argv[1]=="threshold year month":

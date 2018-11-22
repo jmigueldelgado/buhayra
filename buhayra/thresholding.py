@@ -1,3 +1,4 @@
+import datetime
 from buhayra.getpaths import *
 import numpy as np
 import numpy.ma as ma
@@ -16,7 +17,6 @@ def threshold_loop(tiffs):
         logger.debug('moving away '+f+'')
         os.rename(sarOut+'/'+f,procOut+'/'+f)
         os.rename(sarOut+'/'+f[:-3]+'json',procOut+'/'+f[:-3]+'json')
-        logger.debug('Threshold for '+f + ' is ' + str(thr))
 
 def apply_thresh(f):
     with rasterio.open(sarOut+'/'+f,'r') as ds:
@@ -43,8 +43,8 @@ def apply_thresh(f):
             res[i]=np.concatenate(res[i],1)
         openwater=np.concatenate(res,0)
 
-        with rasterio.open(polOut+'/'+f,'w',driver=ds.driver,height=ds.height,width=ds.width,count=1,dtype=rasterio.int8) as dsout:
-            dsout.write(openwater.astype(rasterio.int8),1)
+        with rasterio.open(polOut+'/'+f,'w',driver=ds.driver,height=ds.height,width=ds.width,count=1,dtype=rasterio.ubyte) as dsout:
+            dsout.write(openwater.astype(rasterio.ubyte),1)
     copyfile(sarOut+'/'+f[:-3]+'json',polOut+'/'+f[:-3]+'json')
 
 
@@ -64,9 +64,9 @@ def threshold(nparray):
     thr=kittler(nparray)
     wm=ma.array(nparray,mask= (nparray>=thr))
     wm.fill(1)
-    if(np.amax(nparray)< -1000) # all cells in raster are open water
+    if(np.amax(nparray)< -1300): # all cells in raster are open water
         rshape=wm.data
-    elif(thr < -1000):          # there is a threshold and it is a valid threshold
+    elif(thr < -1300):          # there is a threshold and it is a valid threshold
         rshape=(wm.mask*-1+1)*wm.data
     else:                       # the threshold is too large to be a valid threshold
         rshape=wm.data-1
@@ -171,5 +171,5 @@ def select_n_last_tiffs(n):
             return(tiffs)
         else:
             index=np.argsort(timestamp)
-            return(tiffs[index[-n:]])
+            return([tiffs[i] for i in index[-n:]])
     return(tiffs)

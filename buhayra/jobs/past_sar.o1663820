@@ -1,0 +1,20 @@
+Picked up JAVA_TOOL_OPTIONS: -Xmx16g
+Picked up _JAVA_OPTIONS: -Xmx18g -Xss2m
+INFO: org.esa.snap.core.gpf.operators.tooladapter.ToolAdapterIO: Initializing external tool adapters
+SEVERE: org.esa.s2tbx.dataio.gdal.activator.GDALDistributionInstaller: The environment variable LD_LIBRARY_PATH does not contain the current folder '.'. Its value is '/users/stud09/martinsd/local/jdk-11.0.1/lib/lserver/:'.
+WARNING: org.esa.snap.core.util.VersionChecker: Not able to check for new SNAP version. Remote version could not be retrieved.
+java.lang.NullPointerException
+Traceback (most recent call last):
+  File "/users/stud09/martinsd/local/miniconda2/envs/buhayra/lib/python3.6/runpy.py", line 193, in _run_module_as_main
+    "__main__", mod_spec)
+  File "/users/stud09/martinsd/local/miniconda2/envs/buhayra/lib/python3.6/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/users/stud09/martinsd/proj/buhayra/__main__.py", line 101, in <module>
+    main()
+  File "/users/stud09/martinsd/proj/buhayra/__main__.py", line 48, in main
+    sar.sar2sigma(f)
+  File "/users/stud09/martinsd/proj/buhayra/sar2watermask/sar.py", line 296, in sar2sigma
+    product_oc_tn=thermal_noise_removal(product)
+  File "/users/stud09/martinsd/proj/buhayra/sar2watermask/sar.py", line 201, in thermal_noise_removal
+    result = GPF.createProduct('ThermalNoiseRemoval',params,product)
+RuntimeError: org.esa.snap.core.gpf.OperatorException: java.lang.NullPointerException
