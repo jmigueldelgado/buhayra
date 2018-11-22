@@ -29,6 +29,74 @@ import re
 System = jpy.get_type('java.lang.System')
 BandDescriptor = jpy.get_type('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor')
 
+
+def sar2sigma(scenes):
+    logger = logging.getLogger('root')
+
+    outForm='GeoTIFF+XML'
+
+    product = ProductIO.readProduct(sarIn+"/"+f)
+    productName=product.getName()
+    rect_utm=getBoundingBoxScene(product)
+    wm_in_scene,id_in_scene = getWMinScene(rect_utm)
+
+
+    for f in scenes:
+        logger.info("processing " + f)
+
+
+        if check_orbit(product.getName()):
+            product_oc=orbit_correction(product)
+        else:
+            logger.info("skipping orbital correction for " + f+". Please download the relevant orbit files with `python buhayra get ``past scenes`` year month`")
+            product_oc=product
+        product_oc_tnr=thermal_noise_removal_gpt(product_oc)
+        Cal=calibration(product_oc_tnr)
+        # Cal=calibration(product)
+        CalSf=speckle_filtering(Cal)
+        CalSfCorr=geom_correction(CalSf)
+
+        # GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
+        logger.info("starting loop on reservoirs")
+         # i=0
+        for i in range(0,len(id_in_scene)):
+
+            fname=productName + "_" + str(id_in_scene[i]) + "_CalSfCorr"
+            if (fname+".tif") in listdir(sarOut):
+                logger.debug("product "+fname+".tif already exists: skipping")
+                continue
+
+            logger.debug("subsetting product "+ str(id_in_scene[i]))
+            product_subset=subsetProduct(CalSfCorr,wm_in_scene[i])
+
+            logger.debug("writing product "+ str(id_in_scene[i]))
+            ProductIO.writeProduct(product_subset,sarOut+"/"+fname+'_big',outForm)
+            product_subset.dispose()
+            logger.info("Compressing and saving " + sarOut+"/"+fname+'_big'+'.tif')
+            compress_tiff(sarOut+"/"+fname+'_big'+'.tif')
+            path=sarOut+"/"+fname+'_big'+'.tif'
+
+        product.dispose()
+        product_oc.dispose()
+        product_oc_tnr.dispose()
+        Cal.dispose()
+        CalSf.dispose()
+        CalSfCorr.dispose()
+
+        ### remove scene from folder
+        logger.info("REMOVING " + f)
+
+        if os.path.isfile(sarIn+"/"+f):
+            os.remove(sarIn+"/"+f)
+        if os.path.isfile(sarIn+"/"+productName+'.dim'):
+            os.remove(sarIn+"/"+productName+'.dim')
+        if os.path.isdir(sarIn+"/"+productName+'.data'):
+            shutil.rmtree(sarIn+"/"+productName+'.data')
+
+        logger.info("**** sar2watermask completed!" + f  + " processed**********")
+    System.gc()
+
+
 def select_last_scene():
     logger = logging.getLogger('root')
     if(len(listdir(sarIn))<1):
@@ -58,13 +126,31 @@ def select_past_scene(Y,M):
             if re.search('.zip$',scn) and stamp.year==Y and stamp.month==M:
                 scenes_in_ym.append(scn)
                 timestamp.append(stamp)
-
         if(len(timestamp)<1):
             logger.info(sarIn+" has no scene for year "+Y+" and month "+M+"Exiting and returning None.")
             f=None
         else:
             f=scenes_in_ym[timestamp.index(max(timestamp))]
     return(f)
+
+def select_scenes_year_month(Y,M):
+    logger = logging.getLogger('root')
+
+    if(len(listdir(sarIn))<1):
+        logger.info(sarIn+" is empty! Nothing to do. Exiting and returning None.")
+        scenes_in_ym=None
+    else:
+        timestamp=list()
+        scenes_in_ym=list()
+        for scn in listdir(sarIn):
+            stamp=datetime.datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S')
+            if re.search('.zip$',scn) and stamp.year==Y and stamp.month==M:
+                scenes_in_ym.append(scn)
+                timestamp.append(stamp)
+        if(len(timestamp)<1):
+            logger.info(sarIn+" has no scene for year "+Y+" and month "+M+"Exiting and returning None.")
+            scenes_in_ym=None
+    return(scenes_in_ym)
 
 def geojson2wkt(jsgeom):
     from shapely.geometry import shape,polygon
@@ -289,75 +375,3 @@ def compress_tiff(path):
         json.dump(gdalParam, fjson)
     os.remove(path)
     os.remove(path[:-3]+'xml')
-
-def sar2sigma(f):
-    logger = logging.getLogger('root')
-
-
-    logger.info("importing functions from snappy")
-
-    outForm='GeoTIFF+XML'
-    logger.debug(HashMap)
-    logger.debug(BandDescriptor)
-    logger.debug(System)
-
-
-
-    product = ProductIO.readProduct(sarIn+"/"+f)
-    productName=product.getName()
-    rect_utm=getBoundingBoxScene(product)
-    wm_in_scene,id_in_scene = getWMinScene(rect_utm)
-
-    logger.info("processing " + f)
-
-
-    if check_orbit(product.getName()):
-        product_oc=orbit_correction(product)
-    else:
-        logger.info("skipping orbital correction for " + f+". Please download the relevant orbit files with `python buhayra get ``past scenes`` year month`")
-        product_oc=product
-    product_oc_tnr=thermal_noise_removal_gpt(product_oc)
-    Cal=calibration(product_oc_tnr)
-    # Cal=calibration(product)
-    CalSf=speckle_filtering(Cal)
-    CalSfCorr=geom_correction(CalSf)
-
-    # GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
-    logger.info("starting loop on reservoirs")
-     # i=0
-    for i in range(0,len(id_in_scene)):
-
-        fname=productName + "_" + str(id_in_scene[i]) + "_CalSfCorr"
-        if (fname+".tif") in listdir(sarOut):
-            logger.debug("product "+fname+".tif already exists: skipping")
-            continue
-
-        logger.debug("subsetting product "+ str(id_in_scene[i]))
-        product_subset=subsetProduct(CalSfCorr,wm_in_scene[i])
-
-        logger.debug("writing product "+ str(id_in_scene[i]))
-        ProductIO.writeProduct(product_subset,sarOut+"/"+fname+'_big',outForm)
-        product_subset.dispose()
-        logger.info("Compressing and saving " + sarOut+"/"+fname+'_big'+'.tif')
-        compress_tiff(sarOut+"/"+fname+'_big'+'.tif')
-        path=sarOut+"/"+fname+'_big'+'.tif'
-
-    product.dispose()
-    product_oc.dispose()
-    product_oc_tnr.dispose()
-    Cal.dispose()
-    CalSf.dispose()
-    CalSfCorr.dispose()
-    System.gc()
-
-    ### remove scene from folder
-    logger.info("REMOVING " + f)
-
-    if os.path.isfile(sarIn+"/"+f):
-        os.remove(sarIn+"/"+f)
-    if os.path.isfile(sarIn+"/"+productName+'.dim'):
-        os.remove(sarIn+"/"+productName+'.dim')
-    if os.path.isdir(sarIn+"/"+productName+'.data'):
-        shutil.rmtree(sarIn+"/"+productName+'.data')
-
-    logger.info("**** sar2watermask completed!" + f  + " processed**********")

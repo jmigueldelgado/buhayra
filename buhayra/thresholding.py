@@ -7,10 +7,11 @@ import os
 import json
 from shutil import copyfile
 
-def threshold_loop():
+
+
+def threshold_loop(tiffs):
     logger = logging.getLogger('root')
-    while(selectTiff(sarOut)):
-        f=selectTiff(sarOut)
+    for f in tiffs:
         thr=apply_thresh(f)
         if thr is None:
             logger.debug('moving away '+f)
@@ -68,7 +69,7 @@ def threshold(nparray):
     thr=kittler(nparray)
     wm=ma.array(nparray,mask= (nparray>=thr))
     wm.fill(1)
-    if(thr<-10):
+    if(thr < -1000):
         rshape=(wm.mask*-1+1)*wm.data
     else:
         rshape=wm.data-1
@@ -130,3 +131,48 @@ def kittler(nparray):
                 threshold = breaksSeq[m]
 
         return threshold
+
+
+def select_tiffs_year_month(Y,M):
+    logger = logging.getLogger('root')
+
+    if(len(listdir(sarOut))<1):
+        logger.info(sarOut+" is empty! Nothing to do. Exiting and returning None.")
+        polys_in_ym=None
+    else:
+        timestamp=list()
+        polys_in_ym=list()
+        for poly in listdir(sarOut):
+            stamp=datetime.datetime.strptime(poly.split('_')[4],'%Y%m%dT%H%M%S')
+            if re.search('.tif$',poly) and stamp.year==Y and stamp.month==M:
+                polys_in_ym.append(poly)
+                timestamp.append(stamp)
+        if(len(timestamp)<1):
+            logger.info(sarOut+" has no scene for year "+Y+" and month "+M+"Exiting and returning None.")
+            polys_in_ym=None
+    return(polys_in_ym)
+
+def select_n_last_tiffs(n):
+    logger = logging.getLogger('root')
+
+    if(len(listdir(sarOut))<1):
+        logger.info(sarOut+" is empty! Nothing to do. Exiting and returning None.")
+        tiffs=None
+    else:
+        timestamp=list()
+        tiffs=list()
+        for tiff in listdir(sarOut):
+            stamp=datetime.datetime.strptime(tiff.split('_')[4],'%Y%m%dT%H%M%S')
+            if re.search('.tif$',tiff):
+                tiffs.append(tiff)
+                timestamp.append(stamp)
+
+        if(len(timestamp)<1):
+            logger.info(sarOut+"Has not tifs. Exiting and returning None.")
+            tiffs.append(None)
+        if(len(timestamp)<=n):
+            return(tiffs)
+        else:
+            index=np.argsort(timestamp)
+            return(tiffs[index[-n:]])
+    return(tiffs)
