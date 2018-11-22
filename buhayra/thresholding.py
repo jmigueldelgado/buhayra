@@ -14,9 +14,11 @@ def threshold_loop(tiffs):
     logger = logging.getLogger('root')
     for f in tiffs:
         apply_thresh(f)
-        logger.debug('moving away '+f+'')
+        logger.debug('moving away '+f)
         os.rename(sarOut+'/'+f,procOut+'/'+f)
         os.rename(sarOut+'/'+f[:-3]+'json',procOut+'/'+f[:-3]+'json')
+    logger.info('finished threshold loop. processed '+int(len(tiffs)) + ' tifs')
+
 
 def apply_thresh(f):
     with rasterio.open(sarOut+'/'+f,'r') as ds:
@@ -62,14 +64,16 @@ def subset_200x200(nparray):
 
 def threshold(nparray):
     thr=kittler(nparray)
-    wm=ma.array(nparray,mask= (nparray>=thr))
-    wm.fill(1)
     if(np.amax(nparray)< -1300): # all cells in raster are open water
-        rshape=wm.data
+        rshape=nparray
+        rshape.fill(1)
     elif(thr < -1300):          # there is a threshold and it is a valid threshold
+        wm=ma.array(nparray,mask= (nparray>=thr))
+        wm.fill(1)
         rshape=(wm.mask*-1+1)*wm.data
-    else:                       # the threshold is too large to be a valid threshold
-        rshape=wm.data-1
+    else: # the threshold is too large to be a valid threshold
+        rshape=nparray
+        rshape.fill(0)
     return rshape
 
 
