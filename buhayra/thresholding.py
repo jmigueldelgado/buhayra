@@ -64,7 +64,10 @@ def subset_200x200(nparray):
 
 def threshold(nparray):
     thr=kittler(nparray)
-    if(np.amax(nparray)< -1300): # all cells in raster are open water
+    if thr is None:
+        rshape=nparray
+        rshape.fill(0)
+    elif(np.amax(nparray)< -1300): # all cells in raster are open water
         rshape=nparray
         rshape.fill(1)
     elif(thr < -1300):          # there is a threshold and it is a valid threshold

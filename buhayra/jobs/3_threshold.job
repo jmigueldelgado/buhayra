@@ -8,4 +8,4 @@
 #PBS -l mem=10gb
 
 source activate buhayra
-python /users/stud09/martinsd/proj/buhayra "threshold last" 100
+python /users/stud09/martinsd/proj/buhayra "threshold year month" 2018 3
