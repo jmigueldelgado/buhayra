@@ -12,16 +12,11 @@ from shutil import copyfile
 def threshold_loop(tiffs):
     logger = logging.getLogger('root')
     for f in tiffs:
-        thr=apply_thresh(f)
-        if thr is None:
-            logger.debug('moving away '+f)
-            os.remove(sarOut+'/'+f)
-            os.remove(sarOut+'/'+f[:-3]+'json')
-        else:
-            logger.debug('moving away '+f+'')
-            os.rename(sarOut+'/'+f,procOut+'/'+f)
-            os.rename(sarOut+'/'+f[:-3]+'json',procOut+'/'+f[:-3]+'json')
-            logger.debug('Threshold for '+f + ' is ' + str(thr))
+        apply_thresh(f)
+        logger.debug('moving away '+f+'')
+        os.rename(sarOut+'/'+f,procOut+'/'+f)
+        os.rename(sarOut+'/'+f[:-3]+'json',procOut+'/'+f[:-3]+'json')
+        logger.debug('Threshold for '+f + ' is ' + str(thr))
 
 def apply_thresh(f):
     with rasterio.open(sarOut+'/'+f,'r') as ds:
@@ -69,9 +64,11 @@ def threshold(nparray):
     thr=kittler(nparray)
     wm=ma.array(nparray,mask= (nparray>=thr))
     wm.fill(1)
-    if(thr < -1000):
+    if(np.amax(nparray)< -1000) # all cells in raster are open water
+        rshape=wm.data
+    elif(thr < -1000):          # there is a threshold and it is a valid threshold
         rshape=(wm.mask*-1+1)*wm.data
-    else:
+    else:                       # the threshold is too large to be a valid threshold
         rshape=wm.data-1
     return rshape
 
