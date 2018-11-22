@@ -35,14 +35,13 @@ def sar2sigma(scenes):
 
     outForm='GeoTIFF+XML'
 
-    product = ProductIO.readProduct(sarIn+"/"+f)
-    productName=product.getName()
-    rect_utm=getBoundingBoxScene(product)
-    wm_in_scene,id_in_scene = getWMinScene(rect_utm)
-
 
     for f in scenes:
         logger.info("processing " + f)
+        product = ProductIO.readProduct(sarIn+"/"+f)
+        productName=product.getName()
+        rect_utm=getBoundingBoxScene(product)
+        wm_in_scene,id_in_scene = getWMinScene(rect_utm)
 
 
         if check_orbit(product.getName()):
