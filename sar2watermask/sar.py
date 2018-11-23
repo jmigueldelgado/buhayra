@@ -55,25 +55,7 @@ def sar2sigma(scenes):
         CalSf=speckle_filtering(Cal)
         CalSfCorr=geom_correction(CalSf)
 
-        # GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
-        logger.info("starting loop on reservoirs")
-         # i=0
-        for i in range(0,len(id_in_scene)):
-
-            fname=productName + "_" + str(id_in_scene[i]) + "_CalSfCorr"
-            if (fname+".tif") in listdir(sarOut):
-                logger.debug("product "+fname+".tif already exists: skipping")
-                continue
-
-            logger.debug("subsetting product "+ str(id_in_scene[i]))
-            product_subset=subsetProduct(CalSfCorr,wm_in_scene[i])
-
-            logger.debug("writing product "+ str(id_in_scene[i]))
-            ProductIO.writeProduct(product_subset,sarOut+"/"+fname+'_big',outForm)
-            product_subset.dispose()
-            logger.info("Compressing and saving " + sarOut+"/"+fname+'_big'+'.tif')
-            compress_tiff(sarOut+"/"+fname+'_big'+'.tif')
-            path=sarOut+"/"+fname+'_big'+'.tif'
+        ProductIO.writeProduct(CalSfCorr,sarIn+"/"+fname,outForm)
 
         product.dispose()
         product_oc.dispose()
@@ -81,7 +63,6 @@ def sar2sigma(scenes):
         Cal.dispose()
         CalSf.dispose()
         CalSfCorr.dispose()
-
         ### remove scene from folder
         logger.info("REMOVING " + f)
 
@@ -92,8 +73,31 @@ def sar2sigma(scenes):
         if os.path.isdir(sarIn+"/"+productName+'.data'):
             shutil.rmtree(sarIn+"/"+productName+'.data')
 
-        logger.info("**** sar2watermask completed!" + f  + " processed**********")
+        logger.info("**** sar2sigma completed!" + f  + " processed**********")
     System.gc()
+
+
+        #
+        # # GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
+        # logger.info("starting loop on reservoirs")
+        #  # i=0
+        # for i in range(0,len(id_in_scene)):
+        #
+        #     fname=productName + "_" + str(id_in_scene[i]) + "_CalSfCorr"
+        #     if (fname+".tif") in listdir(sarOut):
+        #         logger.debug("product "+fname+".tif already exists: skipping")
+        #         continue
+        #
+        #     logger.debug("subsetting product "+ str(id_in_scene[i]))
+        #     product_subset=subsetProduct(CalSfCorr,wm_in_scene[i])
+        #
+        #     logger.debug("writing product "+ str(id_in_scene[i]))
+        #     ProductIO.writeProduct(product_subset,sarOut+"/"+fname+'_big',outForm)
+        #     product_subset.dispose()
+        #     logger.info("Compressing and saving " + sarOut+"/"+fname+'_big'+'.tif')
+        #     compress_tiff(sarOut+"/"+fname+'_big'+'.tif')
+        #     path=sarOut+"/"+fname+'_big'+'.tif'
+
 
 
 def select_last_scene():
@@ -267,6 +271,7 @@ def check_orbit(fname):
     return check
 
 def orbit_correction(product):
+    logger = logging.getLogger('root')
 
     params = HashMap()
     root = xml.etree.ElementTree.parse(home['parameters']+'/orbit_correction.xml').getroot()
@@ -274,10 +279,12 @@ def orbit_correction(product):
         params.put(child.tag,child.text)
 
     result = GPF.createProduct('Apply-Orbit-File',params,product)
+    logger.info("finished orbit correction")
     return(result)
 
 ### currently being performed with gpt
 def thermal_noise_removal_gpt(product):
+    logger = logging.getLogger('root')
     fname=product.getName()
     ProductIO.writeProduct(product,sarIn+"/"+fname+'.dim',"BEAM-DIMAP")
     product.dispose()
@@ -291,6 +298,7 @@ def thermal_noise_removal_gpt(product):
         sarIn+'/'+fname+'.dim'])
 
     result = ProductIO.readProduct(sarIn+"/"+fname + '.dim')
+    logger.info("finished orbit correction")
     return(result)
 
 
@@ -310,16 +318,19 @@ def thermal_noise_removal(product):
 
 
 def calibration(product):
+    logger = logging.getLogger('root')
     params = HashMap()
     root = xml.etree.ElementTree.parse(home['parameters']+'/calibration.xml').getroot()
     for child in root:
         params.put(child.tag,child.text)
 
     result = GPF.createProduct('Calibration',params,product)
+    logger.info("finished calibration")
     return(result)
 
 def speckle_filtering(product):
     ## Speckle filtering
+    logger = logging.getLogger('root')
 
     params = HashMap()
     root = xml.etree.ElementTree.parse(home['parameters']+'/speckle_filtering.xml').getroot()
@@ -327,10 +338,12 @@ def speckle_filtering(product):
         params.put(child.tag,child.text)
 
     result = GPF.createProduct('Speckle-Filter',params,product)
+    logger.info("finished speckle filtering")
     return(result)
 
 def geom_correction(product):
     ## Geometric correction
+    logger = logging.getLogger('root')
 
     params = HashMap()
     root = xml.etree.ElementTree.parse(home['parameters']+'/terrain_correction.xml').getroot()
@@ -340,6 +353,7 @@ def geom_correction(product):
     result = GPF.createProduct('Terrain-Correction',params,product)
     # current_bands = CalSfCorr.getBandNames()
     # logger.debug("Current Bands after Terrain Correction:   %s" % (list(current_bands)))
+    logger.info("finished geometric correction")
     return(result)
 
 
