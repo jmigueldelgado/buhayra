@@ -8,8 +8,9 @@ import os
 import json
 from shutil import copyfile
 
-
-
+tiffs=select_n_last_tiffs(1)
+f=tiffs[0]
+f
 def threshold_loop(tiffs):
     logger = logging.getLogger('root')
     for f in tiffs:
@@ -63,7 +64,11 @@ def subset_200x200(nparray):
 
 
 def threshold(nparray):
-    thr=kittler(nparray)
+    try:
+        thr=kittler(nparray)
+    except:
+        logger.info( "Error: %s" % e )
+        thr=None
     if thr is None:
         rshape=nparray
         rshape.fill(0)
@@ -92,8 +97,15 @@ def kittler(nparray):
     # get indices of missing values
     # missing value is np.iinfo(np.int16).min or np.iinfo(np.int32).min depending on dtype
     # and mask them
-    n = nparray==np.iinfo(nparray.dtype).min
-    band = np.ma.masked_array(nparray, mask=n)
+
+    try:
+        n = nparray==np.iinfo(nparray.dtype).min
+        band = np.ma.masked_array(nparray, mask=n)
+    except: # catch *all* exceptions
+        e = sys.exc_info()[0]
+        logger.info(nparray.dtype)
+        logger.info( "Error: %s" % e )
+        return(None)
 
 
     # count entries in array
