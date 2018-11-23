@@ -7,48 +7,74 @@ import logging
 import os
 import json
 from shutil import copyfile
+from shapely.geometry import Polygon
+import pyproj
+from functools import partial
+from shapely.ops import transform
 
-tiffs=select_n_last_tiffs(1)
-f=tiffs[0]
-f
-def threshold_loop(tiffs):
+
+
+def threshold_loop(f):
     logger = logging.getLogger('root')
-    for f in tiffs:
-        apply_thresh(f)
-        logger.debug('moving away '+f)
-        os.rename(sarOut+'/'+f,procOut+'/'+f)
-        os.rename(sarOut+'/'+f[:-3]+'json',procOut+'/'+f[:-3]+'json')
-    logger.info('finished threshold loop. processed '+int(len(tiffs)) + ' tifs')
+    with rasterio.open(sarIn+'/'+f,'r') as ds:
+        # ds=rasterio.open('/home/delgado/Documents/tmp/testproduct_watermask.tif')
+        # r=ds.read(1)
+
+        rect_utm=getBoundingBoxScene(ds)
+        wm_in_scene,id_in_scene = getWMinScene(rect_utm)
+
+        for i in range(0,len(id_in_scene)):
+
+            fname=f[:-4] + "_" + str(id_in_scene[i])+".tif"
+            if (fname) in listdir(sarOut):
+                logger.info("product "+fname+" already exists: skipping")
+                continue
+
+            out_image,out_transform=subset_by_lake(ds,wm_in_scene[i])
+            gdalParam=out_transform.to_gdal()
+            out_db=sigma_naught(out_image)
+            openwater=apply_thresh(out_db)
+
+            logger.debug("writing out to sarOut and processed folder in compressed form"+fname)
+
+            with rasterio.open(polOut+'/'+fname,'w',driver=ds.driver,height=openwater.shape[0],width=openwater.shape[1],count=1,dtype=rasterio.ubyte) as dsout:
+                dsout.write(openwater.astype(rasterio.ubyte),1)
+            with open(polOut+'/'+fname[:-3]+'json', 'w') as fjson:
+                json.dump(gdalParam, fjson)
+            with rasterio.open(procOut+'/'+fname,'w',driver=ds.driver,height=openwater.shape[0],width=openwater.shape[1],count=1,dtype=rasterio.ubyte) as dsout:
+                dsout.write(out_image.astype(rasterio.ubyte),1)
+            with open(procOut+'/'+fname[:-3]+'json', 'w') as fjson:
+                json.dump(gdalParam, fjson)
 
 
-def apply_thresh(f):
-    with rasterio.open(sarOut+'/'+f,'r') as ds:
-        r_db=ds.read(1)
-        # r_db=np.random.rand(20,20)
-
-        # subset into 200x200 m approx.
+        logger.info('finished threshold loop. processed '+int(len(wm_in_scene)) + ' tifs')
+    logger.info('removing '+f)
+    os.remove(sarIn+'/'+f)
+    os.remove(sarIn+'/'+f[:-3]+'xml')
 
 
-        splt=subset_200x200(r_db)
+
+def apply_thresh(r_db):
+    # subset into 200x200 m approx.
+    splt=subset_200x200(r_db)
+
+    ### loop through subsets
+    res=list()
+    for i in range(len(splt)):
+        subres=list()
+        for j in range(len(splt[i])):
+            # subres.append(splt[i][j])
+            subres.append(threshold(splt[i][j]))
+        res.append(subres)
+
+    ### stitch raster back together
+    for i in range(len(res)):
+        res[i]=np.concatenate(res[i],1)
+    openwater=np.concatenate(res,0)
+
+    return(openwater)
 
 
-        ### loop through subsets
-        res=list()
-        for i in range(len(splt)):
-            subres=list()
-            for j in range(len(splt[i])):
-                # subres.append(splt[i][j])
-                subres.append(threshold(splt[i][j]))
-            res.append(subres)
-
-        ### stitch raster back together
-        for i in range(len(res)):
-            res[i]=np.concatenate(res[i],1)
-        openwater=np.concatenate(res,0)
-
-        with rasterio.open(polOut+'/'+f,'w',driver=ds.driver,height=ds.height,width=ds.width,count=1,dtype=rasterio.ubyte) as dsout:
-            dsout.write(openwater.astype(rasterio.ubyte),1)
-    copyfile(sarOut+'/'+f[:-3]+'json',polOut+'/'+f[:-3]+'json')
 
 
 def subset_200x200(nparray):
@@ -154,19 +180,19 @@ def select_tiffs_year_month(Y,M):
 
     if(len(listdir(sarOut))<1):
         logger.info(sarOut+" is empty! Nothing to do. Exiting and returning None.")
-        polys_in_ym=None
+        tiffs_in_ym=None
     else:
         timestamp=list()
-        polys_in_ym=list()
-        for poly in listdir(sarOut):
-            stamp=datetime.datetime.strptime(poly.split('_')[4],'%Y%m%dT%H%M%S')
-            if re.search('.tif$',poly) and stamp.year==Y and stamp.month==M:
-                polys_in_ym.append(poly)
+        tiffs_in_ym=list()
+        for tif in listdir(sarOut):
+            stamp=datetime.datetime.strptime(tif.split('_')[4],'%Y%m%dT%H%M%S')
+            if re.search('.tif$',tif) and stamp.year==Y and stamp.month==M:
+                tiffs_in_ym.append(tif)
                 timestamp.append(stamp)
         if(len(timestamp)<1):
             logger.info(sarOut+" has no scene for year "+Y+" and month "+M+"Exiting and returning None.")
-            polys_in_ym=None
-    return(polys_in_ym)
+            tiffs_in_ym=None
+    return(tiffs_in_ym)
 
 def select_n_last_tiffs(n):
     logger = logging.getLogger('root')
@@ -192,3 +218,67 @@ def select_n_last_tiffs(n):
             index=np.argsort(timestamp)
             return([tiffs[i] for i in index[-n:]])
     return(tiffs)
+
+
+
+
+def getBoundingBoxScene(ds):
+    # ds=rasterio.open('/home/delgado/Documents/tmp/testproduct_watermask.tif')
+    rect=Polygon([(ds.bounds.left,ds.bounds.bottom),(ds.bounds.left,ds.bounds.top),(ds.bounds.right,ds.bounds.top),(ds.bounds.right,ds.bounds.bottom)])
+
+    project = partial(
+        pyproj.transform,
+        pyproj.Proj(init='epsg:4326'),
+        pyproj.Proj(init='epsg:32724'))
+
+    rect_utm=transform(project,rect)
+    return(rect_utm)
+
+
+
+
+def subset_by_lake(ds,pol):
+    if pol.area<1000:
+        buff=pol.buffer(10*(pol.area)**0.5)
+    else:
+        buff=pol.buffer((pol.area)**0.5)
+
+    coords=buff.bounds
+    bb=Polygon([(coords[0],coords[1]),(coords[0],coords[3]),(coords[2],coords[3]),(coords[2],coords[1])])
+
+    project = partial(
+        pyproj.transform,
+        pyproj.Proj(init='epsg:32724'),
+        pyproj.Proj(init='epsg:4326'))
+    bb_ll=transform(project,bb)
+
+    out_image, out_transform = rasterio.mask.mask(ds, bb_ll,crop=True)
+
+    return(out_image,out_transform)
+
+
+def getWMinScene(rect):
+    wm=fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r')
+    wm_in_scene=list()
+    id=list()
+    for feat in wm:
+        pol=geojson2shapely(feat['geometry'])
+        pol=checknclean(pol)
+        if rect.contains(pol):
+            wm_in_scene.append(pol)
+            id.append(feat['properties']['id'])
+    wm.close()
+    return(wm_in_scene,id)
+
+def sigma_naught(r):
+    r[r==0]=np.nan
+
+    r_db=10*np.log10(r)*100
+
+    if (np.nanmax(r_db)< np.iinfo(np.int16).max) and (np.nanmin(r_db) > (np.iinfo(np.int16).min+1)):
+        r_db[np.isnan(r_db)]=np.iinfo(np.int16).min
+        r_db=np.int16(r_db)
+    else:
+        r_db[np.isnan(r_db)]=np.iinfo(np.int32).min
+        r_db=np.int32(r_db)
+    return(r_db)

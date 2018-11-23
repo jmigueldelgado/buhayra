@@ -1,4 +1,3 @@
-import numpy as np
 from os import listdir
 import os
 import shutil
@@ -15,12 +14,6 @@ from snappy import HashMap
 from snappy import PixelPos
 from snappy import GeoPos
 from snappy import WKTReader
-from shapely.geometry import Polygon
-from shapely.ops import transform
-import pyproj
-from functools import partial
-import fiona
-import rasterio
 import json
 import datetime
 import subprocess
@@ -40,8 +33,8 @@ def sar2sigma(scenes):
         logger.info("processing " + f)
         product = ProductIO.readProduct(sarIn+"/"+f)
         productName=product.getName()
-        rect_utm=getBoundingBoxScene(product)
-        wm_in_scene,id_in_scene = getWMinScene(rect_utm)
+        # rect_utm=getBoundingBoxScene(product)
+        # wm_in_scene,id_in_scene = getWMinScene(rect_utm)
 
 
         if check_orbit(product.getName()):
@@ -167,43 +160,6 @@ def geojson2shapely(jsgeom):
 
 
 
-def getBoundingBoxScene(product):
-    gc=product.getSceneGeoCoding()
-    rsize=product.getSceneRasterSize()
-    h=rsize.getHeight()
-    w=rsize.getWidth()
-
-    p1=gc.getGeoPos(PixelPos(0,0),None)
-    p2=gc.getGeoPos(PixelPos(0,h),None)
-    p3=gc.getGeoPos(PixelPos(w,h),None)
-    p4=gc.getGeoPos(PixelPos(w,0),None)
-
-    rect=Polygon([(p1.getLon(),p1.getLat()),(p2.getLon(),p2.getLat()),(p3.getLon(),p3.getLat()),(p4.getLon(),p4.getLat())])
-    project = partial(
-        pyproj.transform,
-        pyproj.Proj(init='epsg:4326'),
-        pyproj.Proj(init='epsg:32724'))
-    rect_utm=transform(project,rect)
-    return(rect_utm)
-
-
-def getBoundingBoxWM(pol):
-    coords=pol.bounds
-    bb=Polygon([(coords[0],coords[1]),(coords[0],coords[3]),(coords[2],coords[3]),(coords[2],coords[1])])
-    return(bb)
-
-def getWMinScene(rect):
-    wm=fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r')
-    wm_in_scene=list()
-    id=list()
-    for feat in wm:
-        pol=geojson2shapely(feat['geometry'])
-        pol=checknclean(pol)
-        if rect.contains(pol):
-            wm_in_scene.append(pol)
-            id.append(feat['properties']['id'])
-    wm.close()
-    return(wm_in_scene,id)
 
 def checknclean(pol):
     if not pol.is_valid:
@@ -364,27 +320,3 @@ def geom_correction(product):
         # bandraster = currentband.readPixels(0, 0, w, h, array)
 
         # np.amax(bandraster)
-
-
-def compress_tiff(path):
-    with rasterio.open(path,'r') as ds:
-        r=ds.read(1)
-        r[r==0]=np.nan
-
-        r_db=10*np.log10(r)*100
-
-        if (np.nanmax(r_db)< np.iinfo(np.int16).max) and (np.nanmin(r_db) > (np.iinfo(np.int16).min+1)):
-            r_db[np.isnan(r_db)]=np.iinfo(np.int16).min
-            r_db=np.int16(r_db)
-        else:
-            r_db[np.isnan(r_db)]=np.iinfo(np.int32).min
-            r_db=np.int32(r_db)
-
-        gdalParam=ds.transform.to_gdal()
-        with rasterio.open(path[:-8]+'.tif','w',driver=ds.driver,height=ds.height,width=ds.width,count=1,dtype=r_db.dtype) as dsout:
-            dsout.write(r_db,1)
-
-    with open(path[:-8]+'.json', 'w') as fjson:
-        json.dump(gdalParam, fjson)
-    os.remove(path)
-    os.remove(path[:-3]+'xml')
