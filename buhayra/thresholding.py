@@ -26,7 +26,7 @@ def threshold_loop(f):
         for i in range(0,len(id_in_scene)):
 
             fname=f[:-4] + "_" + str(id_in_scene[i])+".tif"
-            if (fname) in listdir(sarOut):
+            if (fname) in listdir(polOut):
                 logger.info("product "+fname+" already exists: skipping")
                 continue
 
