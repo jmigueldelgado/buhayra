@@ -17,7 +17,7 @@ from shapely.ops import transform
 def threshold_loop(scenes):
     for f in scenes:
         logger = logging.getLogger('root')
-        with rasterio.open(sarIn+'/'+f,'r') as ds:
+        with rasterio.open(sarOut+'/'+f,'r') as ds:
             # ds=rasterio.open('/home/delgado/Documents/tmp/testproduct_watermask.tif')
             # r=ds.read(1)
 
@@ -50,8 +50,8 @@ def threshold_loop(scenes):
 
             logger.info('finished threshold loop. processed '+int(len(wm_in_scene)) + ' tifs')
         logger.info('removing '+f)
-        # os.remove(sarIn+'/'+f)
-        # os.remove(sarIn+'/'+f[:-3]+'xml')
+        os.remove(sarOut+'/'+f)
+        os.remove(sarOut+'/'+f[:-3]+'xml')
 
 
 
