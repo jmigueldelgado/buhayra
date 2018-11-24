@@ -14,43 +14,44 @@ from shapely.ops import transform
 
 
 
-def threshold_loop(f):
-    logger = logging.getLogger('root')
-    with rasterio.open(sarIn+'/'+f,'r') as ds:
-        # ds=rasterio.open('/home/delgado/Documents/tmp/testproduct_watermask.tif')
-        # r=ds.read(1)
+def threshold_loop(scenes):
+    for f in scenes:
+        logger = logging.getLogger('root')
+        with rasterio.open(sarIn+'/'+f,'r') as ds:
+            # ds=rasterio.open('/home/delgado/Documents/tmp/testproduct_watermask.tif')
+            # r=ds.read(1)
 
-        rect_utm=getBoundingBoxScene(ds)
-        wm_in_scene,id_in_scene = getWMinScene(rect_utm)
+            rect_utm=getBoundingBoxScene(ds)
+            wm_in_scene,id_in_scene = getWMinScene(rect_utm)
 
-        for i in range(0,len(id_in_scene)):
+            for i in range(0,len(id_in_scene)):
 
-            fname=f[:-4] + "_" + str(id_in_scene[i])+".tif"
-            if (fname) in listdir(polOut):
-                logger.info("product "+fname+" already exists: skipping")
-                continue
+                fname=f[:-4] + "_" + str(id_in_scene[i])+".tif"
+                if (fname) in listdir(polOut):
+                    logger.info("product "+fname+" already exists: skipping")
+                    continue
 
-            out_image,out_transform=subset_by_lake(ds,wm_in_scene[i])
-            gdalParam=out_transform.to_gdal()
-            out_db=sigma_naught(out_image)
-            openwater=apply_thresh(out_db)
+                out_image,out_transform=subset_by_lake(ds,wm_in_scene[i])
+                gdalParam=out_transform.to_gdal()
+                out_db=sigma_naught(out_image)
+                openwater=apply_thresh(out_db)
 
-            logger.debug("writing out to sarOut and processed folder in compressed form"+fname)
+                logger.debug("writing out to sarOut and processed folder in compressed form"+fname)
 
-            with rasterio.open(polOut+'/'+fname,'w',driver=ds.driver,height=openwater.shape[0],width=openwater.shape[1],count=1,dtype=rasterio.ubyte) as dsout:
-                dsout.write(openwater.astype(rasterio.ubyte),1)
-            with open(polOut+'/'+fname[:-3]+'json', 'w') as fjson:
-                json.dump(gdalParam, fjson)
-            with rasterio.open(procOut+'/'+fname,'w',driver=ds.driver,height=openwater.shape[0],width=openwater.shape[1],count=1,dtype=rasterio.ubyte) as dsout:
-                dsout.write(out_image.astype(rasterio.ubyte),1)
-            with open(procOut+'/'+fname[:-3]+'json', 'w') as fjson:
-                json.dump(gdalParam, fjson)
+                with rasterio.open(polOut+'/'+fname,'w',driver=ds.driver,height=openwater.shape[0],width=openwater.shape[1],count=1,dtype=rasterio.ubyte) as dsout:
+                    dsout.write(openwater.astype(rasterio.ubyte),1)
+                with open(polOut+'/'+fname[:-3]+'json', 'w') as fjson:
+                    json.dump(gdalParam, fjson)
+                with rasterio.open(procOut+'/'+fname,'w',driver=ds.driver,height=openwater.shape[0],width=openwater.shape[1],count=1,dtype=rasterio.ubyte) as dsout:
+                    dsout.write(out_image.astype(rasterio.ubyte),1)
+                with open(procOut+'/'+fname[:-3]+'json', 'w') as fjson:
+                    json.dump(gdalParam, fjson)
 
 
-        logger.info('finished threshold loop. processed '+int(len(wm_in_scene)) + ' tifs')
-    logger.info('removing '+f)
-    # os.remove(sarIn+'/'+f)
-    # os.remove(sarIn+'/'+f[:-3]+'xml')
+            logger.info('finished threshold loop. processed '+int(len(wm_in_scene)) + ' tifs')
+        logger.info('removing '+f)
+        # os.remove(sarIn+'/'+f)
+        # os.remove(sarIn+'/'+f[:-3]+'xml')
 
 
 
