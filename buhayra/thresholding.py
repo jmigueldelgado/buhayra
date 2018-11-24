@@ -49,8 +49,8 @@ def threshold_loop(f):
 
         logger.info('finished threshold loop. processed '+int(len(wm_in_scene)) + ' tifs')
     logger.info('removing '+f)
-    os.remove(sarIn+'/'+f)
-    os.remove(sarIn+'/'+f[:-3]+'xml')
+    # os.remove(sarIn+'/'+f)
+    # os.remove(sarIn+'/'+f[:-3]+'xml')
 
 
 
@@ -59,22 +59,30 @@ def apply_thresh(r_db):
     splt=subset_200x200(r_db)
 
     ### loop through subsets
-    res=list()
+    # res=list()
+    thr=list()
     for i in range(len(splt)):
-        subres=list()
+        thr_i=list()
+        # subres=list()
         for j in range(len(splt[i])):
-            # subres.append(splt[i][j])
-            subres.append(threshold(splt[i][j]))
-        res.append(subres)
+            thr_i.append(get_thr(splt[i][j])) # subres.append(threshold(splt[i][j]))
+        # res.append(subres)
+        thr.append(thr_i)
 
-    ### stitch raster back together
-    for i in range(len(res)):
-        res[i]=np.concatenate(res[i],1)
-    openwater=np.concatenate(res,0)
+    # thr_i=[1,2,3,np.nan]
+    # thr=list()
+    # thr.append(thr_i)
+    # thr
+    npthr = np.array(thr)
+    thrmedian=np.nanmedian(npthr)
+
+    openwater=threshold(r_db,thrmedian)
+    # ### stitch raster back together
+    # for i in range(len(res)):
+    #     res[i]=np.concatenate(res[i],1)
+    # openwater=np.concatenate(res,0)
 
     return(openwater)
-
-
 
 
 def subset_200x200(nparray):
@@ -86,16 +94,11 @@ def subset_200x200(nparray):
         m=round(chunk.shape[1]/20)
         splt1=np.array_split(chunk,m,1)
         splt.append(splt1)
-    return splt
+    return(splt)
 
 
-def threshold(nparray):
-    try:
-        thr=kittler(nparray)
-    except:
-        logger.info( "Error: %s" % e )
-        thr=None
-    if thr is None:
+def threshold(nparray,thr):
+    if np.isnan(thr):
         rshape=nparray
         rshape.fill(0)
     elif(np.amax(nparray)< -1300): # all cells in raster are open water
@@ -108,7 +111,17 @@ def threshold(nparray):
     else: # the threshold is too large to be a valid threshold
         rshape=nparray
         rshape.fill(0)
-    return rshape
+    return(rshape)
+
+def get_thr(nparray):
+    try:
+        thr=kittler(nparray)
+    except:
+        logger.info( "Error: %s" % e )
+        thr=np.nan
+    if(thr > -1300):
+        thr=np.nan
+    return(thr)
 
 
 
