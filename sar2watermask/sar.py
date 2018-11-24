@@ -48,7 +48,7 @@ def sar2sigma(scenes):
         CalSf=speckle_filtering(Cal)
         CalSfCorr=geom_correction(CalSf)
 
-        ProductIO.writeProduct(CalSfCorr,sarOut+"/"+fname,outForm)
+        ProductIO.writeProduct(CalSfCorr,sarOut+"/"+productName,outForm)
 
         product.dispose()
         product_oc.dispose()
