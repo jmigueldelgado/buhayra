@@ -37,14 +37,14 @@ def sar2sigma(scenes):
         # wm_in_scene,id_in_scene = getWMinScene(rect_utm)
 
 
-        if check_orbit(product.getName()):
+        if orbit_exists(product):
             product_oc=orbit_correction(product)
         else:
             logger.info("skipping orbital correction for " + f+". Please download the relevant orbit files with `python buhayra get ``past scenes`` year month`")
             product_oc=product
+
         product_oc_tnr=thermal_noise_removal_gpt(product_oc)
         Cal=calibration(product_oc_tnr)
-        # Cal=calibration(product)
         CalSf=speckle_filtering(Cal)
         CalSfCorr=geom_correction(CalSf)
 
@@ -190,8 +190,8 @@ def subsetProduct(product,pol):
     return(product_subset)
 
 
-def check_orbit(fname):
-
+def orbit_exists(product):
+    fname=product.getName()
     # check if orbit was downloaded
     startdt=datetime.datetime.strptime(fname.split('_')[4],'%Y%m%dT%H%M%S')
     stopdt=datetime.datetime.strptime(fname.split('_')[5],'%Y%m%dT%H%M%S')
@@ -254,7 +254,7 @@ def thermal_noise_removal_gpt(product):
         sarIn+'/'+fname+'.dim'])
 
     result = ProductIO.readProduct(sarIn+"/"+fname + '.dim')
-    logger.info("finished orbit correction")
+    logger.info("finished thermal noise removal")
     return(result)
 
 
