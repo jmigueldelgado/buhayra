@@ -148,25 +148,6 @@ def select_scenes_year_month(Y,M):
             scenes_in_ym=None
     return(scenes_in_ym)
 
-def geojson2wkt(jsgeom):
-    from shapely.geometry import shape,polygon
-    polygon=shape(jsgeom)
-    return(polygon.wkt)
-
-def geojson2shapely(jsgeom):
-    from shapely.geometry import shape,polygon
-    polygon=shape(jsgeom)
-    return(polygon)
-
-
-
-
-def checknclean(pol):
-    if not pol.is_valid:
-        clean=pol.buffer(0)
-        return(clean)
-    else:
-        return(pol)
 
 def subsetProduct(product,pol):
     if pol.area<1000:

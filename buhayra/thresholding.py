@@ -3,6 +3,8 @@ from buhayra.getpaths import *
 import numpy as np
 import numpy.ma as ma
 import rasterio
+import rasterio.mask
+import fiona
 import logging
 import os
 import json
@@ -33,7 +35,7 @@ def threshold_loop(scenes):
 
                 out_image,out_transform=subset_by_lake(ds,wm_in_scene[i])
                 gdalParam=out_transform.to_gdal()
-                out_db=sigma_naught(out_image)
+                out_db=sigma_naught(out_image[0])
                 openwater=apply_thresh(out_db)
 
                 logger.debug("writing out to sarOut and processed folder in compressed form"+fname)
@@ -99,18 +101,22 @@ def subset_200x200(nparray):
 
 
 def threshold(nparray,thr):
+
+    n = nparray==np.iinfo(nparray.dtype).min
+    band = ma.masked_array(nparray, mask=n)
+
     if np.isnan(thr):
-        rshape=nparray
+        rshape=band
         rshape.fill(0)
     elif(np.amax(nparray)< -1300): # all cells in raster are open water
-        rshape=nparray
+        rshape=band
         rshape.fill(1)
     elif(thr < -1300):          # there is a threshold and it is a valid threshold
-        wm=ma.array(nparray,mask= (nparray>=thr))
-        wm.fill(1)
-        rshape=(wm.mask*-1+1)*wm.data
+        rshape=band
+        rshape.fill(0)
+        rshape[band>=thr]=1
     else: # the threshold is too large to be a valid threshold
-        rshape=nparray
+        rshape=band
         rshape.fill(0)
     return(rshape)
 
@@ -142,7 +148,7 @@ def kittler(nparray):
 
     try:
         n = nparray==np.iinfo(nparray.dtype).min
-        band = np.ma.masked_array(nparray, mask=n)
+        band = ma.masked_array(nparray, mask=n)
     except: # catch *all* exceptions
         e = sys.exc_info()[0]
         logger.info(nparray.dtype)
@@ -268,7 +274,7 @@ def subset_by_lake(ds,pol):
         pyproj.Proj(init='epsg:4326'))
     bb_ll=transform(project,bb)
 
-    out_image, out_transform = rasterio.mask.mask(ds, bb_ll,crop=True)
+    out_image, out_transform = rasterio.mask.mask(ds,[bb_ll],crop=True)
 
     return(out_image,out_transform)
 
@@ -287,9 +293,10 @@ def getWMinScene(rect):
     return(wm_in_scene,id)
 
 def sigma_naught(r):
-    r[r==0]=np.nan
+    r_db=r
+    r_db[r==0]=np.nan
 
-    r_db=10*np.log10(r)*100
+    r_db=10*np.log10(r_db)*100
 
     if (np.nanmax(r_db)< np.iinfo(np.int16).max) and (np.nanmin(r_db) > (np.iinfo(np.int16).min+1)):
         r_db[np.isnan(r_db)]=np.iinfo(np.int16).min
@@ -298,3 +305,23 @@ def sigma_naught(r):
         r_db[np.isnan(r_db)]=np.iinfo(np.int32).min
         r_db=np.int32(r_db)
     return(r_db)
+
+def geojson2wkt(jsgeom):
+    from shapely.geometry import shape,polygon
+    polygon=shape(jsgeom)
+    return(polygon.wkt)
+
+def geojson2shapely(jsgeom):
+    from shapely.geometry import shape,polygon
+    polygon=shape(jsgeom)
+    return(polygon)
+
+
+
+
+def checknclean(pol):
+    if not pol.is_valid:
+        clean=pol.buffer(0)
+        return(clean)
+    else:
+        return(pol)
