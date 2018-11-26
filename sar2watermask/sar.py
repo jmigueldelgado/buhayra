@@ -26,7 +26,7 @@ BandDescriptor = jpy.get_type('org.esa.snap.core.gpf.common.BandMathsOp$BandDesc
 def sar2sigma(scenes):
     logger = logging.getLogger('root')
 
-    outForm='GeoTIFF+XML'
+    outForm='GeoTIFF-BigTIFF'
 
 
     for f in scenes:
