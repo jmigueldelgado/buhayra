@@ -44,8 +44,8 @@ def threshold_loop(scenes):
                     dsout.write(openwater.astype(rasterio.ubyte),1)
                 with open(polOut+'/'+fname[:-3]+'json', 'w') as fjson:
                     json.dump(gdalParam, fjson)
-                with rasterio.open(procOut+'/'+fname,'w',driver=ds.driver,height=openwater.shape[0],width=openwater.shape[1],count=1,dtype=rasterio.ubyte) as dsout:
-                    dsout.write(out_image.astype(rasterio.ubyte),1)
+                with rasterio.open(procOut+'/'+fname,'w',driver=ds.driver,height=out_db.shape[0],width=out_db.shape[1],count=1,dtype=out_db.dtype) as dsout:
+                    dsout.write(out_db,1)
                 with open(procOut+'/'+fname[:-3]+'json', 'w') as fjson:
                     json.dump(gdalParam, fjson)
 
@@ -157,7 +157,7 @@ def kittler(nparray):
     # count entries in array
     if band.count() < 50:
         logger.info("The size of the population is smaller than 50! Returning None")
-        return None
+        return np.nan
     else:
         # calculate minimum and maximum as histogram breaks
         breaks = [band.min(), np.ceil(band.max()) + 1]
