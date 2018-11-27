@@ -36,17 +36,24 @@ def threshold_loop(scenes):
                 out_image,out_transform=subset_by_lake(ds,wm_in_scene[i])
                 gdalParam=out_transform.to_gdal()
                 out_db=sigma_naught(out_image[0])
-                openwater=apply_thresh(out_db)
+                with rasterio.open(procOut+'/'+fname,'w',driver=ds.driver,height=out_db.shape[0],width=out_db.shape[1],count=1,dtype=out_db.dtype) as dsout:
+                    dsout.write(out_db,1)
+
+                openwater,thr=apply_thresh(out_db)
+                gdalParam=list(gdalParam)
+                gdalParam.append(thr)
+                with open(procOut+'/'+fname[:-3]+'json', 'w') as fjson:
+                    json.dump(gdalParam, fjson)
+
+
+                gdalParam=list(gdalParam)
+                gdalParam.append(thr)
 
                 logger.debug("writing out to sarOut and processed folder in compressed form"+fname)
 
                 with rasterio.open(polOut+'/'+fname,'w',driver=ds.driver,height=openwater.shape[0],width=openwater.shape[1],count=1,dtype=rasterio.ubyte) as dsout:
                     dsout.write(openwater.astype(rasterio.ubyte),1)
                 with open(polOut+'/'+fname[:-3]+'json', 'w') as fjson:
-                    json.dump(gdalParam, fjson)
-                with rasterio.open(procOut+'/'+fname,'w',driver=ds.driver,height=out_db.shape[0],width=out_db.shape[1],count=1,dtype=out_db.dtype) as dsout:
-                    dsout.write(out_db,1)
-                with open(procOut+'/'+fname[:-3]+'json', 'w') as fjson:
                     json.dump(gdalParam, fjson)
 
 
@@ -85,7 +92,7 @@ def apply_thresh(r_db):
     #     res[i]=np.concatenate(res[i],1)
     # openwater=np.concatenate(res,0)
 
-    return(openwater)
+    return(openwater,thrmedian)
 
 
 def subset_200x200(nparray):
@@ -261,7 +268,7 @@ def subset_by_lake(ds,pol):
     if pol.area<1000:
         buff=pol.buffer(10*(pol.area)**0.5)
     else:
-        buff=pol.buffer((pol.area)**0.5)
+        buff=pol.buffer(2*(pol.area)**0.5)
 
     coords=buff.bounds
     bb=Polygon([(coords[0],coords[1]),(coords[0],coords[3]),(coords[2],coords[3]),(coords[2],coords[1])])
