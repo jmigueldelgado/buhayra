@@ -9,7 +9,8 @@ info.log
 4_insert.o*
 poly+mongo.o*
 test*.o*
-
+dask-worker.e*
+dask-worker.o*
 *.qgs
 # Sentinel data and test data
 

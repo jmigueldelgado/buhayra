@@ -14,7 +14,7 @@ import pyproj
 from functools import partial
 from shapely.ops import transform
 
-
+user_thresh=-1000
 
 def threshold_loop(scenes):
     for f in scenes:
@@ -101,24 +101,22 @@ def subset_200x200(nparray):
 
 
 def threshold(nparray,thr):
-
     n = nparray==np.iinfo(nparray.dtype).min
-    band = ma.masked_array(nparray, mask=n)
+    band = ma.masked_array(nparray, mask=n,fill_value=0)
 
     if np.isnan(thr):
-        rshape=band
-        rshape.fill(0)
-    elif(np.amax(nparray)< -1300): # all cells in raster are open water
-        rshape=band
-        rshape.fill(1)
-    elif(thr < -1300):          # there is a threshold and it is a valid threshold
-        rshape=band
-        rshape.fill(0)
-        rshape[band>=thr]=1
+        band[:]=ma.masked
+    elif(np.amax(nparray)< user_thresh): # all cells in raster are open water
+        band.data.fill(1)
+    elif(thr < user_thresh):          # there is a threshold and it is a valid threshold
+        band[band>thr]=ma.masked
+        band.data.fill(1)
     else: # the threshold is too large to be a valid threshold
-        rshape=band
-        rshape.fill(0)
-    return(rshape)
+        band[:]=ma.masked
+
+    band.data[band.mask]=0
+
+    return(band.data)
 
 def get_thr(nparray):
     try:
@@ -126,9 +124,9 @@ def get_thr(nparray):
     except:
         logger.info( "Error: %s" % e )
         thr=np.nan # there was an error computing the threshold, check the error message
-    if(thr > -1300): # threshold is too large to be a valid water-land threshold
+    if(thr > user_thresh): # threshold is too large to be a valid water-land threshold
         thr=np.nan
-    if(np.amax(nparray)< -1300): # all cells in raster are open water
+    if(np.amax(nparray)< user_thresh): # all cells in raster are open water
         thr=np.nan
     return(thr)
 

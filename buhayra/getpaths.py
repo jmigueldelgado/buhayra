@@ -20,7 +20,7 @@ elif socket.gethostname()=='ubuntuserver':
 elif socket.gethostname()=='MEKONG':
     home = {
         'home' : expanduser("~"),
-        'scratch' : expanduser("~") + '/scratch/test_dataset',
+        'scratch' : expanduser("~") + '/scratch',
         'proj' : expanduser("~") + '/proj/buhayra',
         'parameters' : expanduser("~") + '/proj/buhayra/buhayra/parameters'}
 else:
