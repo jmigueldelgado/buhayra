@@ -14,7 +14,7 @@ import pyproj
 from functools import partial
 from shapely.ops import transform
 
-user_thresh=-1000
+user_thresh=-1200
 
 def threshold_loop(scenes):
     for f in scenes:
@@ -51,10 +51,10 @@ def threshold_loop(scenes):
 
                 logger.debug("writing out to sarOut and processed folder in compressed form"+fname)
 
-                with rasterio.open(polOut+'/'+fname,'w',driver=ds.driver,height=openwater.shape[0],width=openwater.shape[1],count=1,dtype=rasterio.ubyte) as dsout:
+                with rasterio.open(polOut+'/'+fname,'w',driver=ds.driver,height=openwater.shape[0],width=openwater.shape[1],count=1,dtype=rasterio.ubyte,transform=out_transform) as dsout:
                     dsout.write(openwater.astype(rasterio.ubyte),1)
-                with open(polOut+'/'+fname[:-3]+'json', 'w') as fjson:
-                    json.dump(gdalParam, fjson)
+                # with open(polOut+'/'+fname[:-3]+'json', 'w') as fjson:
+                #     json.dump(gdalParam, fjson)
 
 
             logger.info('finished threshold loop. processed '+int(len(wm_in_scene)) + ' tifs')
