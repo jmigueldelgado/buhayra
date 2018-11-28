@@ -14,7 +14,7 @@ import pyproj
 from functools import partial
 from shapely.ops import transform
 
-user_thresh=-1200
+user_thresh=-1300
 
 def threshold_loop(scenes):
     for f in scenes:
