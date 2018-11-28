@@ -36,16 +36,6 @@ else:
         'proj' : expanduser("~") + '/proj/buhayra',
         'parameters' : expanduser("~") + '/proj/buhayra/buhayra/parameters'}
 
-pyt = home['home'] + "/local/miniconda2/envs/gdal/bin/python"
-pyGdal = home['home'] + "/local/miniconda2/envs/gdal/bin/python"
-pyFmask = home['home'] + "/local/miniconda2/envs/fmask/bin/python"
-
-gdalPol = home['home'] + "/local/miniconda2/envs/gdal/bin/gdal_polygonize.py"
-gdalMerge = home['home'] + "/local/miniconda2/envs/gdal/bin/gdal_merge.py"
-gdalBuildvrt = home['home'] + "/local/miniconda3/envs/fiorio/bin/gdalbuildvrt"
-fmaskMakeAngles = home['home'] + "/local/miniconda2/envs/fmask/bin/fmask_sentinel2makeAnglesImage.py"
-fmaskStack = home['home'] + "/local/miniconda2/envs/fmask/bin/fmask_sentinel2Stacked.py"
-
 
 proj = home['proj']
 scratch= home['scratch']
