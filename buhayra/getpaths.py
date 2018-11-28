@@ -23,6 +23,12 @@ elif socket.gethostname()=='MEKONG':
         'scratch' : expanduser("~") + '/local_scratch',
         'proj' : expanduser("~") + '/proj/buhayra',
         'parameters' : expanduser("~") + '/proj/buhayra/buhayra/parameters'}
+elif socket.gethostname()=='vm-sesam':
+    home = {
+        'home' : expanduser("~"),
+        'scratch' : expanduser("~") + '/SESAM/sesam_share/delgado/scratch',
+        'proj' : expanduser("~") + '/proj/buhayra',
+        'parameters' : expanduser("~") + '/proj/buhayra/buhayra/parameters'}
 else:
     home = {
         'home' : expanduser("~"),
