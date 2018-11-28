@@ -45,7 +45,7 @@ def threshold_loop(scenes):
                 with open(procOut+'/'+fname[:-3]+'json', 'w') as fjson:
                     json.dump(gdalParam, fjson)
 
-                if np.isnan(thr):
+                if not np.isnan(thr):
                     logger.debug("writing out to sarOut and processed folder in compressed form"+fname)
 
                     with rasterio.open(polOut+'/'+fname,'w',driver=ds.driver,height=openwater.shape[0],width=openwater.shape[1],count=1,dtype=rasterio.ubyte,transform=out_transform) as dsout:
