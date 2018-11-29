@@ -50,11 +50,11 @@ def threshold_loop(scenes):
 
                     with rasterio.open(polOut+'/'+fname,'w',driver=ds.driver,height=openwater.shape[0],width=openwater.shape[1],count=1,dtype=rasterio.ubyte,transform=out_transform) as dsout:
                         dsout.write(openwater.astype(rasterio.ubyte),1)
-                    # with open(polOut+'/'+fname[:-3]+'json', 'w') as fjson:
-                    #     json.dump(gdalParam, fjson)
+                    with open(polOut+'/'+fname[:-3]+'json', 'w') as fjson:
+                        json.dump(gdalParam, fjson)
 
 
-            logger.info('finished threshold loop. processed '+int(len(wm_in_scene)) + ' tifs')
+            logger.info('finished threshold loop. processed '+str(len(wm_in_scene)) + ' tifs')
         logger.info('removing '+f)
         os.remove(sarOut+'/'+f)
         os.remove(sarOut+'/'+f[:-3]+'xml')

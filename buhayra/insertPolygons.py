@@ -11,10 +11,9 @@ from buhayra.credentials import *
 
 def insertLoop():
     logger = logging.getLogger('root')
-    logger.debug('Selecting tif %s',selectTiff(polOut))
     while(selectTiff(polOut)):
         f=selectTiff(polOut)
-        logger.debug('Selected feature %s',f)
+        logger.debug('Selecting tif %s',f)
         poly=tif2shapely(f)
         props=getProperties(f)
         logger.debug('Preparing JSON to insert')

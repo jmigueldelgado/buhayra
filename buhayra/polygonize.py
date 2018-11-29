@@ -4,8 +4,7 @@ import logging
 import rasterio
 from rasterio import features
 import shapely
-from shapely.geometry import shape
-from shapely.geometry import mapping
+from shapely.geometry import mapping, Polygon, shape
 from shapely.ops import cascaded_union, transform
 import fiona
 import datetime
@@ -62,12 +61,36 @@ def wgs2utm(geom):
     return(geom_utm)
 
 def getProperties(f):
+    with open(polOut+'/'+f[:-3]+'json', 'r') as fjson:
+        param = json.load(fjson)
+
+#######################################
+#######################################
+
     metalist=f.split('_')
     sentx=metalist[0]
     meta={
         # 'source_id':metalist[0],
         'ingestion_time':datetime.datetime.strptime(metalist[4],'%Y%m%dT%H%M%S'),
-        'id_jrc':int(metalist[9]),}
+        'id_jrc':int(metalist[9]),
+        'threshold':int(param[6]),}
     if sentx.startswith('S1'):
         meta['source_id']=1
     return(meta)
+
+
+def write_pol(pols,meta):
+    schema = {
+        'geometry': 'Polygon',
+        'properties': {'id': 'int','threshold':'int'},
+    }
+
+    with fiona.open(polOut+'/'+f[:-3]+'.gpkg', 'w',
+                    layer='polygons',
+                    driver='GPKG',
+                    schema=schema) as dst:
+        for pol in pols:
+            dst.write({
+                'geometry':mapping(pol),
+                'properties': {'id':meta['id_jrc'],'threshold':meta['threshold']}
+                })

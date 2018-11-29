@@ -11,6 +11,12 @@ if socket.gethostname()=='vouga':
         'scratch' : expanduser("~") + '/scratch/test_dataset',
         'proj' : expanduser("~") + '/proj/buhayra',
         'parameters' : expanduser("~") + '/proj/buhayra/buhayra/parameters'}
+elif socket.gethostname()=='compute':
+    home = {
+        'home' : expanduser("~"),
+        'scratch' : expanduser("~") + '/scratch',
+        'proj' : expanduser("~") + '/proj/buhayra',
+        'parameters' : expanduser("~") + '/proj/buhayra/buhayra/parameters'}
 elif socket.gethostname()=='ubuntuserver':
     home = {
         'home' : expanduser("~"),
