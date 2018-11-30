@@ -29,6 +29,8 @@ def write_poly_loop():
         logger.debug('Selecting tif %s',f)
         poly=tif2shapely(f)
         write_pol(poly,f)
+#        logger.info('deleting ' + f)
+        os.remove(polOut + '/' + f)
 
 def insertNEB(feat):
     logger = logging.getLogger('root')

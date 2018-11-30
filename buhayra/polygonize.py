@@ -50,6 +50,8 @@ def getProperties(f):
         # 'threshold':int(param[6]),}
     if sentx.startswith('S1'):
         meta['source_id']=1
+    else:
+        meta['source_id']=None
     return(meta)
 
 def prepareJSON(poly,f):
@@ -78,19 +80,19 @@ def wgs2utm(geom):
 
 def write_pol(pols,f):
     meta=getProperties(f)
+
     schema = {
-        'geometry': 'Polygon',
-        'properties': {'id': 'int','threshold':'int'},
+        'geometry': str(pols.geom_type),
+        'properties': {'id': 'int'}#,'threshold':'int'},
     }
-    fpath=home['home']+'/'+f[:-3]+'.gpkg'
+    fpath=home['home']+'/'+f[:-3]+'gpkg'
 
     if not os.path.isfile(fpath):
         with fiona.open(fpath, 'w',
-                        layer='polygons',
+                        layer=str(pols.geom_type),
                         driver='GPKG',
                         schema=schema) as dst:
-            for pol in pols:
-                dst.write({
-                    'geometry':mapping(pol),
-                    'properties': {'id':meta['id_jrc']}#,'threshold':meta['threshold']}
-                    })
+            dst.write({
+                'geometry':mapping(pols),
+                'properties': {'id':meta['id_jrc']}#,'threshold':meta['threshold']}
+            })
