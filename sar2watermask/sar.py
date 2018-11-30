@@ -43,7 +43,7 @@ def sar2sigma(scenes):
             # logger.info("skipping orbital correction for " + f+". Please download the relevant orbit files with `python buhayra get ``past scenes`` year month`")
             # product_oc=product
 
-        product_oc_tnr=thermal_noise_removal_gpt(product_oc)
+        product_oc_tnr=thermal_noise_removal(product_oc)
         Cal=calibration(product_oc_tnr)
         CalSf=speckle_filtering(Cal)
         CalSfCorr=geom_correction(CalSf)
