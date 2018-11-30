@@ -27,6 +27,7 @@ def insertLoop():
 
 def write_poly_loop():
     logger = logging.getLogger('root')
+    wm=fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r')
     while(selectTiff(polOut)):
         f=selectTiff(polOut)
         logger.debug('Selecting tif %s',f)

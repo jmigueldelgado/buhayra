@@ -121,7 +121,7 @@ def select_intersecting_polys(feat,wm):
             break
 
     inters=list()
-    if len(geom)>1:
+    if geom.geom_type == 'MultiPolygon':
         for poly in geom:
             if poly.intersects(refgeom):
                 inters.append(poly)
