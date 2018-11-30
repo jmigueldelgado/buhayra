@@ -23,7 +23,7 @@ def tif2shapely(f):
         # ds.close()
 
         polys=list()
-        for pol, value in features.shapes(r, transform=ds.transform:
+        for pol, value in features.shapes(r, transform=ds.transform):
             if value>0:
                 polys.append(shape(pol))
                 # print("Image value:")
@@ -38,16 +38,16 @@ def tif2shapely(f):
     return(poly)
 
 def getProperties(f):
-    with open(polOut+'/'+f[:-3]+'json', 'r') as fjson:
-        param = json.load(fjson)
+    # with open(polOut+'/'+f[:-3]+'json', 'r') as fjson:
+    #     param = json.load(fjson)
 
     metalist=f.split('_')
     sentx=metalist[0]
     meta={
         # 'source_id':metalist[0],
         'ingestion_time':datetime.datetime.strptime(metalist[4],'%Y%m%dT%H%M%S'),
-        'id_jrc':int(metalist[9]),
-        'threshold':int(param[6]),}
+        'id_jrc':int(metalist[9]),}
+        # 'threshold':int(param[6]),}
     if sentx.startswith('S1'):
         meta['source_id']=1
     return(meta)
@@ -92,5 +92,5 @@ def write_pol(pols,f):
             for pol in pols:
                 dst.write({
                     'geometry':mapping(pol),
-                    'properties': {'id':meta['id_jrc'],'threshold':meta['threshold']}
+                    'properties': {'id':meta['id_jrc']}#,'threshold':meta['threshold']}
                     })
