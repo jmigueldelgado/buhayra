@@ -82,10 +82,10 @@ def write_pol(pols,f):
         'geometry': 'Polygon',
         'properties': {'id': 'int','threshold':'int'},
     }
-    fpath=polOut+'/'+f[:-3]+'.gpkg'
+    fpath=home['home']+'/'+f[:-3]+'.gpkg'
 
     if not os.path.isfile(fpath):
-        with fiona.open(polOut+'/'+f[:-3]+'.gpkg', 'w',
+        with fiona.open(home['home']+'/'+f[:-3]+'.gpkg', 'w',
                         layer='polygons',
                         driver='GPKG',
                         schema=schema) as dst:
