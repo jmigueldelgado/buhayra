@@ -37,7 +37,23 @@ def tif2shapely(f):
 
     return(poly)
 
-def prepareJSON(poly,props):
+def getProperties(f):
+    with open(polOut+'/'+f[:-3]+'json', 'r') as fjson:
+        param = json.load(fjson)
+
+    metalist=f.split('_')
+    sentx=metalist[0]
+    meta={
+        # 'source_id':metalist[0],
+        'ingestion_time':datetime.datetime.strptime(metalist[4],'%Y%m%dT%H%M%S'),
+        'id_jrc':int(metalist[9]),
+        'threshold':int(param[6]),}
+    if sentx.startswith('S1'):
+        meta['source_id']=1
+    return(meta)
+
+def prepareJSON(poly,f):
+    props=getProperties(f)
     s=json.dumps(mapping(poly))
     geom=json.loads(s)
 
@@ -60,37 +76,21 @@ def wgs2utm(geom):
     geom_utm=transform(project,geom)
     return(geom_utm)
 
-def getProperties(f):
-    with open(polOut+'/'+f[:-3]+'json', 'r') as fjson:
-        param = json.load(fjson)
-
-#######################################
-#######################################
-
-    metalist=f.split('_')
-    sentx=metalist[0]
-    meta={
-        # 'source_id':metalist[0],
-        'ingestion_time':datetime.datetime.strptime(metalist[4],'%Y%m%dT%H%M%S'),
-        'id_jrc':int(metalist[9]),
-        'threshold':int(param[6]),}
-    if sentx.startswith('S1'):
-        meta['source_id']=1
-    return(meta)
-
-
-def write_pol(pols,meta):
+def write_pol(pols,f):
+    meta=getProperties(f)
     schema = {
         'geometry': 'Polygon',
         'properties': {'id': 'int','threshold':'int'},
     }
+    fpath=polOut+'/'+f[:-3]+'.gpkg'
 
-    with fiona.open(polOut+'/'+f[:-3]+'.gpkg', 'w',
-                    layer='polygons',
-                    driver='GPKG',
-                    schema=schema) as dst:
-        for pol in pols:
-            dst.write({
-                'geometry':mapping(pol),
-                'properties': {'id':meta['id_jrc'],'threshold':meta['threshold']}
-                })
+    if not os.path.isfile(fpath):
+        with fiona.open(polOut+'/'+f[:-3]+'.gpkg', 'w',
+                        layer='polygons',
+                        driver='GPKG',
+                        schema=schema) as dst:
+            for pol in pols:
+                dst.write({
+                    'geometry':mapping(pol),
+                    'properties': {'id':meta['id_jrc'],'threshold':meta['threshold']}
+                    })

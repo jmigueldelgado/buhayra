@@ -79,6 +79,12 @@ def main():
         import buhayra.insertPolygons as ipol
         ipol.insertLoop()
 
+    elif sys.argv[1]=="write polygons":
+
+        logger.info("writing polygons as gpkg")
+        import buhayra.insertPolygons as ipol
+        ipol.write_poly_loop()
+
     elif sys.argv[1]=="recent polys":
 
         logger.info("obtain most recent polygons from mongodb")

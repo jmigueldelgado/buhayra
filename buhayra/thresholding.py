@@ -59,8 +59,6 @@ def threshold_loop(scenes):
         os.remove(sarOut+'/'+f)
         os.remove(sarOut+'/'+f[:-3]+'xml')
 
-
-
 def apply_thresh(r_db):
     # subset into 200x200 m approx.
     splt=subset_200x200(r_db)
@@ -91,7 +89,6 @@ def apply_thresh(r_db):
 
     return(openwater,thrmedian)
 
-
 def subset_200x200(nparray):
 
     splt=list()
@@ -102,7 +99,6 @@ def subset_200x200(nparray):
         splt1=np.array_split(chunk,m,1)
         splt.append(splt1)
     return(splt)
-
 
 def threshold(nparray,thr):
     n = nparray==np.iinfo(nparray.dtype).min
@@ -133,8 +129,6 @@ def get_thr(nparray):
     if(np.amax(nparray)< user_thresh): # all cells in raster are open water
         thr=np.nan
     return(thr)
-
-
 
 def kittler(nparray):
     """
@@ -198,7 +192,6 @@ def kittler(nparray):
 
         return threshold
 
-
 def select_tiffs_year_month(Y,M):
     logger = logging.getLogger('root')
 
@@ -243,9 +236,6 @@ def select_n_last_tiffs(n):
             return([tiffs[i] for i in index[-n:]])
     return(tiffs)
 
-
-
-
 def getBoundingBoxScene(ds):
     # ds=rasterio.open('/home/delgado/Documents/tmp/testproduct_watermask.tif')
     rect=Polygon([(ds.bounds.left,ds.bounds.bottom),(ds.bounds.left,ds.bounds.top),(ds.bounds.right,ds.bounds.top),(ds.bounds.right,ds.bounds.bottom)])
@@ -257,9 +247,6 @@ def getBoundingBoxScene(ds):
 
     rect_utm=transform(project,rect)
     return(rect_utm)
-
-
-
 
 def subset_by_lake(ds,pol):
     if pol.area<1000:
@@ -279,7 +266,6 @@ def subset_by_lake(ds,pol):
     out_image, out_transform = rasterio.mask.mask(ds,[bb_ll],crop=True)
 
     return(out_image,out_transform)
-
 
 def getWMinScene(rect):
     wm=fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r')
@@ -317,9 +303,6 @@ def geojson2shapely(jsgeom):
     from shapely.geometry import shape,polygon
     polygon=shape(jsgeom)
     return(polygon)
-
-
-
 
 def checknclean(pol):
     if not pol.is_valid:

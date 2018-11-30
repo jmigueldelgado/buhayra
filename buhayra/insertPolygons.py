@@ -15,13 +15,20 @@ def insertLoop():
         f=selectTiff(polOut)
         logger.debug('Selecting tif %s',f)
         poly=tif2shapely(f)
-        props=getProperties(f)
         logger.debug('Preparing JSON to insert')
-        feat=prepareJSON(poly,props)
+        feat=prepareJSON(poly,f)
         feat_id=insertNEB(feat)
         logger.debug('Inserted feature ID: %s',feat_id)
         logger.info('deleting ' + f)
         os.remove(polOut + '/' + f)
+
+def write_poly_loop():
+    logger = logging.getLogger('root')
+    while(selectTiff(polOut)):
+        f=selectTiff(polOut)
+        logger.debug('Selecting tif %s',f)
+        poly=tif2shapely(f)
+        write_pol(poly,f)
 
 def insertNEB(feat):
     logger = logging.getLogger('root')
@@ -46,8 +53,6 @@ def insertNEB(feat):
 
     # result = neb.insert_one(feat)
     return(result.upserted_id)
-
-
 
 def testMongoConnect():
     logger = logging.getLogger('root')
