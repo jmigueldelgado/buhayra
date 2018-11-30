@@ -7,8 +7,6 @@ from buhayra.polygonize import *
 from buhayra.getpaths import *
 from buhayra.credentials import *
 
-
-
 def insertLoop():
     logger = logging.getLogger('root')
     while(selectTiff(polOut)):
@@ -28,9 +26,13 @@ def write_poly_loop():
         f=selectTiff(polOut)
         logger.debug('Selecting tif %s',f)
         poly=tif2shapely(f)
-        write_pol(poly,f)
-#        logger.info('deleting ' + f)
+        feat=prepareJSON(poly,f)
+        feat['properties']['ingestion_time']=None
+        with open(home['home']+'/'+f[:-3]+'geojson', 'w') as fjson:
+            json.dump(feat, fjson)
         os.remove(polOut + '/' + f)
+
+
 
 def insertNEB(feat):
     logger = logging.getLogger('root')

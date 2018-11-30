@@ -11,7 +11,7 @@ import datetime
 import json
 from functools import partial
 import pyproj
-
+from numpy import amax
 
 def tif2shapely(f):
     with rasterio.open(polOut+'/'+f,'r') as ds:
@@ -21,19 +21,21 @@ def tif2shapely(f):
         # affParam=rasterio.Affine.from_gdal(gdalParam[0],gdalParam[1],gdalParam[2],gdalParam[3],gdalParam[4],gdalParam[5])
         r=ds.read(1)
         # ds.close()
-
-        polys=list()
-        for pol, value in features.shapes(r, transform=ds.transform):
-            if value>0:
-                polys.append(shape(pol))
-                # print("Image value:")
-                # print(value)
-            # print("Geometry:")
-            # pprint.pprint(shape)
-        if len(polys)>1:
-            poly = cascaded_union(polys)
+        if amax(r)==0:
+            poly = Polygon()
         else:
-            poly=polys[0]
+            polys=list()
+            for pol, value in features.shapes(r, transform=ds.transform):
+                if value>0:
+                    polys.append(shape(pol))
+                    # print("Image value:")
+                    # print(value)
+                # print("Geometry:")
+                # pprint.pprint(shape)
+            if len(polys)>1:
+                poly = cascaded_union(polys)
+            else:
+                poly=polys[0]
 
     return(poly)
 
