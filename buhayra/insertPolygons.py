@@ -9,16 +9,21 @@ from buhayra.credentials import *
 
 def insertLoop():
     logger = logging.getLogger('root')
+    wm=fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r')
     while(selectTiff(polOut)):
         f=selectTiff(polOut)
         logger.debug('Selecting tif %s',f)
         poly=tif2shapely(f)
         logger.debug('Preparing JSON to insert')
         feat=prepareJSON(poly,f)
+
+        feat=select_intersecting_polys(feat,wm)
+
         feat_id=insertNEB(feat)
         logger.debug('Inserted feature ID: %s',feat_id)
         logger.info('deleting ' + f)
         os.remove(polOut + '/' + f)
+    wm.close()
 
 def write_poly_loop():
     logger = logging.getLogger('root')
@@ -27,6 +32,7 @@ def write_poly_loop():
         logger.debug('Selecting tif %s',f)
         poly=tif2shapely(f)
         feat=prepareJSON(poly,f)
+        feat=select_intersecting_polys(feat,wm)
         feat['properties']['ingestion_time']=None
         with open(home['home']+'/'+f[:-3]+'geojson', 'w') as fjson:
             json.dump(feat, fjson)

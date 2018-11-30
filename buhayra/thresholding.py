@@ -9,7 +9,7 @@ import logging
 import os
 import json
 from shutil import copyfile
-from shapely.geometry import Polygon
+from shapely.geometry import Polygon, shape
 import pyproj
 from functools import partial
 from shapely.ops import transform
@@ -295,12 +295,10 @@ def sigma_naught(r):
     return(r_db)
 
 def geojson2wkt(jsgeom):
-    from shapely.geometry import shape,polygon
     polygon=shape(jsgeom)
     return(polygon.wkt)
 
 def geojson2shapely(jsgeom):
-    from shapely.geometry import shape,polygon
     polygon=shape(jsgeom)
     return(polygon)
 

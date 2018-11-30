@@ -12,6 +12,8 @@ import json
 from functools import partial
 import pyproj
 from numpy import amax
+from buhayra.thresholding import *
+
 
 def tif2shapely(f):
     with rasterio.open(polOut+'/'+f,'r') as ds:
@@ -70,6 +72,7 @@ def prepareJSON(poly,f):
         }
 
     feat['properties']['area']=poly_utm.area
+
     return(feat)
 
 def wgs2utm(geom):
@@ -98,3 +101,38 @@ def write_pol(pols,f):
                 'geometry':mapping(pols),
                 'properties': {'id':meta['id_jrc']}#,'threshold':meta['threshold']}
             })
+
+
+def select_intersecting_polys(feat,wm):
+
+    geom=geojson2shapely(feat['geometry'])
+    geom=checknclean(geom)
+
+    project = partial(
+        pyproj.transform,
+        pyproj.Proj(init='epsg:32724'),
+        pyproj.Proj(init='epsg:4326'))
+
+    for wm_feat in wm:
+        if int(wm_feat['id'])==feat['properties']['id_jrc']:
+            refgeom=geojson2shapely(wm_feat['geometry'])
+            refgeom=checknclean(refgeom)
+            refgeom=transform(project,refgeom)
+            break
+
+    inters=list()
+    if len(geom)>1:
+        for poly in geom:
+            if poly.intersects(refgeom):
+                inters.append(poly)
+        if len(inters)>1:
+            inters = cascaded_union(inters)
+        else:
+            inters=inters[0]
+        s=json.dumps(mapping(inters))
+    else:
+        if geom.intersects(refgeom):
+            s=json.dumps(mapping(geom))
+
+    feat['geometry']=json.loads(s)
+    return(feat)
