@@ -41,7 +41,7 @@ def getProperties(f):
     # with open(polOut+'/'+f[:-3]+'json', 'r') as fjson:
     #     param = json.load(fjson)
 
-    metalist=f.split('_')
+    metalist=f[:-4].split('_')
     sentx=metalist[0]
     meta={
         # 'source_id':metalist[0],
@@ -82,10 +82,10 @@ def write_pol(pols,f):
         'geometry': 'Polygon',
         'properties': {'id': 'int','threshold':'int'},
     }
-    fpath=polOut+'/'+f[:-3]+'.gpkg'
+    fpath=home['home']+'/'+f[:-3]+'.gpkg'
 
     if not os.path.isfile(fpath):
-        with fiona.open(polOut+'/'+f[:-3]+'.gpkg', 'w',
+        with fiona.open(fpath, 'w',
                         layer='polygons',
                         driver='GPKG',
                         schema=schema) as dst:
