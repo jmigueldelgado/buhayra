@@ -53,7 +53,7 @@ def get_scenes():
     # tf=datetime(2018,1,10)
     t0 = tf - timedelta(days=7)
 
-    get_s1_orbits(t0,tf)
+    # get_s1_orbits(t0,tf)
 
 
     # search by polygon, time, and SciHub query keywords
@@ -84,7 +84,7 @@ def get_past_scenes(Y,M):
     t0 = datetime(Y,M,1,0,0,0)
     tf = t0 + timedelta(days=30)
 
-    get_s1_orbits(t0,tf)
+    # get_s1_orbits(t0,tf)
 
 
     # search by polygon, time, and SciHub query keywords

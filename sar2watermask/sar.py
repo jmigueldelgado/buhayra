@@ -37,11 +37,11 @@ def sar2sigma(scenes):
         # wm_in_scene,id_in_scene = getWMinScene(rect_utm)
 
 
-        if orbit_exists(product):
-            product_oc=orbit_correction(product)
-        else:
-            logger.info("skipping orbital correction for " + f+". Please download the relevant orbit files with `python buhayra get ``past scenes`` year month`")
-            product_oc=product
+        # if orbit_exists(product):
+        product_oc=orbit_correction(product)
+        # else:
+            # logger.info("skipping orbital correction for " + f+". Please download the relevant orbit files with `python buhayra get ``past scenes`` year month`")
+            # product_oc=product
 
         product_oc_tnr=thermal_noise_removal_gpt(product_oc)
         Cal=calibration(product_oc_tnr)

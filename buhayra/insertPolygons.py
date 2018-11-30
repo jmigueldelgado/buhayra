@@ -16,9 +16,7 @@ def insertLoop():
         poly=tif2shapely(f)
         logger.debug('Preparing JSON to insert')
         feat=prepareJSON(poly,f)
-
         feat=select_intersecting_polys(feat,wm)
-
         feat_id=insertNEB(feat)
         logger.debug('Inserted feature ID: %s',feat_id)
         logger.info('deleting ' + f)
@@ -38,7 +36,6 @@ def write_poly_loop():
         with open(home['home']+'/'+f[:-3]+'geojson', 'w') as fjson:
             json.dump(feat, fjson)
         os.remove(polOut + '/' + f)
-
 
 
 def insertNEB(feat):
