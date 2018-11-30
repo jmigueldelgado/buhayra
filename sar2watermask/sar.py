@@ -33,17 +33,10 @@ def sar2sigma(scenes):
         logger.info("processing " + f)
         product = ProductIO.readProduct(sarIn+"/"+f)
         productName=product.getName()
-        # rect_utm=getBoundingBoxScene(product)
-        # wm_in_scene,id_in_scene = getWMinScene(rect_utm)
 
-
-        # if orbit_exists(product):
         product=orbit_correction(product)
-        # else:
-            # logger.info("skipping orbital correction for " + f+". Please download the relevant orbit files with `python buhayra get ``past scenes`` year month`")
-            # product_oc=product
         product=remove_border_noise(product)
-        product=thermal_noise_removal_gpt(product)
+        product=thermal_noise_removal(product)
         product=calibration(product)
         product=speckle_filtering(product)
         product=geom_correction(product)
@@ -51,11 +44,6 @@ def sar2sigma(scenes):
         ProductIO.writeProduct(product,sarOut+"/"+productName,outForm)
 
         product.dispose()
-        # product_oc.dispose()
-        # product_oc_tnr.dispose()
-        # Cal.dispose()
-        # CalSf.dispose()
-        # CalSfCorr.dispose()
         ### remove scene from folder
         logger.info("REMOVING " + f)
 
@@ -68,28 +56,6 @@ def sar2sigma(scenes):
 
         logger.info("**** sar2sigma completed!" + f  + " processed**********")
     System.gc()
-
-
-        #
-        # # GPF.getDefaultInstance().getOperatorSpiRegistry().loadOperatorSpis()
-        # logger.info("starting loop on reservoirs")
-        #  # i=0
-        # for i in range(0,len(id_in_scene)):
-        #
-        #     fname=productName + "_" + str(id_in_scene[i]) + "_CalSfCorr"
-        #     if (fname+".tif") in listdir(sarOut):
-        #         logger.debug("product "+fname+".tif already exists: skipping")
-        #         continue
-        #
-        #     logger.debug("subsetting product "+ str(id_in_scene[i]))
-        #     product_subset=subsetProduct(CalSfCorr,wm_in_scene[i])
-        #
-        #     logger.debug("writing product "+ str(id_in_scene[i]))
-        #     ProductIO.writeProduct(product_subset,sarOut+"/"+fname+'_big',outForm)
-        #     product_subset.dispose()
-        #     logger.info("Compressing and saving " + sarOut+"/"+fname+'_big'+'.tif')
-        #     compress_tiff(sarOut+"/"+fname+'_big'+'.tif')
-        #     path=sarOut+"/"+fname+'_big'+'.tif'
 
 
 

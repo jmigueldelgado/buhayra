@@ -1,4 +1,4 @@
 #!/bin/bash
 
 source activate buhayra
-python /users/stud09/martinsd/proj/buhayra "get scenes"
+python /users/stud09/martinsd/proj/buhayra "get scenes" $1 $2
