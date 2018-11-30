@@ -1,0 +1,5 @@
+<parameters>
+    <selectedPolarisations/>
+    <borderLimit>500</borderLimit>
+    <trimThreshold>0.5</trimThreshold>
+</parameters>

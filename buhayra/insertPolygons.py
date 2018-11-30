@@ -18,7 +18,7 @@ def insertLoop():
         feat=prepareJSON(poly,f)
         feat=select_intersecting_polys(feat,wm)
         feat_id=insertNEB(feat)
-        logger.debug('Inserted feature ID: %s',feat_id)
+        logger.info('Inserted feature ID: %s',feat_id)
         logger.info('deleting ' + f)
         os.remove(polOut + '/' + f)
     wm.close()

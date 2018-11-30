@@ -38,24 +38,24 @@ def sar2sigma(scenes):
 
 
         # if orbit_exists(product):
-        product_oc=orbit_correction(product)
+        product=orbit_correction(product)
         # else:
             # logger.info("skipping orbital correction for " + f+". Please download the relevant orbit files with `python buhayra get ``past scenes`` year month`")
             # product_oc=product
+        product=remove_border_noise(product)
+        product=thermal_noise_removal_gpt(product)
+        product=calibration(product)
+        product=speckle_filtering(product)
+        product=geom_correction(product)
 
-        product_oc_tnr=thermal_noise_removal_gpt(product_oc)
-        Cal=calibration(product_oc_tnr)
-        CalSf=speckle_filtering(Cal)
-        CalSfCorr=geom_correction(CalSf)
-
-        ProductIO.writeProduct(CalSfCorr,sarOut+"/"+productName,outForm)
+        ProductIO.writeProduct(product,sarOut+"/"+productName,outForm)
 
         product.dispose()
-        product_oc.dispose()
-        product_oc_tnr.dispose()
-        Cal.dispose()
-        CalSf.dispose()
-        CalSfCorr.dispose()
+        # product_oc.dispose()
+        # product_oc_tnr.dispose()
+        # Cal.dispose()
+        # CalSf.dispose()
+        # CalSfCorr.dispose()
         ### remove scene from folder
         logger.info("REMOVING " + f)
 
@@ -219,11 +219,25 @@ def orbit_correction(product):
     logger.info("finished orbit correction")
     return(result)
 
+def thermal_noise_removal(product):
+    logger = logging.getLogger('root')
+
+    params = HashMap()
+    root = xml.etree.ElementTree.parse(home['parameters']+'/thermal_noise.xml').getroot()
+    for child in root:
+        params.put(child.tag,child.text)
+
+    result = GPF.createProduct('ThermalNoiseRemoval',params,product)
+    logger.info("finished ThermalNoiseRemoval")
+    return(result)
+
 ### currently being performed with gpt
 def thermal_noise_removal_gpt(product):
     logger = logging.getLogger('root')
     fname=product.getName()
+    logger.info("writing product for thermal noise removal")
     ProductIO.writeProduct(product,sarIn+"/"+fname+'.dim',"BEAM-DIMAP")
+    logger.info("finished writing. proceeding with gpt ThermalNoiseRemoval")
     product.dispose()
 
     subprocess.call(['/users/stud09/martinsd/local/snap/bin/gpt',
@@ -238,19 +252,17 @@ def thermal_noise_removal_gpt(product):
     logger.info("finished thermal noise removal")
     return(result)
 
-
-
-
-def thermal_noise_removal(product):
+def remove_border_noise(product):
+    logger = logging.getLogger('root')
 
     params = HashMap()
-    root = xml.etree.ElementTree.parse(home['parameters']+'/thermal_noise.xml').getroot()
+    root = xml.etree.ElementTree.parse(home['parameters']+'/border-noise.xml').getroot()
     for child in root:
         params.put(child.tag,child.text)
 
-    result = GPF.createProduct('ThermalNoiseRemoval',params,product)
+    result = GPF.createProduct('Remove-GRD-Border-Noise',params,product)
+    logger.info("finished Remove-GRD-Border-Noise")
     return(result)
-
 
 
 
