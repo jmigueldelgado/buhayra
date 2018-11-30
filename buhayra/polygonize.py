@@ -14,26 +14,26 @@ import pyproj
 
 
 def tif2shapely(f):
-    ds=rasterio.open(polOut+'/'+f,'r')
-    # ds.profile.update(dtype=rasterio.int32)
-    with open(polOut+'/'+f[:-3]+'json', 'r') as fjson:
-        gdalParam = json.load(fjson)
-    affParam=rasterio.Affine.from_gdal(gdalParam[0],gdalParam[1],gdalParam[2],gdalParam[3],gdalParam[4],gdalParam[5])
-    r=ds.read(1)
-    ds.close()
+    with rasterio.open(polOut+'/'+f,'r') as ds:
+        # ds.profile.update(dtype=rasterio.int32)
+        # with open(polOut+'/'+f[:-3]+'json', 'r') as fjson:
+        #     gdalParam = json.load(fjson)
+        # affParam=rasterio.Affine.from_gdal(gdalParam[0],gdalParam[1],gdalParam[2],gdalParam[3],gdalParam[4],gdalParam[5])
+        r=ds.read(1)
+        # ds.close()
 
-    polys=list()
-    for pol, value in features.shapes(r, transform=affParam):
-        if value>0:
-            polys.append(shape(pol))
-            # print("Image value:")
-            # print(value)
-        # print("Geometry:")
-        # pprint.pprint(shape)
-    if len(polys)>1:
-        poly = cascaded_union(polys)
-    else:
-        poly=polys[0]
+        polys=list()
+        for pol, value in features.shapes(r, transform=ds.transform:
+            if value>0:
+                polys.append(shape(pol))
+                # print("Image value:")
+                # print(value)
+            # print("Geometry:")
+            # pprint.pprint(shape)
+        if len(polys)>1:
+            poly = cascaded_union(polys)
+        else:
+            poly=polys[0]
 
     return(poly)
 
