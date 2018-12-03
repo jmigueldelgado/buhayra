@@ -13,47 +13,52 @@ from shapely.geometry import Polygon, shape
 import pyproj
 from functools import partial
 from shapely.ops import transform
+from dask import compute, delayed
+import dask.multiprocessing
 
-user_thresh=-1300
 
 def threshold_loop(tiffs):
-    for f in tiffs:
-        logger = logging.getLogger('root')
-        with rasterio.open(sarOut+'/'+f,'r') as ds:
-            if (f) in listdir(polOut):
-                logger.info("product "+f+" already exists: skipping")
-                continue
+    logger = logging.getLogger('root')
+    values = [delayed(process)(f) for f in tiffs]
+    results = compute(*values, scheduler='processes')
+    logger.info('finished threshold loop. processed '+str(len(tiffs)) + ' tifs')
 
-            gdalParam=ds.transform.to_gdal()
+def process(f):
+    with rasterio.open(sarOut+'/'+f,'r') as ds:
+        if (f) in listdir(polOut):
+            logger.info("product "+f+" already exists: skipping")
+            continue
 
-            r=ds.read(1)
-            out_db=scale_integer(r)
+        gdalParam=ds.transform.to_gdal()
 
-            logger.debug("saving compressed version of lake subset")
-            with rasterio.open(procOut+'/'+f,'w',driver=ds.driver,height=out_db.shape[0],width=out_db.shape[1],count=1,dtype=out_db.dtype) as dsout:
-                dsout.write(out_db,1)
+        r=ds.read(1)
+        out_db=scale_integer(r)
 
-            openwater,thr=apply_thresh(out_db)
-            gdalParam=list(gdalParam)
-            gdalParam.append(thr)
-            logger.debug("saving metadata of lake subset, including determined threshold")
-            with open(procOut+'/'+fname[:-3]+'json', 'w') as fjson:
+        logger.debug("saving compressed version of lake subset")
+        with rasterio.open(procOut+'/'+f,'w',driver=ds.driver,height=out_db.shape[0],width=out_db.shape[1],count=1,dtype=out_db.dtype) as dsout:
+            dsout.write(out_db,1)
+
+        openwater,thr=apply_thresh(out_db)
+        gdalParam=list(gdalParam)
+        gdalParam.append(thr)
+        logger.debug("saving metadata of lake subset, including determined threshold")
+        with open(procOut+'/'+fname[:-3]+'json', 'w') as fjson:
+            json.dump(gdalParam, fjson)
+
+
+        if not np.isnan(thr):
+            logger.debug("writing out to sarOut "+fname)
+
+            with rasterio.open(polOut+'/'+fname,'w',driver=ds.driver,height=openwater.shape[0],width=openwater.shape[1],count=1,dtype=rasterio.ubyte,transform=ds.transform) as dsout:
+                dsout.write(openwater.astype(rasterio.ubyte),1)
+            with open(polOut+'/'+fname[:-3]+'json', 'w') as fjson:
                 json.dump(gdalParam, fjson)
 
+        logger.debug('removing '+f)
+        os.remove(sarOut+'/'+f)
+        os.remove(sarOut+'/'+f[:-3]+'xml')
+        return f
 
-            if not np.isnan(thr):
-                logger.debug("writing out to sarOut "+fname)
-
-                with rasterio.open(polOut+'/'+fname,'w',driver=ds.driver,height=openwater.shape[0],width=openwater.shape[1],count=1,dtype=rasterio.ubyte,transform=ds.transform) as dsout:
-                    dsout.write(openwater.astype(rasterio.ubyte),1)
-                with open(polOut+'/'+fname[:-3]+'json', 'w') as fjson:
-                    json.dump(gdalParam, fjson)
-
-            logger.debug('removing '+f)
-            os.remove(sarOut+'/'+f)
-            os.remove(sarOut+'/'+f[:-3]+'xml')
-
-        logger.info('finished threshold loop. processed '+str(len(tiffs)) + ' tifs')
 
 def apply_thresh(r_db):
     # subset into 200x200 m approx.
@@ -102,9 +107,9 @@ def threshold(nparray,thr):
 
     if np.isnan(thr):
         band[:]=ma.masked
-    elif(np.amax(nparray)< user_thresh): # all cells in raster are open water
+    elif(np.amax(nparray)< -1300): # all cells in raster are open water
         band.data.fill(1)
-    elif(thr < user_thresh):          # there is a threshold and it is a valid threshold
+    elif(thr < -1300):          # there is a threshold and it is a valid threshold
         band[band>thr]=ma.masked
         band.data.fill(1)
     else: # the threshold is too large to be a valid threshold
@@ -120,9 +125,9 @@ def get_thr(nparray):
     except:
         logger.info( "Error: %s" % e )
         thr=np.nan # there was an error computing the threshold, check the error message
-    if(thr > user_thresh): # threshold is too large to be a valid water-land threshold
+    if(thr > -1300): # threshold is too large to be a valid water-land threshold
         thr=np.nan
-    if(np.amax(nparray)< user_thresh): # all cells in raster are open water
+    if(np.amax(nparray)< -1300): # all cells in raster are open water
         thr=np.nan
     return(thr)
 
