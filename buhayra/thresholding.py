@@ -30,7 +30,7 @@ def threshold_loop(scenes):
 
                 fname=f[:-4] + "_" + str(id_in_scene[i])+".tif"
                 if (fname) in listdir(polOut):
-                    logger.info("product "+fname+" already exists: skipping")
+                    logger.debug("product "+fname+" already exists: skipping")
                     continue
 
                 out_image,out_transform=subset_by_lake(ds,wm_in_scene[i])
@@ -57,7 +57,7 @@ def threshold_loop(scenes):
             logger.info('finished threshold loop. processed '+str(len(wm_in_scene)) + ' tifs')
         logger.info('removing '+f)
         os.remove(sarOut+'/'+f)
-        os.remove(sarOut+'/'+f[:-3]+'xml')
+#        os.remove(sarOut+'/'+f[:-3]+'xml')
 
 def apply_thresh(r_db):
     # subset into 200x200 m approx.
@@ -119,10 +119,12 @@ def threshold(nparray,thr):
     return(band.data)
 
 def get_thr(nparray):
+    logger = logging.getLogger('root')
     try:
         thr=kittler(nparray)
     except:
-        logger.info( "Error: %s" % e )
+        e = sys.exc_info()[0]
+        logger.info( "Error in kittler: %s" % e )
         thr=np.nan # there was an error computing the threshold, check the error message
     if(thr > user_thresh): # threshold is too large to be a valid water-land threshold
         thr=np.nan
@@ -154,7 +156,7 @@ def kittler(nparray):
 
     # count entries in array
     if band.count() < 50:
-        logger.info("The size of the population is smaller than 50! Returning None")
+        logger.debug("The size of the population is smaller than 50! Returning None")
         return np.nan
     else:
         # calculate minimum and maximum as histogram breaks
