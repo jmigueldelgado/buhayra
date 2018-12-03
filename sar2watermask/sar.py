@@ -18,6 +18,15 @@ import json
 import datetime
 import subprocess
 import re
+import rasterio
+import rasterio.mask
+import fiona
+from shutil import copyfile
+from shapely.geometry import Polygon, shape
+import pyproj
+from functools import partial
+from shapely.ops import transform
+
 
 System = jpy.get_type('java.lang.System')
 BandDescriptor = jpy.get_type('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor')
@@ -26,13 +35,16 @@ BandDescriptor = jpy.get_type('org.esa.snap.core.gpf.common.BandMathsOp$BandDesc
 def sar2sigma(scenes):
     logger = logging.getLogger('root')
 
-    outForm='GeoTIFF-BigTIFF'
-
+    outForm='GeoTIFF+XML'
+    wm=fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r')
 
     for f in scenes:
         logger.info("processing " + f)
         product = ProductIO.readProduct(sarIn+"/"+f)
         productName=product.getName()
+
+        rect_utm=getBoundingBoxScene(product)
+        wm_in_scene,id_in_scene = getWMinScene(rect_utm,wm)
 
         product=orbit_correction(product)
         product=remove_border_noise(product)
@@ -40,19 +52,33 @@ def sar2sigma(scenes):
         product=calibration(product)
         product=speckle_filtering(product)
         product=geom_correction(product)
+        product=sigma_naught(product)
 
-        ProductIO.writeProduct(product,sarOut+"/"+productName,outForm)
+        logger.info("starting loop on reservoirs")
+        for i in range(0,len(id_in_scene)):
+            fname=productName + "_" + str(id_in_scene[i])
+            if (fname+".tif") in listdir(sarOut):
+                logger.debug("product "+fname+".tif already exists: skipping")
+                continue
+
+            logger.debug("subsetting product "+ str(id_in_scene[i]))
+            product_subset=subsetProduct(product,wm_in_scene[i])
+
+            logger.debug("writing product "+ str(id_in_scene[i]))
+            ProductIO.writeProduct(product_subset,sarOut+"/locked",outForm)
+            product_subset.dispose()
+
+            if os.path.isfile(sarOut+'/locked.tif'):
+                os.rename(sarOut+'/locked.tif',sarOut+'/'+fname+.'tif')
+            if os.path.isfile(sarOut+'/locked.xml'):
+                os.rename(sarOut+'/locked.xml',sarOut+'/'+fname+.'xml')
+        # ProductIO.writeProduct(product,sarOut+"/"+productName,outForm)
 
         product.dispose()
         ### remove scene from folder
         logger.info("REMOVING " + f)
-
         if os.path.isfile(sarIn+"/"+f):
             os.remove(sarIn+"/"+f)
-        if os.path.isfile(sarIn+"/"+productName+'.dim'):
-            os.remove(sarIn+"/"+productName+'.dim')
-        if os.path.isdir(sarIn+"/"+productName+'.data'):
-            shutil.rmtree(sarIn+"/"+productName+'.data')
 
         logger.info("**** sar2sigma completed!" + f  + " processed**********")
     System.gc()
@@ -117,9 +143,9 @@ def select_scenes_year_month(Y,M):
 
 def subsetProduct(product,pol):
     if pol.area<1000:
-        buff=pol.buffer(10*(pol.area)**0.5)
+        buff=pol.buffer(5*(pol.area)**0.5)
     else:
-        buff=pol.buffer((pol.area)**0.5)
+        buff=pol.buffer(2*(pol.area)**0.5)
 
     bb=getBoundingBoxWM(buff)
     project = partial(
@@ -279,3 +305,61 @@ def geom_correction(product):
         # bandraster = currentband.readPixels(0, 0, w, h, array)
 
         # np.amax(bandraster)
+def getWMinScene(rect,wm):
+    wm_in_scene=list()
+    id=list()
+    for feat in wm:
+        pol=geojson2shapely(feat['geometry'])
+        pol=checknclean(pol)
+        if rect.contains(pol):
+            wm_in_scene.append(pol)
+            id.append(feat['properties']['id'])
+    wm.close()
+    return(wm_in_scene,id)
+
+def getBoundingBoxScene(product):
+    gc=product.getSceneGeoCoding()
+    rsize=product.getSceneRasterSize()
+    h=rsize.getHeight()
+    w=rsize.getWidth()
+
+    p1=gc.getGeoPos(PixelPos(0,0),None)
+    p2=gc.getGeoPos(PixelPos(0,h),None)
+    p3=gc.getGeoPos(PixelPos(w,h),None)
+    p4=gc.getGeoPos(PixelPos(w,0),None)
+
+    rect=Polygon([(p1.getLon(),p1.getLat()),(p2.getLon(),p2.getLat()),(p3.getLon(),p3.getLat()),(p4.getLon(),p4.getLat())])
+    project = partial(
+        pyproj.transform,
+        pyproj.Proj(init='epsg:4326'),
+        pyproj.Proj(init='epsg:32724'))
+    rect_utm=transform(project,rect)
+return(rect_utm)
+
+def sigma_naught(product):
+    targetBands = jpy.array('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor',1)
+    targetBand1 = BandDescriptor()
+    targetBand1.name = 'sigma_int'
+    targetBand1.type = 'Int32'
+    targetBand1.setNoDataValue(-999999999)
+    targetBand1.setNoDataValueUsed(true)
+    targetBand1.expression = 'round(log10(Sigma0_VV)*1000)'
+
+    targetBands[0] = targetBand1
+
+    parameters = HashMap()
+    parameters.put('targetBands', targetBands)
+
+    result = GPF.createProduct('BandMaths', parameters, product)
+    return(result)
+
+
+def geojson2wkt(jsgeom):
+    from shapely.geometry import shape,polygon
+    polygon=shape(jsgeom)
+    return(polygon.wkt)
+
+def geojson2shapely(jsgeom):
+    from shapely.geometry import shape,polygon
+    polygon=shape(jsgeom)
+    return(polygon)

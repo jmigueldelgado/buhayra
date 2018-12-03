@@ -16,48 +16,44 @@ from shapely.ops import transform
 
 user_thresh=-1300
 
-def threshold_loop(scenes):
-    for f in scenes:
+def threshold_loop(tiffs):
+    for f in tiffs:
         logger = logging.getLogger('root')
         with rasterio.open(sarOut+'/'+f,'r') as ds:
-            # ds=rasterio.open('/home/delgado/Documents/tmp/testproduct_watermask.tif')
-            # r=ds.read(1)
+            if (f) in listdir(polOut):
+                logger.info("product "+f+" already exists: skipping")
+                continue
 
-            rect_utm=getBoundingBoxScene(ds)
-            wm_in_scene,id_in_scene = getWMinScene(rect_utm)
+            gdalParam=ds.transform.to_gdal()
 
-            for i in range(0,len(id_in_scene)):
+            r=ds.read(1)
+            out_db=scale_integer(r)
 
-                fname=f[:-4] + "_" + str(id_in_scene[i])+".tif"
-                if (fname) in listdir(polOut):
-                    logger.info("product "+fname+" already exists: skipping")
-                    continue
+            logger.debug("saving compressed version of lake subset")
+            with rasterio.open(procOut+'/'+f,'w',driver=ds.driver,height=out_db.shape[0],width=out_db.shape[1],count=1,dtype=out_db.dtype) as dsout:
+                dsout.write(out_db,1)
 
-                out_image,out_transform=subset_by_lake(ds,wm_in_scene[i])
-                gdalParam=out_transform.to_gdal()
-                out_db=sigma_naught(out_image[0])
-                with rasterio.open(procOut+'/'+fname,'w',driver=ds.driver,height=out_db.shape[0],width=out_db.shape[1],count=1,dtype=out_db.dtype) as dsout:
-                    dsout.write(out_db,1)
+            openwater,thr=apply_thresh(out_db)
+            gdalParam=list(gdalParam)
+            gdalParam.append(thr)
+            logger.debug("saving metadata of lake subset, including determined threshold")
+            with open(procOut+'/'+fname[:-3]+'json', 'w') as fjson:
+                json.dump(gdalParam, fjson)
 
-                openwater,thr=apply_thresh(out_db)
-                gdalParam=list(gdalParam)
-                gdalParam.append(thr)
-                with open(procOut+'/'+fname[:-3]+'json', 'w') as fjson:
+
+            if not np.isnan(thr):
+                logger.debug("writing out to sarOut "+fname)
+
+                with rasterio.open(polOut+'/'+fname,'w',driver=ds.driver,height=openwater.shape[0],width=openwater.shape[1],count=1,dtype=rasterio.ubyte,transform=ds.transform) as dsout:
+                    dsout.write(openwater.astype(rasterio.ubyte),1)
+                with open(polOut+'/'+fname[:-3]+'json', 'w') as fjson:
                     json.dump(gdalParam, fjson)
 
-                if not np.isnan(thr):
-                    logger.debug("writing out to sarOut and processed folder in compressed form"+fname)
+            logger.debug('removing '+f)
+            os.remove(sarOut+'/'+f)
+            os.remove(sarOut+'/'+f[:-3]+'xml')
 
-                    with rasterio.open(polOut+'/'+fname,'w',driver=ds.driver,height=openwater.shape[0],width=openwater.shape[1],count=1,dtype=rasterio.ubyte,transform=out_transform) as dsout:
-                        dsout.write(openwater.astype(rasterio.ubyte),1)
-                    with open(polOut+'/'+fname[:-3]+'json', 'w') as fjson:
-                        json.dump(gdalParam, fjson)
-
-
-            logger.info('finished threshold loop. processed '+str(len(wm_in_scene)) + ' tifs')
-        logger.info('removing '+f)
-        os.remove(sarOut+'/'+f)
-        os.remove(sarOut+'/'+f[:-3]+'xml')
+        logger.info('finished threshold loop. processed '+str(len(tiffs)) + ' tifs')
 
 def apply_thresh(r_db):
     # subset into 200x200 m approx.
@@ -207,7 +203,7 @@ def select_tiffs_year_month(Y,M):
                 tiffs_in_ym.append(tif)
                 timestamp.append(stamp)
         if(len(timestamp)<1):
-            logger.info(sarOut+" has no scene for year "+Y+" and month "+M+"Exiting and returning None.")
+            logger.info(sarOut+" has no tiffs for year "+Y+" and month "+M+"Exiting and returning None.")
             tiffs_in_ym=None
     return(tiffs_in_ym)
 
@@ -236,55 +232,9 @@ def select_n_last_tiffs(n):
             return([tiffs[i] for i in index[-n:]])
     return(tiffs)
 
-def getBoundingBoxScene(ds):
-    # ds=rasterio.open('/home/delgado/Documents/tmp/testproduct_watermask.tif')
-    rect=Polygon([(ds.bounds.left,ds.bounds.bottom),(ds.bounds.left,ds.bounds.top),(ds.bounds.right,ds.bounds.top),(ds.bounds.right,ds.bounds.bottom)])
 
-    project = partial(
-        pyproj.transform,
-        pyproj.Proj(init='epsg:4326'),
-        pyproj.Proj(init='epsg:32724'))
-
-    rect_utm=transform(project,rect)
-    return(rect_utm)
-
-def subset_by_lake(ds,pol):
-    if pol.area<1000:
-        buff=pol.buffer(10*(pol.area)**0.5)
-    else:
-        buff=pol.buffer(2*(pol.area)**0.5)
-
-    coords=buff.bounds
-    bb=Polygon([(coords[0],coords[1]),(coords[0],coords[3]),(coords[2],coords[3]),(coords[2],coords[1])])
-
-    project = partial(
-        pyproj.transform,
-        pyproj.Proj(init='epsg:32724'),
-        pyproj.Proj(init='epsg:4326'))
-    bb_ll=transform(project,bb)
-
-    out_image, out_transform = rasterio.mask.mask(ds,[bb_ll],crop=True)
-
-    return(out_image,out_transform)
-
-def getWMinScene(rect):
-    wm=fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r')
-    wm_in_scene=list()
-    id=list()
-    for feat in wm:
-        pol=geojson2shapely(feat['geometry'])
-        pol=checknclean(pol)
-        if rect.contains(pol):
-            wm_in_scene.append(pol)
-            id.append(feat['properties']['id'])
-    wm.close()
-    return(wm_in_scene,id)
-
-def sigma_naught(r):
-    r_db=r
-    r_db[r==0]=np.nan
-
-    r_db=10*np.log10(r_db)*100
+def scale_integer(r_db):
+    r_db[r_db==-999999999]=np.nan
 
     if (np.nanmax(r_db)< np.iinfo(np.int16).max) and (np.nanmin(r_db) > (np.iinfo(np.int16).min+1)):
         r_db[np.isnan(r_db)]=np.iinfo(np.int16).min
@@ -293,18 +243,3 @@ def sigma_naught(r):
         r_db[np.isnan(r_db)]=np.iinfo(np.int32).min
         r_db=np.int32(r_db)
     return(r_db)
-
-def geojson2wkt(jsgeom):
-    polygon=shape(jsgeom)
-    return(polygon.wkt)
-
-def geojson2shapely(jsgeom):
-    polygon=shape(jsgeom)
-    return(polygon)
-
-def checknclean(pol):
-    if not pol.is_valid:
-        clean=pol.buffer(0)
-        return(clean)
-    else:
-        return(pol)
