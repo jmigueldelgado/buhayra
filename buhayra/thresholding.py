@@ -62,7 +62,7 @@ def threshold_loop(scenes):
 def apply_thresh(r_db):
     # subset into 200x200 m approx.
     splt=subset_200x200(r_db)
-
+        
     ### loop through subsets
     # res=list()
     thr=list()
@@ -92,13 +92,14 @@ def apply_thresh(r_db):
 def subset_200x200(nparray):
 
     splt=list()
-    n=round(nparray.shape[0]/20)
-    splt0=np.array_split(nparray,n,0)
-    for chunk in splt0:
-        m=round(chunk.shape[1]/20)
-        splt1=np.array_split(chunk,m,1)
-        splt.append(splt1)
-    return(splt)
+    if nparray.shape[0]>0 and nparray.shape[1]>0:
+        n=np.ceil(nparray.shape[0]/20)
+        splt0=np.array_split(nparray,n,0)
+        for chunk in splt0:
+            m=np.ceil(chunk.shape[1]/20)
+            splt1=np.array_split(chunk,m,1)
+            splt.append(splt1)
+        return(splt)
 
 def threshold(nparray,thr):
     n = nparray==np.iinfo(nparray.dtype).min
