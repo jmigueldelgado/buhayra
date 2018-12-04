@@ -27,7 +27,7 @@ def process(f):
     with rasterio.open(sarOut+'/'+f,'r') as ds:
         if (f) in listdir(polOut):
             logger.info("product "+f+" already exists: skipping")
-            continue
+            return None
 
         gdalParam=ds.transform.to_gdal()
 
@@ -251,3 +251,10 @@ def scale_integer(r_db):
         r_db[np.isnan(r_db)]=np.iinfo(np.int32).min
         r_db=np.int32(r_db)
     return(r_db)
+
+def checknclean(pol):
+    if not pol.is_valid:
+        clean=pol.buffer(0)
+        return(clean)
+    else:
+        return(pol)

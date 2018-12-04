@@ -27,7 +27,6 @@ import pyproj
 from functools import partial
 from shapely.ops import transform
 
-
 System = jpy.get_type('java.lang.System')
 BandDescriptor = jpy.get_type('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor')
 
@@ -69,9 +68,9 @@ def sar2sigma(scenes):
             product_subset.dispose()
 
             if os.path.isfile(sarOut+'/locked.tif'):
-                os.rename(sarOut+'/locked.tif',sarOut+'/'+fname+.'tif')
+                os.rename(sarOut+'/locked.tif',sarOut+'/'+fname+'.tif')
             if os.path.isfile(sarOut+'/locked.xml'):
-                os.rename(sarOut+'/locked.xml',sarOut+'/'+fname+.'xml')
+                os.rename(sarOut+'/locked.xml',sarOut+'/'+fname+'.xml')
         # ProductIO.writeProduct(product,sarOut+"/"+productName,outForm)
 
         product.dispose()
@@ -334,7 +333,7 @@ def getBoundingBoxScene(product):
         pyproj.Proj(init='epsg:4326'),
         pyproj.Proj(init='epsg:32724'))
     rect_utm=transform(project,rect)
-return(rect_utm)
+    return(rect_utm)
 
 def sigma_naught(product):
     targetBands = jpy.array('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor',1)
@@ -363,3 +362,10 @@ def geojson2shapely(jsgeom):
     from shapely.geometry import shape,polygon
     polygon=shape(jsgeom)
     return(polygon)
+
+def checknclean(pol):
+    if not pol.is_valid:
+        clean=pol.buffer(0)
+        return(clean)
+    else:
+        return(pol)
