@@ -57,6 +57,7 @@ def save_originals(f,out_db,metadata,thr):
         dsout.write(out_db,1)
     with open(procOut+'/'+f[:-3]+'json', 'w') as fjson:
         json.dump(metadata, fjson)
+    return f
 
 def save_watermask(f,openwater,metadata,thr):
     logger = logging.getLogger('root')
@@ -72,6 +73,7 @@ def remove_sigma_naught(f):
     logger = logging.getLogger('root')
     os.remove(sarOut+'/'+f)
     os.remove(sarOut+'/'+f[:-3]+'json')
+    return f
 
 
 def determine_threshold_in_tif(splt):

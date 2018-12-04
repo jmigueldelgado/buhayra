@@ -26,10 +26,10 @@ for f in tiffs:
     thr = determine_threshold_in_tif(splt)
     openwater = threshold(out_db,thr)
 
-    remove_sigma_naught(f)
-    save_originals(f,original,metadata,thr)
-    f=save_watermask(f,openwater,metadata,thr)
-    out.append(f)
+    rm=remove_sigma_naught(f)
+    orig=save_originals(f,original,metadata,thr)
+    wm=save_watermask(f,openwater,metadata,thr)
+
 
 f.compute()
 
