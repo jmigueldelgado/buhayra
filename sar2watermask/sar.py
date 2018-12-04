@@ -37,55 +37,55 @@ def sar2sigma(scenes):
     logger = logging.getLogger('root')
 
     outForm='GeoTIFF+XML'
-    wm=fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r')
+    with fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r') as wm:
 
-    for f in scenes:
-        logger.info("processing " + f)
-        product = ProductIO.readProduct(sarIn+"/"+f)
-        productName=product.getName()
+        for f in scenes:
+            logger.info("processing " + f)
+            product = ProductIO.readProduct(sarIn+"/"+f)
+            productName=product.getName()
 
-        rect_utm=getBoundingBoxScene(product)
-        wm_in_scene,id_in_scene = getWMinScene(rect_utm,wm)
+            rect_utm=getBoundingBoxScene(product)
+            wm_in_scene,id_in_scene = getWMinScene(rect_utm,wm)
 
-        product=orbit_correction(product)
-        product=remove_border_noise(product)
-        product=thermal_noise_removal(product)
-        product=calibration(product)
-        product=speckle_filtering(product)
-        product=geom_correction(product)
-        product=set_no_data_value(product)
-#        product=sigma_naught(product)
+            product=orbit_correction(product)
+            product=remove_border_noise(product)
+            product=thermal_noise_removal(product)
+            product=calibration(product)
+            product=speckle_filtering(product)
+            product=geom_correction(product)
+            product=set_no_data_value(product)
+    #        product=sigma_naught(product)
 
-        logger.info("starting loop on reservoirs")
-        for i in range(0,len(id_in_scene)):
-            fname=productName + "_" + str(id_in_scene[i])
-            if (fname+".tif") in listdir(sarOut):
-                logger.debug("product "+fname+".tif already exists: skipping")
-                continue
+            logger.info("starting loop on reservoirs")
+            for i in range(0,len(id_in_scene)):
+                fname=productName + "_" + str(id_in_scene[i])
+                if (fname+".tif") in listdir(sarOut):
+                    logger.debug("product "+fname+".tif already exists: skipping")
+                    continue
 
-            logger.debug("subsetting product "+ str(id_in_scene[i]))
-            product_subset=subsetProduct(product,wm_in_scene[i])
+                logger.debug("subsetting product "+ str(id_in_scene[i]))
+                product_subset=subsetProduct(product,wm_in_scene[i])
 
-            logger.debug("writing product "+ str(id_in_scene[i]))
-            ProductIO.writeProduct(product_subset,sarOut+"/locked",outForm)
-            product_subset.dispose()
+                logger.debug("writing product "+ str(id_in_scene[i]))
+                ProductIO.writeProduct(product_subset,sarOut+"/locked",outForm)
+                product_subset.dispose()
 
-            compress_tiff(sarOut+'/locked.tif',sarOut+'/'+fname+'.tif')
-            
+                compress_tiff(sarOut+'/locked.tif',sarOut+'/'+fname+'.tif')
 
-#            if os.path.isfile(sarOut+'/locked.tif'):
-#                os.rename(sarOut+'/locked.tif',sarOut+'/'+fname+'.tif')
-#            if os.path.isfile(sarOut+'/locked.xml'):
-#                os.rename(sarOut+'/locked.xml',sarOut+'/'+fname+'.xml')
-        # ProductIO.writeProduct(product,sarOut+"/"+productName,outForm)
 
-        product.dispose()
-        ### remove scene from folder
-        logger.info("REMOVING " + f)
-        if os.path.isfile(sarIn+"/"+f):
-            os.remove(sarIn+"/"+f)
+    #            if os.path.isfile(sarOut+'/locked.tif'):
+    #                os.rename(sarOut+'/locked.tif',sarOut+'/'+fname+'.tif')
+    #            if os.path.isfile(sarOut+'/locked.xml'):
+    #                os.rename(sarOut+'/locked.xml',sarOut+'/'+fname+'.xml')
+            # ProductIO.writeProduct(product,sarOut+"/"+productName,outForm)
 
-        logger.info("**** sar2sigma completed!" + f  + " processed**********")
+            product.dispose()
+            ### remove scene from folder
+            logger.info("REMOVING " + f)
+            if os.path.isfile(sarIn+"/"+f):
+                os.remove(sarIn+"/"+f)
+
+            logger.info("**** sar2sigma completed!" + f  + " processed**********")
     System.gc()
 
 

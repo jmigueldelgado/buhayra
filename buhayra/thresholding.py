@@ -16,95 +16,89 @@ from shapely.ops import transform
 #from dask import compute, delayed
 #import dask.multiprocessing
 
-
 def threshold_loop(tiffs):
     logger = logging.getLogger('root')
     #values = [delayed(process)(f) for f in tiffs]
     #results = compute(*values, scheduler='processes')
     for f in tiffs:
-        out=process(f)
+        out_db=load_sigma_naught(f)
+        metadata=load_metadata(f)
+
+        original = np.copy(out_db)
+        splt = subset_200x200(out_db)
+        thr = determine_threshold_in_tif(splt)
+        openwater = threshold(out_db,thr)
+
+        save_originals(f,original,metadata,thr)
+        f=save_watermask(f,openwater,metadata,thr)
+        remove_sigma_naught(f)
+
     logger.info('finished threshold loop. processed '+str(len(tiffs)) + ' tifs')
 
-def process(f):
+def load_sigma_naught(f):
     logger = logging.getLogger('root')
     with rasterio.open(sarOut+'/'+f,'r') as ds:
-        if (f) in listdir(polOut):
-            logger.info("product "+f+" already exists: skipping")
-            return None
-
-        gdalParam=ds.transform.to_gdal()
-
+        # if (f) in listdir(polOut):
+        #     logger.info("product "+f+" already exists: skipping")
+        #     return None
         out_db=ds.read(1)
+    return out_db
 
-        logger.debug("saving compressed version of lake subset")
-        with rasterio.open(procOut+'/'+f,'w',driver=ds.driver,height=out_db.shape[0],width=out_db.shape[1],count=1,dtype=out_db.dtype) as dsout:
-            dsout.write(out_db,1)
+def load_metadata(f):
+    logger = logging.getLogger('root')
+    with open(sarOut+'/'+f[:-3]+'json', 'r') as fjson:
+        metadata = json.load(fjson)
+    return list(metadata)
 
-        openwater,thr=apply_thresh(out_db)
-        gdalParam=list(gdalParam)
-        gdalParam.append(thr)
-        logger.debug("saving metadata of lake subset, including determined threshold")
-        with open(procOut+'/'+f[:-3]+'json', 'w') as fjson:
+def save_originals(f,out_db,metadata,thr):
+    logger = logging.getLogger('root')
+    metadata.append(thr)
+    with rasterio.open(procOut+'/'+f,'w',driver='GTiff',height=out_db.shape[0],width=out_db.shape[1],count=1,dtype=out_db.dtype) as dsout:
+        dsout.write(out_db,1)
+    with open(procOut+'/'+f[:-3]+'json', 'w') as fjson:
+        json.dump(metadata, fjson)
+
+def save_watermask(f,openwater,metadata,thr):
+    logger = logging.getLogger('root')
+    if not np.isnan(thr):
+        metadata.append(thr)
+        with rasterio.open(polOut+'/'+f,'w',driver='GTiff',height=openwater.shape[0],width=openwater.shape[1],count=1,dtype=rasterio.ubyte) as dsout:
+            dsout.write(openwater.astype(rasterio.ubyte),1)
+        with open(polOut+'/'+f[:-3]+'json', 'w') as fjson:
             json.dump(gdalParam, fjson)
+    return f
+
+def remove_sigma_naught(f):
+    logger = logging.getLogger('root')
+    os.remove(sarOut+'/'+f)
+    os.remove(sarOut+'/'+f[:-3]+'json')
 
 
-        if not np.isnan(thr):
-            logger.debug("writing out to sarOut "+fname)
-
-            with rasterio.open(polOut+'/'+f,'w',driver=ds.driver,height=openwater.shape[0],width=openwater.shape[1],count=1,dtype=rasterio.ubyte,transform=ds.transform) as dsout:
-                dsout.write(openwater.astype(rasterio.ubyte),1)
-            with open(polOut+'/'+f[:-3]+'json', 'w') as fjson:
-                json.dump(gdalParam, fjson)
-
-        logger.debug('removing '+f)
-        os.remove(sarOut+'/'+f)
-        os.remove(sarOut+'/'+f[:-3]+'xml')
-        return f
-
-
-def apply_thresh(r_db):
-    # subset into 200x200 m approx.
-    splt=subset_200x200(r_db)
-
-    ### loop through subsets
-    # res=list()
+def determine_threshold_in_tif(splt):
     thr=list()
     for i in range(len(splt)):
         thr_i=list()
-        # subres=list()
         for j in range(len(splt[i])):
             thr_i.append(get_thr(splt[i][j])) # subres.append(threshold(splt[i][j]))
-        # res.append(subres)
         thr.append(thr_i)
-
-    # thr_i=[1,2,3,np.nan]
-    # thr=list()
-    # thr.append(thr_i)
-    # thr
     npthr = np.array(thr)
     thrmedian=np.nanmedian(npthr)
-
-    openwater=threshold(r_db,thrmedian)
-    # ### stitch raster back together
-    # for i in range(len(res)):
-    #     res[i]=np.concatenate(res[i],1)
-    # openwater=np.concatenate(res,0)
-
-    return(openwater,thrmedian)
+    return thrmedian
 
 def subset_200x200(nparray):
+    logger = logging.getLogger('root')
 
     splt=list()
-    if nparray.shape[0]>0 and nparray.shape[1]>0:
-        n=np.ceil(nparray.shape[0]/20)
-        splt0=np.array_split(nparray,n,0)
-        for chunk in splt0:
-            m=np.ceil(chunk.shape[1]/20)
-            splt1=np.array_split(chunk,m,1)
-            splt.append(splt1)
+    n=np.ceil(nparray.shape[0]/20)
+    splt0=np.array_split(nparray,n,0)
+    for chunk in splt0:
+        m=np.ceil(chunk.shape[1]/20)
+        splt1=np.array_split(chunk,m,1)
+        splt.append(splt1)
         return(splt)
 
 def threshold(nparray,thr):
+    logger = logging.getLogger('root')
     n = nparray==np.iinfo(nparray.dtype).min
     band = ma.masked_array(nparray, mask=n,fill_value=0)
 
@@ -229,6 +223,8 @@ def select_n_last_tiffs(n):
         timestamp=list()
         tiffs=list()
         for tiff in listdir(sarOut):
+            if not tiff.startswith('S'):
+                continue
             stamp=datetime.datetime.strptime(tiff.split('_')[4],'%Y%m%dT%H%M%S')
             if re.search('.tif$',tiff):
                 tiffs.append(tiff)
@@ -244,8 +240,8 @@ def select_n_last_tiffs(n):
             return([tiffs[i] for i in index[-n:]])
     return(tiffs)
 
-
 def checknclean(pol):
+    logger = logging.getLogger('root')
     if not pol.is_valid:
         clean=pol.buffer(0)
         return(clean)
