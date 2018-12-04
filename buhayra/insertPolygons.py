@@ -21,6 +21,7 @@ def insertLoop():
         logger.info('Inserted feature ID: %s',feat_id)
         logger.info('deleting ' + f)
         os.remove(polOut + '/' + f)
+        os.remove(polOut+'/'+f[:-3]+'json')
     wm.close()
 
 def write_poly_loop():
@@ -36,7 +37,7 @@ def write_poly_loop():
         with open(home['home']+'/'+f[:-3]+'geojson', 'w') as fjson:
             json.dump(feat, fjson)
         os.remove(polOut + '/' + f)
-
+        os.remove(polOut+'/'+f[:-3]+'json')
 
 def insertNEB(feat):
     logger = logging.getLogger('root')

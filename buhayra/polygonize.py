@@ -14,20 +14,18 @@ import pyproj
 from numpy import amax
 from buhayra.thresholding import *
 
-
 def tif2shapely(f):
     with rasterio.open(polOut+'/'+f,'r') as ds:
-        # ds.profile.update(dtype=rasterio.int32)
-        # with open(polOut+'/'+f[:-3]+'json', 'r') as fjson:
-        #     gdalParam = json.load(fjson)
-        # affParam=rasterio.Affine.from_gdal(gdalParam[0],gdalParam[1],gdalParam[2],gdalParam[3],gdalParam[4],gdalParam[5])
+        ds.profile.update(dtype=rasterio.int32)
+        with open(polOut+'/'+f[:-3]+'json', 'r') as fjson:
+            gdalParam = json.load(fjson)
+        affParam=rasterio.Affine.from_gdal(gdalParam[0],gdalParam[1],gdalParam[2],gdalParam[3],gdalParam[4],gdalParam[5])
         r=ds.read(1)
-        # ds.close()
         if amax(r)==0:
             poly = Polygon()
         else:
             polys=list()
-            for pol, value in features.shapes(r, transform=ds.transform):
+            for pol, value in features.shapes(r, transform=affParam):
                 if value>0:
                     polys.append(shape(pol))
                     # print("Image value:")
@@ -42,16 +40,16 @@ def tif2shapely(f):
     return(poly)
 
 def getProperties(f):
-    # with open(polOut+'/'+f[:-3]+'json', 'r') as fjson:
-    #     param = json.load(fjson)
+    with open(polOut+'/'+f[:-3]+'json', 'r') as fjson:
+        param = json.load(fjson)
 
     metalist=f[:-4].split('_')
     sentx=metalist[0]
     meta={
-        # 'source_id':metalist[0],
+        'source_id':metalist[0],
         'ingestion_time':datetime.datetime.strptime(metalist[4],'%Y%m%dT%H%M%S'),
-        'id_jrc':int(metalist[9]),}
-        # 'threshold':int(param[6]),}
+        'id_jrc':int(metalist[9]),
+        'threshold':int(param[6]),}
     if sentx.startswith('S1'):
         meta['source_id']=1
     else:
@@ -82,26 +80,6 @@ def wgs2utm(geom):
         pyproj.Proj(init='epsg:32724'))
     geom_utm=transform(project,geom)
     return(geom_utm)
-
-def write_pol(pols,f):
-    meta=getProperties(f)
-
-    schema = {
-        'geometry': str(pols.geom_type),
-        'properties': {'id': 'int'}#,'threshold':'int'},
-    }
-    fpath=home['home']+'/'+f[:-3]+'gpkg'
-
-    if not os.path.isfile(fpath):
-        with fiona.open(fpath, 'w',
-                        layer=str(pols.geom_type),
-                        driver='GPKG',
-                        schema=schema) as dst:
-            dst.write({
-                'geometry':mapping(pols),
-                'properties': {'id':meta['id_jrc']}#,'threshold':meta['threshold']}
-            })
-
 
 def select_intersecting_polys(feat,wm):
 

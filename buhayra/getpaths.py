@@ -8,7 +8,7 @@ import logging
 if socket.gethostname()=='vouga':
     home = {
         'home' : expanduser("~"),
-        'scratch' : expanduser("~") + '/scratch/test_dataset',
+        'scratch' : expanduser("~") + '/scratch',
         'proj' : expanduser("~") + '/proj/buhayra',
         'parameters' : expanduser("~") + '/proj/buhayra/buhayra/parameters'}
 elif socket.gethostname()=='compute':
