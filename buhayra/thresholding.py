@@ -65,7 +65,7 @@ def save_watermask(f,openwater,metadata,thr):
         with rasterio.open(polOut+'/'+f,'w',driver='GTiff',height=openwater.shape[0],width=openwater.shape[1],count=1,dtype=rasterio.ubyte) as dsout:
             dsout.write(openwater.astype(rasterio.ubyte),1)
         with open(polOut+'/'+f[:-3]+'json', 'w') as fjson:
-            json.dump(gdalParam, fjson)
+            json.dump(metadata, fjson)
     return f
 
 def remove_sigma_naught(f):
