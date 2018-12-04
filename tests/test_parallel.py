@@ -14,24 +14,27 @@ save_originals=dask.delayed(save_originals)
 save_watermask=dask.delayed(save_watermask)
 remove_sigma_naught=dask.delayed(remove_sigma_naught)
 
+## must also delay np.copy!!!
+np.copy = dask.delayed(np.copy)
 
 tiffs=select_n_last_tiffs(5)
+
 out=list()
 for f in tiffs:
     out_db=load_sigma_naught(f)
     metadata=load_metadata(f)
 
     original = np.copy(out_db)
+
     splt = subset_200x200(out_db)
     thr = determine_threshold_in_tif(splt)
     openwater = threshold(out_db,thr)
 
-    rm=remove_sigma_naught(f)
     orig=save_originals(f,original,metadata,thr)
-    wm=save_watermask(f,openwater,metadata,thr)
+    out.append(orig)
+    # wm.append(save_watermask(f,openwater,metadata,thr))
+    # rm.append(remove_sigma_naught(f))
+    # out.append(orig)
 
-
-f.compute()
-
-out
-polOut
+total=dask.delayed()(out)
+total.compute()

@@ -12,6 +12,10 @@ test*.o*
 dask-worker.e*
 dask-worker.o*
 *.qgs
+
+dask-worker-space/
+dask-worker-space/*
+
 # Sentinel data and test data
 
 test_data/
