@@ -13,17 +13,20 @@ from shapely.geometry import Polygon, shape
 import pyproj
 from functools import partial
 from shapely.ops import transform
-from dask import compute, delayed
-import dask.multiprocessing
+#from dask import compute, delayed
+#import dask.multiprocessing
 
 
 def threshold_loop(tiffs):
     logger = logging.getLogger('root')
-    values = [delayed(process)(f) for f in tiffs]
-    results = compute(*values, scheduler='processes')
+    #values = [delayed(process)(f) for f in tiffs]
+    #results = compute(*values, scheduler='processes')
+    for f in tiffs:
+        out=process(f)
     logger.info('finished threshold loop. processed '+str(len(tiffs)) + ' tifs')
 
 def process(f):
+    logger = logging.getLogger('root')
     with rasterio.open(sarOut+'/'+f,'r') as ds:
         if (f) in listdir(polOut):
             logger.info("product "+f+" already exists: skipping")
@@ -42,16 +45,16 @@ def process(f):
         gdalParam=list(gdalParam)
         gdalParam.append(thr)
         logger.debug("saving metadata of lake subset, including determined threshold")
-        with open(procOut+'/'+fname[:-3]+'json', 'w') as fjson:
+        with open(procOut+'/'+f[:-3]+'json', 'w') as fjson:
             json.dump(gdalParam, fjson)
 
 
         if not np.isnan(thr):
             logger.debug("writing out to sarOut "+fname)
 
-            with rasterio.open(polOut+'/'+fname,'w',driver=ds.driver,height=openwater.shape[0],width=openwater.shape[1],count=1,dtype=rasterio.ubyte,transform=ds.transform) as dsout:
+            with rasterio.open(polOut+'/'+f,'w',driver=ds.driver,height=openwater.shape[0],width=openwater.shape[1],count=1,dtype=rasterio.ubyte,transform=ds.transform) as dsout:
                 dsout.write(openwater.astype(rasterio.ubyte),1)
-            with open(polOut+'/'+fname[:-3]+'json', 'w') as fjson:
+            with open(polOut+'/'+f[:-3]+'json', 'w') as fjson:
                 json.dump(gdalParam, fjson)
 
         logger.debug('removing '+f)
@@ -244,6 +247,7 @@ def select_n_last_tiffs(n):
 
 
 def scale_integer(r_db):
+    r_db.dtype='float32'
     r_db[r_db==-999999999]=np.nan
 
     if (np.nanmax(r_db)< np.iinfo(np.int16).max) and (np.nanmin(r_db) > (np.iinfo(np.int16).min+1)):
