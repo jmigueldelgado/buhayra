@@ -26,6 +26,8 @@ from shapely.geometry import Polygon, shape
 import pyproj
 from functools import partial
 from shapely.ops import transform
+import numpy as np
+
 
 System = jpy.get_type('java.lang.System')
 BandDescriptor = jpy.get_type('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor')
@@ -359,7 +361,7 @@ def compress_tiff(inpath,outpath):
         gdalParam=ds.transform.to_gdal()
         with rasterio.open(outpath,'w',driver=ds.driver,height=ds.height,width=ds.width,count=1,dtype=r_db.dtype) as dsout:
             dsout.write(r_db,1)
-    with open(outpath[:-3]+'.json', 'w') as fjson:
+    with open(outpath[:-3]+'json', 'w') as fjson:
         json.dump(gdalParam, fjson)
     os.remove(inpath)
     os.remove(inpath[:-3]+'xml')
