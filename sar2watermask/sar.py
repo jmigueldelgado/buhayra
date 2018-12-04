@@ -51,6 +51,7 @@ def sar2sigma(scenes):
         product=calibration(product)
         product=speckle_filtering(product)
         product=geom_correction(product)
+        product=set_no_data_value(product)
         product=sigma_naught(product)
 
         logger.info("starting loop on reservoirs")
@@ -83,120 +84,6 @@ def sar2sigma(scenes):
     System.gc()
 
 
-
-def select_last_scene():
-    logger = logging.getLogger('root')
-    if(len(listdir(sarIn))<1):
-        logger.info(sarIn+" is empty! Nothing to do. Exiting and returning None.")
-        f=None
-    else:
-        timestamp=list()
-        scenes=list()
-        for scn in listdir(sarIn):
-            if re.search('.zip$',scn):
-                scenes.append(scn)
-                timestamp.append(datetime.datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S'))
-        f=scenes[timestamp.index(max(timestamp))]
-    return(f)
-
-def select_past_scene(Y,M):
-    logger = logging.getLogger('root')
-
-    if(len(listdir(sarIn))<1):
-        logger.info(sarIn+" is empty! Nothing to do. Exiting and returning None.")
-        f=None
-    else:
-        timestamp=list()
-        scenes_in_ym=list()
-        for scn in listdir(sarIn):
-            stamp=datetime.datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S')
-            if re.search('.zip$',scn) and stamp.year==Y and stamp.month==M:
-                scenes_in_ym.append(scn)
-                timestamp.append(stamp)
-        if(len(timestamp)<1):
-            logger.info(sarIn+" has no scene for year "+Y+" and month "+M+"Exiting and returning None.")
-            f=None
-        else:
-            f=scenes_in_ym[timestamp.index(max(timestamp))]
-    return(f)
-
-def select_scenes_year_month(Y,M):
-    logger = logging.getLogger('root')
-
-    if(len(listdir(sarIn))<1):
-        logger.info(sarIn+" is empty! Nothing to do. Exiting and returning None.")
-        scenes_in_ym=None
-    else:
-        timestamp=list()
-        scenes_in_ym=list()
-        for scn in listdir(sarIn):
-            stamp=datetime.datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S')
-            if re.search('.zip$',scn) and stamp.year==Y and stamp.month==M:
-                scenes_in_ym.append(scn)
-                timestamp.append(stamp)
-        if(len(timestamp)<1):
-            logger.info(sarIn+" has no scene for year "+Y+" and month "+M+"Exiting and returning None.")
-            scenes_in_ym=None
-    return(scenes_in_ym)
-
-
-def subsetProduct(product,pol):
-    if pol.area<1000:
-        buff=pol.buffer(5*(pol.area)**0.5)
-    else:
-        buff=pol.buffer(2*(pol.area)**0.5)
-
-    bb=getBoundingBoxWM(buff)
-    project = partial(
-        pyproj.transform,
-        pyproj.Proj(init='epsg:32724'),
-        pyproj.Proj(init='epsg:4326'))
-    bb_ll=transform(project,bb)
-    geom = WKTReader().read(bb_ll.wkt)
-
-
-    parameters = HashMap()
-    parameters.put('copyMetadata', True)
-    parameters.put('geoRegion', geom)
-    product_subset = GPF.createProduct('Subset', parameters, product)
-    return(product_subset)
-
-
-def orbit_exists(product):
-    fname=product.getName()
-    # check if orbit was downloaded
-    startdt=datetime.datetime.strptime(fname.split('_')[4],'%Y%m%dT%H%M%S')
-    stopdt=datetime.datetime.strptime(fname.split('_')[5],'%Y%m%dT%H%M%S')
-
-    startdir=home['home']+\
-                '/.snap/auxdata/Orbits/Sentinel-1/RESORB/'+fname[0:3]+'/'+\
-                str(startdt.year)+\
-                '/'+\
-                str(startdt.month)+\
-                '/'
-    stopdir=home['home']+\
-                '/.snap/auxdata/Orbits/Sentinel-1/RESORB/'+fname[0:3]+'/'+\
-                str(stopdt.year)+\
-                '/'+\
-                str(stopdt.month)+\
-                '/'
-
-    orbits=list()
-    if os.path.isdir(startdir):
-        for orbit in os.listdir(startdir):
-            orbits.append(orbit)
-
-    if os.path.isdir(stopdir):
-        for orbit in os.listdir(stopdir):
-            orbits.append(orbit)
-    check=False
-    for orbit in orbits:
-        orbit0=datetime.datetime.strptime(orbit.split('_')[6],'V%Y%m%dT%H%M%S')
-        orbitf=datetime.datetime.strptime(orbit.split('_')[7],'%Y%m%dT%H%M%S.EOF')
-        if ((orbit0<startdt) and (orbitf>stopdt)):
-            check=True
-
-    return check
 
 def orbit_correction(product):
     logger = logging.getLogger('root')
@@ -296,14 +183,53 @@ def geom_correction(product):
     logger.info("finished geometric correction")
     return(result)
 
+def set_no_data_value(product):
+    logger = logging.getLogger('root')
+    params = HashMap()
+    root = xml.etree.ElementTree.parse(home['parameters']+'/nodatavalue.xml').getroot()
+    for child in root:
+        params.put(child.tag,child.text)
 
-        # w=CalSfCorr.getSceneRasterWidth()
-        # h=CalSfCorr.getSceneRasterHeight()
-        # array = np.zeros((w,h),dtype=np.float32)  # Empty array
-        # currentband=CalSfCorr.getBand('Sigma0_VV')
-        # bandraster = currentband.readPixels(0, 0, w, h, array)
+    result = GPF.createProduct('SetNoDataValue',params,product)
+    logger.info("finished calibration")
+    return(result)
 
-        # np.amax(bandraster)
+def sigma_naught(product):
+    targetBands = jpy.array('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor',1)
+    targetBand1 = BandDescriptor()
+    targetBand1.name = 'sigma_int'
+    targetBand1.type = 'Int32'
+    targetBand1.expression = 'round(log10(Sigma0_VV)*1000)'
+
+    targetBands[0] = targetBand1
+
+    parameters = HashMap()
+    parameters.put('targetBands', targetBands)
+
+    result = GPF.createProduct('BandMaths', parameters, product)
+    return(result)
+
+def subsetProduct(product,pol):
+    if pol.area<1000:
+        buff=pol.buffer(5*(pol.area)**0.5)
+    else:
+        buff=pol.buffer(2*(pol.area)**0.5)
+
+    bb=getBoundingBoxWM(buff)
+    project = partial(
+        pyproj.transform,
+        pyproj.Proj(init='epsg:32724'),
+        pyproj.Proj(init='epsg:4326'))
+    bb_ll=transform(project,bb)
+    geom = WKTReader().read(bb_ll.wkt)
+
+
+    parameters = HashMap()
+    parameters.put('copyMetadata', True)
+    parameters.put('geoRegion', geom)
+    product_subset = GPF.createProduct('Subset', parameters, product)
+    return(product_subset)
+
 def getWMinScene(rect,wm):
     wm_in_scene=list()
     id=list()
@@ -335,23 +261,6 @@ def getBoundingBoxScene(product):
     rect_utm=transform(project,rect)
     return(rect_utm)
 
-def sigma_naught(product):
-    targetBands = jpy.array('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor',1)
-    targetBand1 = BandDescriptor()
-    targetBand1.name = 'sigma_int'
-    targetBand1.type = 'Int32'
-    targetBand1.setNoDataValue(-999999999)
-    targetBand1.setNoDataValueUsed(true)
-    targetBand1.expression = 'round(log10(Sigma0_VV)*1000)'
-
-    targetBands[0] = targetBand1
-
-    parameters = HashMap()
-    parameters.put('targetBands', targetBands)
-
-    result = GPF.createProduct('BandMaths', parameters, product)
-    return(result)
-
 
 def geojson2wkt(jsgeom):
     from shapely.geometry import shape,polygon
@@ -369,3 +278,62 @@ def checknclean(pol):
         return(clean)
     else:
         return(pol)
+
+
+
+
+
+def select_last_scene():
+    logger = logging.getLogger('root')
+    if(len(listdir(sarIn))<1):
+        logger.info(sarIn+" is empty! Nothing to do. Exiting and returning None.")
+        f=None
+    else:
+        timestamp=list()
+        scenes=list()
+        for scn in listdir(sarIn):
+            if re.search('.zip$',scn):
+                scenes.append(scn)
+                timestamp.append(datetime.datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S'))
+        f=scenes[timestamp.index(max(timestamp))]
+    return(f)
+
+def select_past_scene(Y,M):
+    logger = logging.getLogger('root')
+
+    if(len(listdir(sarIn))<1):
+        logger.info(sarIn+" is empty! Nothing to do. Exiting and returning None.")
+        f=None
+    else:
+        timestamp=list()
+        scenes_in_ym=list()
+        for scn in listdir(sarIn):
+            stamp=datetime.datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S')
+            if re.search('.zip$',scn) and stamp.year==Y and stamp.month==M:
+                scenes_in_ym.append(scn)
+                timestamp.append(stamp)
+        if(len(timestamp)<1):
+            logger.info(sarIn+" has no scene for year "+Y+" and month "+M+"Exiting and returning None.")
+            f=None
+        else:
+            f=scenes_in_ym[timestamp.index(max(timestamp))]
+    return(f)
+
+def select_scenes_year_month(Y,M):
+    logger = logging.getLogger('root')
+
+    if(len(listdir(sarIn))<1):
+        logger.info(sarIn+" is empty! Nothing to do. Exiting and returning None.")
+        scenes_in_ym=None
+    else:
+        timestamp=list()
+        scenes_in_ym=list()
+        for scn in listdir(sarIn):
+            stamp=datetime.datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S')
+            if re.search('.zip$',scn) and stamp.year==Y and stamp.month==M:
+                scenes_in_ym.append(scn)
+                timestamp.append(stamp)
+        if(len(timestamp)<1):
+            logger.info(sarIn+" has no scene for year "+Y+" and month "+M+"Exiting and returning None.")
+            scenes_in_ym=None
+    return(scenes_in_ym)
