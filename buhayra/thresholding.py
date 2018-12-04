@@ -34,8 +34,7 @@ def process(f):
 
         gdalParam=ds.transform.to_gdal()
 
-        r=ds.read(1)
-        out_db=scale_integer(r)
+        out_db=ds.read(1)
 
         logger.debug("saving compressed version of lake subset")
         with rasterio.open(procOut+'/'+f,'w',driver=ds.driver,height=out_db.shape[0],width=out_db.shape[1],count=1,dtype=out_db.dtype) as dsout:
@@ -245,18 +244,6 @@ def select_n_last_tiffs(n):
             return([tiffs[i] for i in index[-n:]])
     return(tiffs)
 
-
-def scale_integer(r_db):
-    r_db.dtype='float32'
-    r_db[r_db==-999999999]=np.nan
-
-    if (np.nanmax(r_db)< np.iinfo(np.int16).max) and (np.nanmin(r_db) > (np.iinfo(np.int16).min+1)):
-        r_db[np.isnan(r_db)]=np.iinfo(np.int16).min
-        r_db=np.int16(r_db)
-    else:
-        r_db[np.isnan(r_db)]=np.iinfo(np.int32).min
-        r_db=np.int32(r_db)
-    return(r_db)
 
 def checknclean(pol):
     if not pol.is_valid:
