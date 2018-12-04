@@ -206,6 +206,8 @@ def select_tiffs_year_month(Y,M):
         timestamp=list()
         tiffs_in_ym=list()
         for tif in listdir(sarOut):
+            if not tif.startswith('S'):
+                continue
             stamp=datetime.datetime.strptime(tif.split('_')[4],'%Y%m%dT%H%M%S')
             if re.search('.tif$',tif) and stamp.year==Y and stamp.month==M:
                 tiffs_in_ym.append(tif)

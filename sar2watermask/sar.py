@@ -52,7 +52,7 @@ def sar2sigma(scenes):
         product=speckle_filtering(product)
         product=geom_correction(product)
         product=set_no_data_value(product)
-        product=sigma_naught(product)
+#        product=sigma_naught(product)
 
         logger.info("starting loop on reservoirs")
         for i in range(0,len(id_in_scene)):
@@ -68,10 +68,13 @@ def sar2sigma(scenes):
             ProductIO.writeProduct(product_subset,sarOut+"/locked",outForm)
             product_subset.dispose()
 
-            if os.path.isfile(sarOut+'/locked.tif'):
-                os.rename(sarOut+'/locked.tif',sarOut+'/'+fname+'.tif')
-            if os.path.isfile(sarOut+'/locked.xml'):
-                os.rename(sarOut+'/locked.xml',sarOut+'/'+fname+'.xml')
+            compress_tiff(sarOut+'/locked.tif',sarOut+'/'+fname+'.tif')
+            
+
+#            if os.path.isfile(sarOut+'/locked.tif'):
+#                os.rename(sarOut+'/locked.tif',sarOut+'/'+fname+'.tif')
+#            if os.path.isfile(sarOut+'/locked.xml'):
+#                os.rename(sarOut+'/locked.xml',sarOut+'/'+fname+'.xml')
         # ProductIO.writeProduct(product,sarOut+"/"+productName,outForm)
 
         product.dispose()
@@ -191,7 +194,7 @@ def set_no_data_value(product):
         params.put(child.tag,child.text)
 
     result = GPF.createProduct('SetNoDataValue',params,product)
-    logger.info("finished calibration")
+    logger.info("finished set_no_data_value")
     return(result)
 
 def sigma_naught(product):
@@ -261,6 +264,10 @@ def getBoundingBoxScene(product):
     rect_utm=transform(project,rect)
     return(rect_utm)
 
+def getBoundingBoxWM(pol):
+    coords=pol.bounds
+    bb=Polygon([(coords[0],coords[1]),(coords[0],coords[3]),(coords[2],coords[3]),(coords[2],coords[1])])
+    return(bb)
 
 def geojson2wkt(jsgeom):
     from shapely.geometry import shape,polygon
@@ -337,3 +344,22 @@ def select_scenes_year_month(Y,M):
             logger.info(sarIn+" has no scene for year "+Y+" and month "+M+"Exiting and returning None.")
             scenes_in_ym=None
     return(scenes_in_ym)
+
+def compress_tiff(inpath,outpath):
+    with rasterio.open(inpath,'r') as ds:
+        r=ds.read(1)
+        r[r==0]=np.nan
+        r_db=10*np.log10(r)*100
+        if (np.nanmax(r_db)< np.iinfo(np.int16).max) and (np.nanmin(r_db) > (np.iinfo(np.int16).min+1)):
+            r_db[np.isnan(r_db)]=np.iinfo(np.int16).min
+            r_db=np.int16(r_db)
+        else:
+            r_db[np.isnan(r_db)]=np.iinfo(np.int32).min
+            r_db=np.int32(r_db)
+        gdalParam=ds.transform.to_gdal()
+        with rasterio.open(outpath,'w',driver=ds.driver,height=ds.height,width=ds.width,count=1,dtype=r_db.dtype) as dsout:
+            dsout.write(r_db,1)
+    with open(outpath[:-3]+'.json', 'w') as fjson:
+        json.dump(gdalParam, fjson)
+    os.remove(inpath)
+    os.remove(inpath[:-3]+'xml')
