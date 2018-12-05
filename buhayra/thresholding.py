@@ -17,7 +17,6 @@ from shapely.ops import transform
 #import dask.multiprocessing
 import dask
 from dask.distributed import Client, progress, LocalCluster
-from sar2watermask import checknclean
 
 
 def threshold_loop(tiffs):
@@ -268,11 +267,3 @@ def select_n_last_tiffs(n):
             index=np.argsort(timestamp)
             return([tiffs[i] for i in index[-n:]])
     return(tiffs)
-
-def checknclean(pol):
-    logger = logging.getLogger('root')
-    if not pol.is_valid:
-        clean=pol.buffer(0)
-        return(clean)
-    else:
-        return(pol)

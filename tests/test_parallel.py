@@ -2,7 +2,7 @@
 from buhayra.thresholding import *
 import dask
 from dask.distributed import Client, progress, LocalCluster
-cluster = LocalCluster(processes=False,n_workers=3,threads_per_worker=6)
+cluster = LocalCluster(processes=False,n_workers=3,threads_per_worker=12)
 client = Client(cluster)
 
 load_sigma_naught=dask.delayed(load_sigma_naught)
@@ -17,7 +17,7 @@ remove_sigma_naught=dask.delayed(remove_sigma_naught)
 ## must also delay np.copy!!!
 np.copy = dask.delayed(np.copy)
 
-tiffs=select_n_last_tiffs(1000)
+tiffs=select_tiffs_year_month(2018,1)
 
 out=list()
 for f in tiffs:
