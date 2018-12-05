@@ -62,8 +62,9 @@ def main():
 
         logger.info("computing thresholds for last "+sys.argv[2]+" scenes")
         import buhayra.thresholding as thresh
+        import buhayra.loops as loops
         scenes=thresh.select_n_last_tiffs(int(sys.argv[2]))
-        thresh.threshold_loop(scenes)
+        loops.threshold_loop(scenes)
 
 
     elif sys.argv[1]=="threshold year month":
@@ -117,8 +118,8 @@ def main():
 
     elif sys.argv[1]=="test parallel":
 
-        import maintenance.test_parallel as par
-        par.test()
+        import tests.test_parallel as par
+        par.test_dask()
 
     elif sys.argv[1]=="run maintenance":
 

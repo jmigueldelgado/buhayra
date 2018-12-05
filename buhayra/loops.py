@@ -1,10 +1,13 @@
-
+#from dask import compute, delayed
+#import dask.multiprocessing
 import dask
 from dask.distributed import Client, progress, LocalCluster
 import buhayra.thresholding as thresh
 import numpy as np
+import logging
 
-def test_dask():
+def threshold_loop(tiffs):
+    logger = logging.getLogger('root')
     cluster = LocalCluster(processes=False,n_workers=1,threads_per_worker=2)
     client = Client(cluster)
 
@@ -17,12 +20,10 @@ def test_dask():
     save_watermask=dask.delayed(thresh.save_watermask)
     remove_sigma_naught=dask.delayed(thresh.remove_sigma_naught)
 
-    ## must also delay np.copy!!!
+    # must also delay np.copy!!!
     np.copy = dask.delayed(np.copy)
-
-    # tiffs=select_tiffs_year_month(2018,1)
     tiffs=thresh.select_n_last_tiffs(10)
-
+    tiffs
     out=list()
     for f in tiffs:
         out_db=load_sigma_naught(f)
@@ -42,8 +43,7 @@ def test_dask():
         out.append(rm)
 
 
-    total=dask.delayed()(out)
-    total.compute()
-    client.close()
-    cluster.close()
-# total.visualize(filename='threshold.svg')
+        total=dask.delayed()(out)
+        total.compute()
+
+    logger.info('finished threshold loop. processed '+str(len(tiffs)) + ' tifs')
