@@ -75,9 +75,12 @@ def main():
 
     elif sys.argv[1]=="insert":
 
-        logger.info("inserting into mongodb")
+        logger.info("inserting into mongodb in "+sys.argv[2]+"-"+sys.argv[3])
         import buhayra.insertPolygons as ipol
-        ipol.insertLoop()
+        tiffs=ipol.select_tiffs_year_month(int(sys.argv[2]),int(sys.argv[3]))
+
+
+        ipol.insert_loop(ipol)
 
     elif sys.argv[1]=="write polygons":
 

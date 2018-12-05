@@ -27,7 +27,7 @@ import pyproj
 from functools import partial
 from shapely.ops import transform
 import numpy as np
-
+import dask.distributed
 
 System = jpy.get_type('java.lang.System')
 BandDescriptor = jpy.get_type('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor')
