@@ -44,7 +44,10 @@ def sar2sigma(scenes):
             product = ProductIO.readProduct(sarIn+"/"+f)
             productName=product.getName()
 
+            logger.info("processing " + productName)
             rect_utm=getBoundingBoxScene(product)
+            return
+
             wm_in_scene,id_in_scene = getWMinScene(rect_utm,wm)
 
             product=orbit_correction(product)
@@ -248,6 +251,7 @@ def getWMinScene(rect,wm):
     return(wm_in_scene,id)
 
 def getBoundingBoxScene(product):
+    logger = logging.getLogger('root')
     gc=product.getSceneGeoCoding()
     rsize=product.getSceneRasterSize()
     h=rsize.getHeight()
@@ -259,6 +263,8 @@ def getBoundingBoxScene(product):
     p4=gc.getGeoPos(PixelPos(w,0),None)
 
     rect=Polygon([(p1.getLon(),p1.getLat()),(p2.getLon(),p2.getLat()),(p3.getLon(),p3.getLat()),(p4.getLon(),p4.getLat())])
+    logger.info('Bounding box of the scene:')
+    logger.info(rect.wkt)
     project = partial(
         pyproj.transform,
         pyproj.Proj(init='epsg:4326'),

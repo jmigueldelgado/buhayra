@@ -43,7 +43,7 @@ def main():
 
     elif sys.argv[1]=="sar2sigma year month":
 
-        logger.info("starting sar.sar2sigma() in parallel: processing past sar scenes and subsetting")
+        logger.info("starting sar.sar2sigma(): processing past sar scenes and subsetting")
         import sar2watermask.sar as sar
 
         scenes=sar.select_scenes_year_month(int(sys.argv[2]),int(sys.argv[3]))

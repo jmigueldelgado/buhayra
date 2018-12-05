@@ -2,7 +2,7 @@
 from buhayra.thresholding import *
 import dask
 from dask.distributed import Client, progress, LocalCluster
-cluster = LocalCluster(processes=False,n_workers=4,threads_per_worker=6)
+cluster = LocalCluster(processes=False,n_workers=3,threads_per_worker=6)
 client = Client(cluster)
 
 load_sigma_naught=dask.delayed(load_sigma_naught)
