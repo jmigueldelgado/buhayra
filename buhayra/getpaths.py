@@ -26,7 +26,7 @@ elif socket.gethostname()=='ubuntuserver':
 elif socket.gethostname()=='MEKONG':
     home = {
         'home' : expanduser("~"),
-        'scratch' : expanduser("~") + '/SESAM/sesam_share/delgado/scratch',
+        'scratch' : expanduser("~") + '/scratch',
         'proj' : expanduser("~") + '/proj/buhayra',
         'parameters' : expanduser("~") + '/proj/buhayra/buhayra/parameters'}
 elif socket.gethostname()=='vm-sesam':

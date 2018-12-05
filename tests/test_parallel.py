@@ -2,7 +2,7 @@
 from buhayra.thresholding import *
 import dask
 from dask.distributed import Client, progress, LocalCluster
-cluster = LocalCluster(processes=False,n_workers=1,threads_per_worker=3)
+cluster = LocalCluster(processes=False,n_workers=4,threads_per_worker=6)
 client = Client(cluster)
 
 load_sigma_naught=dask.delayed(load_sigma_naught)
@@ -17,7 +17,7 @@ remove_sigma_naught=dask.delayed(remove_sigma_naught)
 ## must also delay np.copy!!!
 np.copy = dask.delayed(np.copy)
 
-tiffs=select_n_last_tiffs(5)
+tiffs=select_n_last_tiffs(1000)
 
 out=list()
 for f in tiffs:
@@ -30,11 +30,15 @@ for f in tiffs:
     thr = determine_threshold_in_tif(splt)
     openwater = threshold(out_db,thr)
 
-    orig=save_originals(f,original,metadata,thr)
+    orig = save_originals(f,original,metadata,thr)
     out.append(orig)
-    # wm.append(save_watermask(f,openwater,metadata,thr))
-    # rm.append(remove_sigma_naught(f))
-    # out.append(orig)
+    wm = save_watermask(orig,openwater,metadata,thr)
+    out.append(wm)
+    rm = remove_sigma_naught(wm)
+    out.append(rm)
+
 
 total=dask.delayed()(out)
 total.compute()
+
+# total.visualize(filename='threshold.svg')
