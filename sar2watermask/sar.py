@@ -38,7 +38,6 @@ def sar2sigma(scenes):
 
     outForm='GeoTIFF+XML'
     with fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r') as wm:
-
         for f in scenes:
             logger.info("processing " + f)
             product = ProductIO.readProduct(sarIn+"/"+f)
@@ -46,7 +45,6 @@ def sar2sigma(scenes):
 
             logger.info("processing " + productName)
             rect_utm=getBoundingBoxScene(product)
-            return
 
             wm_in_scene,id_in_scene = getWMinScene(rect_utm,wm)
 
@@ -57,7 +55,7 @@ def sar2sigma(scenes):
             product=speckle_filtering(product)
             product=geom_correction(product)
             product=set_no_data_value(product)
-    #        product=sigma_naught(product)
+#            product=sigma_naught(product)
 
             logger.info("starting loop on reservoirs")
             for i in range(0,len(id_in_scene)):
@@ -75,20 +73,13 @@ def sar2sigma(scenes):
 
                 compress_tiff(sarOut+'/locked.tif',sarOut+'/'+fname+'.tif')
 
-
-    #            if os.path.isfile(sarOut+'/locked.tif'):
-    #                os.rename(sarOut+'/locked.tif',sarOut+'/'+fname+'.tif')
-    #            if os.path.isfile(sarOut+'/locked.xml'):
-    #                os.rename(sarOut+'/locked.xml',sarOut+'/'+fname+'.xml')
-            # ProductIO.writeProduct(product,sarOut+"/"+productName,outForm)
-
             product.dispose()
             ### remove scene from folder
             logger.info("REMOVING " + f)
             if os.path.isfile(sarIn+"/"+f):
                 os.remove(sarIn+"/"+f)
-
             logger.info("**** sar2sigma completed!" + f  + " processed**********")
+        
     System.gc()
 
 
@@ -247,7 +238,6 @@ def getWMinScene(rect,wm):
         if rect.contains(pol):
             wm_in_scene.append(pol)
             id.append(feat['properties']['id'])
-    wm.close()
     return(wm_in_scene,id)
 
 def getBoundingBoxScene(product):
