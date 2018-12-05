@@ -12,52 +12,35 @@ import json
 from functools import partial
 import pyproj
 from numpy import amax
-from buhayra.thresholding import *
 
-def tif2shapely(f):
+def load_metadata(f):
+    with open(polOut+'/'+f[:-3]+'json', 'r') as fjson:
+        metadata = json.load(fjson)
+    return metadata
+
+def load_watermask(f):
     with rasterio.open(polOut+'/'+f,'r') as ds:
         ds.profile.update(dtype=rasterio.int32)
-        with open(polOut+'/'+f[:-3]+'json', 'r') as fjson:
-            gdalParam = json.load(fjson)
-        affParam=rasterio.Affine.from_gdal(gdalParam[0],gdalParam[1],gdalParam[2],gdalParam[3],gdalParam[4],gdalParam[5])
         r=ds.read(1)
-        if amax(r)==0:
-            poly = Polygon()
-        else:
-            polys=list()
-            for pol, value in features.shapes(r, transform=affParam):
-                if value>0:
-                    polys.append(shape(pol))
-                    # print("Image value:")
-                    # print(value)
-                # print("Geometry:")
-                # pprint.pprint(shape)
-            if len(polys)>1:
-                poly = cascaded_union(polys)
-            else:
-                poly=polys[0]
+    return r
 
-    return(poly)
+def raster2shapely(r,metadata):
+    affParam=rasterio.Affine.from_gdal(metadata[0],metadata[1],metadata[2],metadata[3],metadata[4],metadata[5])
+    polys=list()
+    for pol, value in features.shapes(r, transform=affParam):
+        if value==1:
+            polys.append(shape(pol))
+    return cascaded_union(polys)
 
-def getProperties(f):
-    with open(polOut+'/'+f[:-3]+'json', 'r') as fjson:
-        param = json.load(fjson)
 
+def prepareJSON(poly,f,metadata):
     metalist=f[:-4].split('_')
     sentx=metalist[0]
-    meta={
-        'source_id':metalist[0],
+    props={
+        'source_id':sentx[1],
         'ingestion_time':datetime.datetime.strptime(metalist[4],'%Y%m%dT%H%M%S'),
         'id_jrc':int(metalist[9]),
-        'threshold':int(param[6]),}
-    if sentx.startswith('S1'):
-        meta['source_id']=1
-    else:
-        meta['source_id']=None
-    return(meta)
-
-def prepareJSON(poly,f):
-    props=getProperties(f)
+        'threshold':int(metadata[6]),}
     s=json.dumps(mapping(poly))
     geom=json.loads(s)
 
@@ -73,6 +56,12 @@ def prepareJSON(poly,f):
 
     return(feat)
 
+def remove_watermask(f,feat_id):
+    logger = logging.getLogger('root')
+    os.remove(polOut+'/'+f[:-3]+'json')
+    os.remove(polOut + '/' + f)
+    return f
+
 def wgs2utm(geom):
     project = partial(
         pyproj.transform,
@@ -82,9 +71,8 @@ def wgs2utm(geom):
     return(geom_utm)
 
 def select_intersecting_polys(feat,wm):
-
-    geom=geojson2shapely(feat['geometry'])
-    geom=checknclean(geom)
+    geom=shape(feat['geometry'])
+    geom=geom.buffer(0)
 
     project = partial(
         pyproj.transform,
@@ -93,8 +81,8 @@ def select_intersecting_polys(feat,wm):
 
     for wm_feat in wm:
         if int(wm_feat['id'])==feat['properties']['id_jrc']:
-            refgeom=geojson2shapely(wm_feat['geometry'])
-            refgeom=checknclean(refgeom)
+            refgeom=shape(wm_feat['geometry'])
+            refgeom=refgeom.buffer(0)
             refgeom=transform(project,refgeom)
             break
 
@@ -103,10 +91,7 @@ def select_intersecting_polys(feat,wm):
         for poly in geom:
             if poly.intersects(refgeom):
                 inters.append(poly)
-        if len(inters)>1:
-            inters = cascaded_union(inters)
-        else:
-            inters=inters[0]
+        inters = cascaded_union(inters)
         s=json.dumps(mapping(inters))
     else:
         if geom.intersects(refgeom):
@@ -114,3 +99,54 @@ def select_intersecting_polys(feat,wm):
 
     feat['geometry']=json.loads(s)
     return(feat)
+
+
+tiffs=select_tiffs_year_month(2018,2)
+
+def select_tiffs_year_month(Y,M):
+    logger = logging.getLogger('root')
+
+    if(len(listdir(polOut))<1):
+        logger.info(polOut+" is empty! Nothing to do. Exiting and returning None.")
+        tiffs_in_ym=None
+    else:
+        timestamp=list()
+        tiffs_in_ym=list()
+        for tif in listdir(polOut):
+            if not tif.startswith('S'):
+                continue
+            stamp=datetime.datetime.strptime(tif.split('_')[4],'%Y%m%dT%H%M%S')
+            if re.search('.tif$',tif) and stamp.year==Y and stamp.month==M:
+                tiffs_in_ym.append(tif)
+                timestamp.append(stamp)
+        if(len(timestamp)<1):
+            logger.info(polOut+" has no tiffs for year "+str(Y)+" and month "+str(M)+"Exiting and returning None.")
+            tiffs_in_ym=None
+    return(tiffs_in_ym)
+
+def select_n_last_tiffs(n):
+    logger = logging.getLogger('root')
+
+    if(len(listdir(polOut))<1):
+        logger.info(polOut+" is empty! Nothing to do. Exiting and returning None.")
+        tiffs=None
+    else:
+        timestamp=list()
+        tiffs=list()
+        for tiff in listdir(polOut):
+            if not tiff.startswith('S'):
+                continue
+            stamp=datetime.datetime.strptime(tiff.split('_')[4],'%Y%m%dT%H%M%S')
+            if re.search('.tif$',tiff):
+                tiffs.append(tiff)
+                timestamp.append(stamp)
+
+        if(len(timestamp)<1):
+            logger.info(polOut+"Has not tifs. Exiting and returning None.")
+            tiffs.append(None)
+        if(len(timestamp)<=n):
+            return(tiffs)
+        else:
+            index=np.argsort(timestamp)
+            return([tiffs[i] for i in index[-n:]])
+    return(tiffs)

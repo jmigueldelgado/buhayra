@@ -6,23 +6,69 @@ import logging
 from buhayra.polygonize import *
 from buhayra.getpaths import *
 from buhayra.credentials import *
+import dask
+from dask.distributed import Client, progress, LocalCluster
 
-def insertLoop():
+
+# f=select_tiffs_year_month(2018,4)[0]
+# wm=fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r')
+
+def insert_loop(tiffs):
     logger = logging.getLogger('root')
-    wm=fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r')
-    while(selectTiff(polOut)):
-        f=selectTiff(polOut)
-        logger.debug('Selecting tif %s',f)
-        poly=tif2shapely(f)
-        logger.debug('Preparing JSON to insert')
-        feat=prepareJSON(poly,f)
-        feat=select_intersecting_polys(feat,wm)
-        feat_id=insertNEB(feat)
-        logger.info('Inserted feature ID: %s',feat_id)
-        logger.info('deleting ' + f)
-        os.remove(polOut + '/' + f)
-        os.remove(polOut+'/'+f[:-3]+'json')
-    wm.close()
+    cluster = LocalCluster(processes=False,n_workers=1,threads_per_worker=2)
+    client = Client(cluster)
+
+    load_watermask=dask.delayed(load_watermask)
+    load_metadata=dask.delayed(load_metadata)
+    raster2shapely=dask.delayed(raster2shapely)
+    prepareJSON=dask.delayed(prepareJSON)
+    select_intersecting_polys=dask.delayed(select_intersecting_polys)
+    insert_into_NEB=dask.delayed(insert_into_NEB)
+    remove_watermask=dask.delayed(remove_watermask)
+
+    logger = logging.getLogger('root')
+    neb = connect_to_NEB()
+    out=list()
+    with fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r') as wm:
+        for f in tiffs:
+            r = load_watermask(f)
+            metadata = load_metadata(f)
+            poly = raster2shapely(r,metadata)
+            feat = prepareJSON(poly,f,metadata)
+            feat_out = select_intersecting_polys(feat,wm)
+            feat_id = insert_into_NEB(feat,neb)
+            out.append(feat_id)
+            rm = remove_watermask(f,feat_id)
+            out.append(rm)
+
+    total=dask.delayed()(out)
+    total.compute()
+
+def connect_to_NEB():
+    logger = logging.getLogger('root')
+
+    # client = MongoClient('127.0.0.1', server.local_bind_port) # server.local_bind_port is assigned local port
+    client = MongoClient('mongodb://'+ MONGO_USER + ':' + MONGO_PASS + '@' + MONGO_HOST + '/' + MONGO_DB)
+    logger.info("%s",client)
+    db = client.sar2watermask
+    neb = db.neb ##  collection
+    logger.info("Connected to mongodb:")
+    logger.info("%s",neb)
+
+    return neb
+
+
+def insert_into_NEB(feat,neb):
+    logger = logging.getLogger('root')
+    # logger.debug('id - ' + str(feat['properties']['id_jrc']) + ' - type' + feat['geometry']['type'])
+    # logger.debug("Ingestion Date:%s",feat["properties"]["ingestion_time"])
+    #feat_id = neb.update_one({'properties.id_jrc':feat["properties"]["id_jrc"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True).upserted_id
+    #logger.debug('Inserted feature ID: %s',feat_id)
+    result = neb.update_one({'properties.id_jrc':feat["properties"]["id_jrc"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True)
+
+    # result = neb.insert_one(feat)
+    return(result.upserted_id)
+
 
 def write_poly_loop():
     logger = logging.getLogger('root')
@@ -36,32 +82,8 @@ def write_poly_loop():
         feat['properties']['ingestion_time']=None
         with open(home['home']+'/'+f[:-3]+'geojson', 'w') as fjson:
             json.dump(feat, fjson)
-        os.remove(polOut + '/' + f)
-        os.remove(polOut+'/'+f[:-3]+'json')
-
-def insertNEB(feat):
-    logger = logging.getLogger('root')
-
-    logger.info("logger start")
-    # client = MongoClient('127.0.0.1', server.local_bind_port) # server.local_bind_port is assigned local port
-    client = MongoClient('mongodb://'+ MONGO_USER + ':' + MONGO_PASS + '@' + MONGO_HOST + '/' + MONGO_DB)
-    logger.info("%s",client)
-    ## in case you want the local host:
-    #client = MongoClient('mongodb://localhost:27017/')
-
-    db = client.sar2watermask
-    neb = db.neb ##  collection
-    # print(db.collection_names())
-    logger.info("Connected to mongodb:")
-    logger.info("%s",neb)
-    logger.debug('id - ' + str(feat['properties']['id_jrc']) + ' - type' + feat['geometry']['type'])
-    logger.debug("Ingestion Date:%s",feat["properties"]["ingestion_time"])
-    #feat_id = neb.update_one({'properties.id_jrc':feat["properties"]["id_jrc"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True).upserted_id
-    #logger.debug('Inserted feature ID: %s',feat_id)
-    result = neb.update_one({'properties.id_jrc':feat["properties"]["id_jrc"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True)
-
-    # result = neb.insert_one(feat)
-    return(result.upserted_id)
+            os.remove(polOut + '/' + f)
+            os.remove(polOut+'/'+f[:-3]+'json')
 
 def testMongoConnect():
     logger = logging.getLogger('root')
