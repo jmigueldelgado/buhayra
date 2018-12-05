@@ -15,8 +15,8 @@ from functools import partial
 from shapely.ops import transform
 #from dask import compute, delayed
 #import dask.multiprocessing
-#import dask
-#from dask.distributed import Client, progress, LocalCluster
+import dask
+from dask.distributed import Client, progress, LocalCluster
 
 
 
@@ -225,6 +225,7 @@ def select_n_last_tiffs(n):
             index=np.argsort(timestamp)
             return([tiffs[i] for i in index[-n:]])
     return(tiffs)
+<<<<<<< HEAD
 
 def threshold_loop(tiffs):
     logger = logging.getLogger('root')
