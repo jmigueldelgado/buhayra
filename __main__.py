@@ -71,8 +71,9 @@ def main():
 
         logger.info("computing thresholds for all tiffs in "+sys.argv[2]+"-"+sys.argv[3])
         import buhayra.thresholding as thresh
+        import buhayra.loops as loops
         tiffs=thresh.select_tiffs_year_month(int(sys.argv[2]),int(sys.argv[3]))
-        thresh.threshold_loop(tiffs)
+        loops.threshold_loop(tiffs)
 
     elif sys.argv[1]=="insert":
 

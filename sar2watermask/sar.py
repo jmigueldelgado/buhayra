@@ -67,10 +67,10 @@ def sar2sigma(scenes):
                 product_subset=subsetProduct(product,wm_in_scene[i])
 
                 logger.debug("writing product "+ str(id_in_scene[i]))
-                ProductIO.writeProduct(product_subset,sarOut+"/locked",outForm)
+                ProductIO.writeProduct(product_subset,sarOut+"/" + fname + "_locked",outForm)
                 product_subset.dispose()
 
-                compress_tiff(sarOut+'/locked.tif',sarOut+'/'+fname+'.tif')
+                compress_tiff(sarOut+'/'+fname+'_locked.tif',sarOut+'/'+fname+'.tif')
 
             product.dispose()
             ### remove scene from folder
