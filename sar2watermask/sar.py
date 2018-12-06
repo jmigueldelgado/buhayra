@@ -31,6 +31,18 @@ import numpy as np
 System = jpy.get_type('java.lang.System')
 BandDescriptor = jpy.get_type('org.esa.snap.core.gpf.common.BandMathsOp$BandDescriptor')
 
+def sar_orbit_correction(scenes):
+    logger = logging.getLogger('root')
+    outForm='GeoTIFF+XML'
+    for f in scenes:
+        logger.info("processing " + f)
+        product = ProductIO.readProduct(sarIn+"/"+f)
+        product=orbit_correction(product)
+        ProductIO.writeProduct(product,vegIn + "/" + fname,outForm)
+        product.dispose()
+    System.gc()
+
+
 
 def sar2sigma(scenes):
     logger = logging.getLogger('root')
@@ -78,7 +90,7 @@ def sar2sigma(scenes):
             if os.path.isfile(sarIn+"/"+f):
                 os.remove(sarIn+"/"+f)
             logger.info("**** sar2sigma completed!" + f  + " processed**********")
-        
+
     System.gc()
 
 

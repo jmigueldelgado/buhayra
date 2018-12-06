@@ -46,13 +46,16 @@ else:
 proj = home['proj']
 scratch= home['scratch']
 
-
+vegdir = scratch + "/vegetated_water_surfaces"
 sardir=scratch+"/s1a_scenes"
 s2adir=scratch+"/s2a_scenes"
 
 s2aIn=s2adir+"/in"
 s2aIn=s2adir+"/in"
 s2aOut=s2adir+"/out"
+
+vegIn = vegdir + "/in"
+vegOut = vegdir + "/out"
 
 sarIn=sardir+"/in"
 sarOut=sardir+"/out"
