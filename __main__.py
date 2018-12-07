@@ -14,7 +14,7 @@ def main():
 
     if sys.argv[1] is None:
 
-        logger.error("an argument is needed, for example: get_scenes, rmclouds, sar, ndwi, polygonize, insert, recent polys, 1 month old polys, 2 months old polys, update validation")
+        logger.error('an argument is needed, list of arguments:\n- "get scenes"\n- "get past scenes" year month\n- "sar2sigma"\n- "sar2sigma" year month\n- "threshold last" N\n- "threshold year month" year month\n- insert\n- recent polys\n- 1 month old polys\n- 2 months old polys\n- update validation')
 
     elif sys.argv[1]=="get scenes":
 
@@ -32,31 +32,26 @@ def main():
 
     elif sys.argv[1]=="sar2sigma":
 
-        logger.info("starting sar.sar2sigma(): processing sar scenes and subsetting")
         import sar2watermask.sar as sar
         f=sar.select_last_scene()
         if f is None:
             logger.info("There are no scenes to process in "+sarIn+". Exiting")
             raise SystemExit()
         sar.sar2sigma([f])
-        logger.info("finished sar2wm")
 
     elif sys.argv[1]=="sar2sigma year month":
 
-        logger.info("starting sar.sar2sigma(): processing past sar scenes and subsetting")
         import sar2watermask.sar as sar
 
         scenes=sar.select_scenes_year_month(int(sys.argv[2]),int(sys.argv[3]))
         if scenes is None:
             logger.info("There are no past scenes for year "+sys.argv[2]+" and month "+sys.argv[3]+" available to process in "+sarIn+". Exiting")
             raise SystemExit()
-        logger.info("entering for loop")
         if len(scenes)==1:
             sar.sar2sigma([scenes])
         if len(scenes)>1:
             sar.sar2sigma(scenes)
 
-        logger.info("finished sar2wm")
 
     elif sys.argv[1]=="threshold last":
 

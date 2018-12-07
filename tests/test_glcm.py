@@ -3,40 +3,61 @@ import matplotlib.pyplot as plt
 from skimage.feature import greycomatrix, greycoprops
 from skimage import data
 from sklearn.decomposition import PCA
-from skimage.util.shape import view_as_windows
+from skimage.util.shape import view_as_windows, view_as_blocks
 import numpy as np
 
 ##### test PCA in parallel
-from dask_ml.decomposition import PCA
-from dask.distributed import Client, progress
-import dask.array as da
+# from dask_ml.decomposition import PCA
+# from dask.distributed import Client, progress
+# import dask.array as da
+#
+# client = Client(processes=False, threads_per_worker=2,
+#             n_workers=1, memory_limit='2GB')
 
-client = Client(processes=False, threads_per_worker=2,
-            n_workers=1, memory_limit='2GB')
-
+from sklearn import preprocessing
+from sklearn import datasets
 #open camera image
-X = data.camera()
+iris = datasets.load_iris()
+XX = preprocessing.scale(iris.data)
+
 dX = da.from_array(X, chunks=X.shape)
 
-pca = PCA(n_components=2)
-pca.fit(dX)
+loadings,variance = get_loadings_and_explained_variance(XX,PCA)
+loadings[0,]
+variance
+
+def get_loadings_and_explained_variance(X,PCA):
+    pca = PCA(n_components='mle')
+    pcafit=pca.fit(X)
+    eigenvectors = pcafit.components_
+    # np.linalg.norm(cmps[2,:])
+    var = pcafit.explained_variance_ratio_
+    return eigenvectors, var
 
 
 
 
 ######  glcm on single cpu
+image = data.camera()
 
-window_shape=(3,3)
 
-B=view_as_windows(image, window_shape)
-X=B.reshape((B.shape[0]*B.shape[1],B.shape[2],B.shape[3]))
+import time
+start=time.process_time()
+predictors=get_glcm_predictors(image)
+time.process_time()-start
 
-predictor=list()
+def get_glcm_predictors(image):
+    window_shape=(3,3)
+    new_image = image[:-(image.shape[0]%window_shape[0]),:-(image.shape[1]%window_shape[1])]
 
-for i in range(10):
-    glcm = greycomatrix(X[i,:,:], [1], [0, np.pi/4, np.pi/2, 3*np.pi/4, np.pi, 5*np.pi/4, 3*np.pi/2,2*np.pi], 256)
-    GLCM=np.sum(glcm,(2,3))
-    glcmi = [np.mean(GLCM),np.std(GLCM)**2,greycoprops(glcm, 'homogeneity')[0,0],greycoprops(glcm, 'dissimilarity')[0,0],greycoprops(glcm, 'correlation')[0, 0]]
-    predictor.append(glcmi)
+    B=view_as_blocks(new_image, window_shape)
+    X=B.reshape((B.shape[0]*B.shape[1],B.shape[2],B.shape[3]))
+    predictor=np.empty((X.shape[0],5))
 
-predictor
+    for i in range(1000):#X.shape[0]):
+        glcm = greycomatrix(X[i,:,:], [1], [0, np.pi/4, np.pi/2, 3*np.pi/4, np.pi, 5*np.pi/4, 3*np.pi/2,2*np.pi], 256)
+        GLCM=np.sum(glcm,(2,3))
+        glcmi = [np.mean(GLCM),np.std(GLCM)**2,greycoprops(glcm, 'homogeneity')[0,0],greycoprops(glcm, 'dissimilarity')[0,0],greycoprops(glcm, 'correlation')[0, 0]]
+        predictor[i]=glcmi
+
+    return(predictor)
