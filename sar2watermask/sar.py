@@ -74,9 +74,9 @@ def sar2sigma(scenes):
 
             product.dispose()
             ### remove scene from folder
-            logger.info("REMOVING " + f)
-            if os.path.isfile(sarIn+"/"+f):
-                os.remove(sarIn+"/"+f)
+#            logger.info("REMOVING " + f)
+#            if os.path.isfile(sarIn+"/"+f):
+#                os.remove(sarIn+"/"+f)
             logger.info("**** sar2sigma completed!" + f  + " processed**********")
         
     System.gc()
