@@ -34,13 +34,15 @@ BandDescriptor = jpy.get_type('org.esa.snap.core.gpf.common.BandMathsOp$BandDesc
 
 def sar_orbit_correction(scenes):
     logger = logging.getLogger('root')
+    time0=time.process_time()
     outForm='GeoTIFF-BigTIFF'
     for f in scenes:
         logger.info("processing " + f)
-        product = ProductIO.readProduct(vegIn+"/"+f)
+        product = ProductIO.readProduct(sarIn+"/"+f)
         product=orbit_correction(product)
         ProductIO.writeProduct(product,vegIn + "/" + f[:-4],outForm)
         product.dispose()
+        logger.info("**** " + f  + " processed in "+str((time.process_time()-time0)/60)+" minutes****")
     System.gc()
 
 def sar2sigma_scene(scenes):

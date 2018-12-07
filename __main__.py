@@ -37,7 +37,25 @@ def main():
         if f is None:
             logger.info("There are no scenes to process in "+sarIn+". Exiting")
             raise SystemExit()
-        sar.sar2sigma([f])
+        sar.sar2sigma_subset([f])
+        
+    elif sys.argv[1]=="sar orbit correction":
+
+        import sar2watermask.sar as sar
+        f=sar.select_last_scene()
+        if f is None:
+            logger.info("There are no scenes to process in "+sarIn+". Exiting")
+            raise SystemExit()
+        sar.sar_orbit_correction([f])
+        
+    elif sys.argv[1]=="sar scene":
+
+        import sar2watermask.sar as sar
+        f=sar.select_last_scene()
+        if f is None:
+            logger.info("There are no scenes to process in "+sarIn+". Exiting")
+            raise SystemExit()
+        sar.sar2sigma_scene([f])
 
     elif sys.argv[1]=="sar2sigma year month":
 
@@ -48,9 +66,9 @@ def main():
             logger.info("There are no past scenes for year "+sys.argv[2]+" and month "+sys.argv[3]+" available to process in "+sarIn+". Exiting")
             raise SystemExit()
         if len(scenes)==1:
-            sar.sar2sigma([scenes])
+            sar.sar2sigma_subset([scenes])
         if len(scenes)>1:
-            sar.sar2sigma(scenes)
+            sar.sar2sigma_subset(scenes)
 
 
     elif sys.argv[1]=="threshold last":
