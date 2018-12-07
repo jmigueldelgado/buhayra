@@ -1,26 +1,38 @@
-
 import matplotlib.pyplot as plt
 from skimage.feature import greycomatrix, greycoprops
 from skimage import data
 from sklearn.decomposition import PCA
 from skimage.util.shape import view_as_windows, view_as_blocks
 import numpy as np
+import buhayra.vegetatedwater as veggie
+
+f=veggie.select_last_tiff()
+
+r, out_transform = veggie.load_raster(f)
 
 ##### test PCA in parallel
 # from dask_ml.decomposition import PCA
-# from dask.distributed import Client, progress
-# import dask.array as da
-#
-# client = Client(processes=False, threads_per_worker=2,
-#             n_workers=1, memory_limit='2GB')
+
+
+from dask.distributed import Client, progress, LocalCluster
+import dask.array as da
+cluster = LocalCluster(processes=False,n_workers=1,threads_per_worker=8)
+client = Client(cluster)
 
 from sklearn import preprocessing
 from sklearn import datasets
-#open camera image
-iris = datasets.load_iris()
-XX = preprocessing.scale(iris.data)
 
-dX = da.from_array(X, chunks=X.shape)
+#open camera image
+#iris = datasets.load_iris()
+#XX = preprocessing.scale(iris.data)
+
+dX = da.from_array(r, chunks=(2000,2000))
+
+
+dXscaled = dX.map_blocks(preprocessing.scale)
+dXscaled.compute() ## OR
+dXscaled.compute(schedule='single-threaded')
+
 
 loadings,variance = get_loadings_and_explained_variance(XX,PCA)
 loadings[0,]
