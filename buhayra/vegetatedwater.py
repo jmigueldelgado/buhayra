@@ -1,8 +1,8 @@
 import numpy as np
 from buhayra.getpaths import *
-import rasterio
 import logging
 import os
+import rasterio
 import re
 import datetime
 from skimage.util.shape import view_as_windows, view_as_blocks

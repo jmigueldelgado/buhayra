@@ -129,7 +129,7 @@ def sar2sigma_subset(scenes):
             # logger.info("REMOVING " + f)
             # if os.path.isfile(sarIn+"/"+f):
             #     os.remove(sarIn+"/"+f)
-            open(fname + '.finished','w').close()
+            open(productName + '.finished','w').close()
             finished=finished+1
             logger.info("**** " + f  + " processed in "+str((time.process_time()-time0)/60)+" minutes****")
             logger.info("**** processed " +str(finished)+" of "+ str(len(scenes))+" in loop ****")
