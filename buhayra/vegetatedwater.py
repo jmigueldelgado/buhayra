@@ -14,6 +14,7 @@ def load_raster(f):
         out_transform=ds.transform
     return r, out_transform
 
+
 def select_last_tiff():
     logger = logging.getLogger('root')
     if(len(listdir(vegIn))<1):
