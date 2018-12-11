@@ -19,8 +19,9 @@ xx=np.random.random((100,100))
 
 X_std = (x - np.amin(x)) / (np.amax(x) - np.amin(x))
 X_scaled = dask.array.round(X_std * (255 - 0) + 0)
+X_scaled = X_scaled.astype('uint8')
+
 x=X_scaled.compute()
-xuint = x.astype='uint8'
 
 get_glcm_predictors = dask.delayed(veggie.get_glcm_predictors)
 
