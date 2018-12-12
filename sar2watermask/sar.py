@@ -93,6 +93,10 @@ def sar2sigma_subset(scenes):
             product = ProductIO.readProduct(sarIn+"/"+f)
             productName=product.getName()
 
+            if (productName+".finished") in listdir(sarIn):
+                logger.debug("product "+fname+" already processed: skipping")
+                continue
+
             # logger.info("processing " + productName)
             rect_utm=getBoundingBoxScene(product)
 

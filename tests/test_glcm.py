@@ -15,22 +15,35 @@ import rasterio
 # cluster = LocalCluster(processes=False,n_workers=2,threads_per_worker=4, memory_limit='1GB')
 # client = Client(cluster)
 # dask
-x = da.random.random((10000, 10000), chunks=(2000, 2000))
 
+f=veggie.select_last_tiff()
+with rasterio.open(vegIn + '/' +f,'r') as ds:
+    x=da.from_array(ds.read(1),(round(ds.shape[0]/5), round(ds.shape[1]/5)))
+
+i=time.time()
+# x = da.random.random((10000, 10000), chunks=(2000, 2000))
 X_std = (x - np.amin(x)) / (np.amax(x) - np.amin(x))
 X_scaled = dask.array.round(X_std * (255 - 0) + 0)
 xuint = X_scaled.astype('uint8')
 get_glcm_predictors = dask.delayed(veggie.get_glcm_predictors)
-predictor=get_glcm_predictors(xuint)
-results = compute(predictor, scheduler='threads')
+predictors = get_glcm_predictors(xuint)
+pca = PCA(n_components=3)
+pcafit=pca.fit(predictors)
+results = compute(pcafit, scheduler='threads')
+time.time()-i
+
+eigenvectors = pcafit.components_
+
 
 
 # no dask
+i=time.time()
 x=np.random.random((10000,10000))
 X_std = (x - np.amin(x)) / (np.amax(x) - np.amin(x))
 X_scaled = np.round(X_std * (255 - 0) + 0)
 xuint = X_scaled.astype('uint8')
 results = veggie.get_glcm_predictors(xuint)
+time.time()-i
 
 
 ########
@@ -45,15 +58,14 @@ z=x.mean()
 z.compute()
 
 
-f=veggie.select_last_tiff()
 
-client.close()
-cluster.close()
+# client.close()
+# cluster.close()
 
 # %timeit
 # start0=time.perf_counter()
 with rasterio.open(vegIn + '/' +f,'r') as ds:
-    x=da.from_array(ds.read(1),(round(ds.shape[0]/20), round(ds.shape[1]/20)))
+    x=da.from_array(ds.read(1),(round(ds.shape[0]/5), round(ds.shape[1]/5)))
     lazymean=x.mean()
     # out.visualize(filename='da_mean.svg')
 # time.perf_counter()-start0
