@@ -7,25 +7,33 @@ from dask.distributed import Client, progress, LocalCluster
 import dask.array as da
 from dask_ml.decomposition import PCA
 # from sklearn.decomposition import PCA
-import dask
+from dask import compute, delayed
+import dask.threaded
 import rasterio
 
 
-cluster = LocalCluster(processes=False,n_workers=2,threads_per_worker=4, memory_limit='1GB')
-client = Client(cluster)
-
-x = da.random.random((5000, 5000), chunks=(1000, 1000))
-xx=np.random.random((100,100))
+# cluster = LocalCluster(processes=False,n_workers=2,threads_per_worker=4, memory_limit='1GB')
+# client = Client(cluster)
+# dask
+x = da.random.random((10000, 10000), chunks=(1000, 1000))
 
 X_std = (x - np.amin(x)) / (np.amax(x) - np.amin(x))
 X_scaled = dask.array.round(X_std * (255 - 0) + 0)
-X_scaled = X_scaled.astype('uint8')
-
-x=X_scaled.compute()
-
+xuint = X_scaled.astype('uint8')
 get_glcm_predictors = dask.delayed(veggie.get_glcm_predictors)
-
 predictor=get_glcm_predictors(xuint)
+results = compute(predictor, scheduler='threads')
+
+
+# no dask
+x=np.random.random((10000,10000))
+X_std = (x - np.amin(x)) / (np.amax(x) - np.amin(x))
+X_scaled = np.round(X_std * (255 - 0) + 0)
+xuint = X_scaled.astype('uint8')
+results = veggie.get_glcm_predictors(xuint)
+
+
+########
 
 out=predictor.compute()
 client.close()
