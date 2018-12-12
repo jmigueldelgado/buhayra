@@ -26,19 +26,29 @@ X_std = (x - np.amin(x)) / (np.amax(x) - np.amin(x))
 X_scaled = dask.array.round(X_std * (255 - 0) + 0)
 xuint = X_scaled.astype('uint8')
 get_glcm_predictors = dask.delayed(veggie.get_glcm_predictors)
-predictors = get_glcm_predictors(xuint)
+lazypredictors = get_glcm_predictors(xuint)
+predictors = compute(lazypredictors, scheduler='threads')
 pca = PCA(n_components=3)
-pcafit=pca.fit(predictors)
-results = compute(pcafit, scheduler='threads')
+
+i=time.time()
+
+
+
+pcafit=pca.fit(predictors[0])
+# results = compute(pcafit, scheduler='threads')
 time.time()-i
+
 
 eigenvectors = pcafit.components_
 
+# no dask
 
+f=veggie.select_last_tiff()
+with rasterio.open(vegIn + '/' +f,'r') as ds:
+    x=ds.read(1)
 
 # no dask
 i=time.time()
-x=np.random.random((10000,10000))
 X_std = (x - np.amin(x)) / (np.amax(x) - np.amin(x))
 X_scaled = np.round(X_std * (255 - 0) + 0)
 xuint = X_scaled.astype('uint8')

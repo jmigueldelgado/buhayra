@@ -47,9 +47,9 @@ def get_glcm_predictors(image):
     predictor=np.empty((X.shape[0],5))
 
     for i in range(1000):#X.shape[0]):
-        glcm = greycomatrix(X[i,:,:], [1], [0, np.pi/4, np.pi/2, 3*np.pi/4, np.pi, 5*np.pi/4, 3*np.pi/2,2*np.pi], 256)
+        glcm = greycomatrix(X[i,:,:], [1], [0, np.pi/4, np.pi/2, 3*np.pi/4], 256,symmetric=True)
         GLCM=np.sum(glcm,(2,3))
-        glcmi = [np.mean(GLCM),np.std(GLCM)**2,greycoprops(glcm, 'homogeneity')[0,0],greycoprops(glcm, 'dissimilarity')[0,0],greycoprops(glcm, 'correlation')[0, 0]]
+        glcmi = [np.mean(GLCM,axis=0)[0],np.std(GLCM)**2,greycoprops(glcm, 'homogeneity')[0,0],greycoprops(glcm, 'dissimilarity')[0,0],greycoprops(glcm, 'correlation')[0, 0]]
         predictor[i]=glcmi
 
     return(predictor)
