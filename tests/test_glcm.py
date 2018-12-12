@@ -15,7 +15,7 @@ import rasterio
 # cluster = LocalCluster(processes=False,n_workers=2,threads_per_worker=4, memory_limit='1GB')
 # client = Client(cluster)
 # dask
-x = da.random.random((10000, 10000), chunks=(1000, 1000))
+x = da.random.random((10000, 10000), chunks=(2000, 2000))
 
 X_std = (x - np.amin(x)) / (np.amax(x) - np.amin(x))
 X_scaled = dask.array.round(X_std * (255 - 0) + 0)
