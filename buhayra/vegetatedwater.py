@@ -37,13 +37,15 @@ def loadings_and_explained_variance(X,PCA):
     var = pcafit.explained_variance_ratio_
     return eigenvectors, var
 
+def shape_of_trimmed_image(image,window_shape):
+    return image.shape[0]-(image.shape[0]%window_shape[0]),image.shape[1]-(image.shape[1]%window_shape[1])
 
-def glcm_predictors(image):
-    window_shape=(3,3)
+def list_of_3x3_blocks(image,window_shape):
     new_image = image[:-(image.shape[0]%window_shape[0]),:-(image.shape[1]%window_shape[1])]
+    B = view_as_blocks(new_image, window_shape)
+    return B.reshape((B.shape[0]*B.shape[1],B.shape[2],B.shape[3]))
 
-    B=view_as_blocks(new_image, window_shape)
-    X=B.reshape((B.shape[0]*B.shape[1],B.shape[2],B.shape[3]))
+def glcm_predictors(X):
     predictor=np.empty((X.shape[0],8))
 
     for i in range(X.shape[0]):

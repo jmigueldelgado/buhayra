@@ -10,6 +10,8 @@ from dask_ml.decomposition import PCA
 from dask import compute, delayed
 import dask.threaded
 import rasterio
+from skimage.util.shape import view_as_windows, view_as_blocks
+from skimage.feature import greycomatrix, greycoprops
 
 
 # cluster = LocalCluster(processes=False,n_workers=2,threads_per_worker=4, memory_limit='1GB')
@@ -21,16 +23,25 @@ with rasterio.open(vegIn + '/' +f,'r') as ds:
     x=da.from_array(ds.read(1),(round(ds.shape[0]/5), round(ds.shape[1]/5)))
 
 i=time.time()
-# x = da.random.random((10000, 10000), chunks=(2000, 2000))
 X_std = (x - np.amin(x)) / (np.amax(x) - np.amin(x))
 X_scaled = dask.array.round(X_std * (255 - 0) + 0)
 xuint = X_scaled.astype('uint8')
-get_glcm_predictors = dask.delayed(veggie.get_glcm_predictors)
-lazypredictors = get_glcm_predictors(xuint)
+lazypredictors = da.map_blocks(veggie.glcm_predictors,xuint)
 predictors = compute(lazypredictors, scheduler='threads')
-pca = PCA(n_components=3)
+time.time()-i
 
-i=time.time()
+
+pca = PCA(n_components=5)
+
+
+image = da.random.random((10000, 10000), chunks=(2000, 2000))
+image = image.astype('int')
+window_shape=(3,3)
+new_image = image[:-(image.shape[0]%window_shape[0]),:-(image.shape[1]%window_shape[1])]
+B=view_as_blocks(new_image, window_shape)
+X=B.reshape((B.shape[0]*B.shape[1],B.shape[2],B.shape[3]))
+predictor=np.empty((X.shape[0],8))
+
 
 
 
@@ -52,7 +63,7 @@ i=time.time()
 X_std = (x - np.amin(x)) / (np.amax(x) - np.amin(x))
 X_scaled = np.round(X_std * (255 - 0) + 0)
 xuint = X_scaled.astype('uint8')
-results = veggie.get_glcm_predictors(xuint)
+results = veggie.glcm_predictors(xuint)
 time.time()-i
 
 

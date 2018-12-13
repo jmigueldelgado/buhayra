@@ -1,51 +1,60 @@
-#from dask import compute, delayed
-#import dask.multiprocessing
-#import dask
-#from dask.distributed import Client, progress, LocalCluster
-#import buhayra.thresholding as thresh
-from buhayra.thresholding import *
+from buhayra.getpaths import *
+import buhayra.thresholding as thresh
+import buhayra.vegetatedwater as veggie
 import numpy as np
 import logging
+import time
+import dask.array as da
+# from dask_ml.decomposition import PCA
+from sklearn.decomposition import PCA
+from dask import compute, delayed
+import dask.threaded
+import rasterio
+
+f=veggie.select_last_tiff()
+def glcm_loop(scenes):
+    window_shape=(3,3)
+    logger = logging.getLogger('root')
+    for f in scenes:
+        with rasterio.open(vegIn + '/' +f,'r') as ds:
+            x=da.from_array(ds.read(1),(round(ds.shape[0]/5), round(ds.shape[1]/5)))
+        X_std = (x - np.amin(x)) / (np.amax(x) - np.amin(x))
+        X_scaled = dask.array.round(X_std * (255 - 0) + 0)
+        xuint = X_scaled.astype('uint8')
+
+        #calculate dimensions of list of 3x3 blocks
+        newshape = shape_of_trimmed_image(xuint,window_shape)
+        nblocks = (newshape[0]/3) * (newshape[1]/3)
+
+        lazyblocks = da.map_blocks(list_of_3x3_blocks,xuint,window_shape,chunks=(round(nblocks/25),3,3))
+        lazypredictors = da.map_blocks(veggie.glcm_predictors,lazyblocks,window_shape,chunks=(round(nblocks/25),8))
+        predictors = compute(lazypredictors, scheduler='threads')
+
+        pca = PCA(n_components=5)
+        lazypca=pca.fit(lazypredictors)
+
+
+
+
 
 def threshold_loop(tiffs):
     logger = logging.getLogger('root')
-#    cluster = LocalCluster(processes=False,n_workers=6,threads_per_worker=6)
-#    client = Client(cluster)
-
-#    load_sigma_naught=dask.delayed(thresh.load_sigma_naught)
-#    load_metadata=dask.delayed(thresh.load_metadata)
-#    subset_200x200=dask.delayed(thresh.subset_200x200)
-#    determine_threshold_in_tif=dask.delayed(thresh.determine_threshold_in_tif)
-#    threshold=dask.delayed(thresh.threshold)
-#    save_originals=dask.delayed(thresh.save_originals)
-#    save_watermask=dask.delayed(thresh.save_watermask)
-#    remove_sigma_naught=dask.delayed(thresh.remove_sigma_naught)
-
-    # must also delay np.copy!!!
-#    np.copy = dask.delayed(np.copy)
     out=list()
     for f in tiffs:
-        out_db=load_sigma_naught(f)
-        metadata=load_metadata(f)
+        out_db=thresh.load_sigma_naught(f)
+        metadata=thresh.load_metadata(f)
 
         original = np.copy(out_db)
 
-        splt = subset_200x200(out_db)
-        thr = determine_threshold_in_tif(splt)
-        openwater = threshold(out_db,thr)
+        splt = thresh.subset_200x200(out_db)
+        thr = thresh.determine_threshold_in_tif(splt)
+        openwater = thresh.threshold(out_db,thr)
 
-        orig = save_originals(f,original,metadata,thr)
+        orig = thresh.save_originals(f,original,metadata,thr)
         out.append(orig)
-        wm = save_watermask(orig,openwater,metadata,thr)
+        wm = thresh.save_watermask(orig,openwater,metadata,thr)
         out.append(wm)
-        rm = remove_sigma_naught(wm)
+        rm = thresh.remove_sigma_naught(wm)
         out.append(rm)
-
-
-#    total=dask.delayed()(out)
-#    total.compute()
-#    client.close()
-#    cluster.close()
-    
 
     logger.info('finished threshold loop. processed '+str(len(tiffs)) + ' tifs')
