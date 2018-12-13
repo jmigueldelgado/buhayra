@@ -21,10 +21,12 @@ def glcm_loop(scenes):
         X_std = (x - np.amin(x)) / (np.amax(x) - np.amin(x))
         X_scaled = dask.array.round(X_std * (255 - 0) + 0)
         xuint = X_scaled.astype('uint8')
-
+        new_image = image[:-(image.shape[0]%window_shape[0]),:-(image.shape[1]%window_shape[1])]
+        
         #calculate dimensions of list of 3x3 blocks
-        newshape = veggie.shape_of_trimmed_image(xuint,window_shape)
-        nblocks = (newshape[0]/3) * (newshape[1]/3)
+        newshape = new_image.shape
+        nblocks = int(newshape[0]/3) * (newshape[1]/3)
+
         lazypredictors = da.map_blocks(veggie.glcm_predictors,xuint,window_shape,chunks=(round(nblocks/25),8))
         predictors = compute(lazypredictors, scheduler='threads')
 

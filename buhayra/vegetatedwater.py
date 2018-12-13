@@ -40,6 +40,10 @@ def loadings_and_explained_variance(X,PCA):
 def shape_of_trimmed_image(image,window_shape):
     return image.shape[0]-(image.shape[0]%window_shape[0]),image.shape[1]-(image.shape[1]%window_shape[1])
 
+def blocks_3x3(image,window_shape):
+    new_image = image[:-(image.shape[0]%window_shape[0]),:-(image.shape[1]%window_shape[1])]
+    return view_as_blocks(new_image, window_shape)
+
 def glcm_predictors(image,window_shape):
     new_image = image[:-(image.shape[0]%window_shape[0]),:-(image.shape[1]%window_shape[1])]
     B=view_as_blocks(new_image, window_shape)

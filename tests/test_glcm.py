@@ -1,48 +1,16 @@
+
 import numpy as np
-import buhayra.vegetatedwater as veggie
-from buhayra.getpaths import *
 import time
-from sklearn.preprocessing import scale, minmax_scale
-from dask.distributed import Client, progress, LocalCluster
 import dask.array as da
-from dask_ml.decomposition import PCA
-# from sklearn.decomposition import PCA
 from dask import compute, delayed
 import dask.threaded
-import rasterio
 from skimage.util.shape import view_as_windows, view_as_blocks
-from skimage.feature import greycomatrix, greycoprops
 
 
-# cluster = LocalCluster(processes=False,n_workers=2,threads_per_worker=4, memory_limit='1GB')
-# client = Client(cluster)
-# dask
+X = np.random.random((500, 500))
+dX = da.random.random((500, 500), chunks=(50, 50))
 
-f=veggie.select_last_tiff()
-with rasterio.open(vegIn + '/' +f,'r') as ds:
-    x=da.from_array(ds.read(1),(round(ds.shape[0]/5), round(ds.shape[1]/5)))
-
-i=time.time()
-X_std = (x - np.amin(x)) / (np.amax(x) - np.amin(x))
-X_scaled = dask.array.round(X_std * (255 - 0) + 0)
-xuint = X_scaled.astype('uint8')
-lazypredictors = da.map_blocks(veggie.glcm_predictors,xuint)
-predictors = compute(lazypredictors, scheduler='threads')
-time.time()-i
-
-
-pca = PCA(n_components=5)
-
-
-image = da.random.random((10000, 10000), chunks=(2000, 2000))
-image = image.astype('int')
-window_shape=(3,3)
-new_image = image[:-(image.shape[0]%window_shape[0]),:-(image.shape[1]%window_shape[1])]
-B=view_as_blocks(new_image, window_shape)
-X=B.reshape((B.shape[0]*B.shape[1],B.shape[2],B.shape[3]))
-predictor=np.empty((X.shape[0],8))
-
-
+da.map_blocks(view_as_windows,dX,(10,10),chunks=(50,50,10,10),new_axis=[2,3])
 
 
 pcafit=pca.fit(predictors[0])
@@ -57,6 +25,7 @@ eigenvectors = pcafit.components_
 f=veggie.select_last_tiff()
 with rasterio.open(vegIn + '/' +f,'r') as ds:
     x=ds.read(1)
+
 
 # no dask
 i=time.time()
