@@ -25,8 +25,8 @@ def glcm_loop(scenes):
         #calculate dimensions of list of 3x3 blocks
         newshape = shape_of_trimmed_image(xuint,window_shape)
         nblocks = (newshape[0]/3) * (newshape[1]/3)
-
-        lazyblocks = da.map_blocks(list_of_3x3_blocks,xuint,window_shape,chunks=(round(nblocks/25),3,3))
+        lazyblocks = da.map_blocks(list_of_3x3_blocks,xuint,window_shape,chunks=(round(newshape[0]/(3*5)),round(newshape[1]/(3*5)),3,3))
+        lazylist = da.map_blocks(reshape_blocks,lazyblocks,chunks=(round(nblocks/25),3,3)
         lazypredictors = da.map_blocks(veggie.glcm_predictors,lazyblocks,window_shape,chunks=(round(nblocks/25),8))
         predictors = compute(lazypredictors, scheduler='threads')
 

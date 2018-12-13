@@ -42,8 +42,11 @@ def shape_of_trimmed_image(image,window_shape):
 
 def list_of_3x3_blocks(image,window_shape):
     new_image = image[:-(image.shape[0]%window_shape[0]),:-(image.shape[1]%window_shape[1])]
-    B = view_as_blocks(new_image, window_shape)
+    return view_as_blocks(new_image, window_shape)
+
+def reshape_blocks(B):
     return B.reshape((B.shape[0]*B.shape[1],B.shape[2],B.shape[3]))
+
 
 def glcm_predictors(X):
     predictor=np.empty((X.shape[0],8))
