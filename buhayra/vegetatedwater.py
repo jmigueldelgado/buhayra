@@ -30,7 +30,7 @@ def select_last_tiff():
         f=scenes[timestamp.index(max(timestamp))]
     return(f)
 
-def get_loadings_and_explained_variance(X,PCA):
+def loadings_and_explained_variance(X,PCA):
     pca = PCA(n_components=3)
     pcafit=pca.fit(X)
     eigenvectors = pcafit.components_
@@ -38,7 +38,7 @@ def get_loadings_and_explained_variance(X,PCA):
     return eigenvectors, var
 
 
-def get_glcm_predictors(image):
+def glcm_predictors(image):
     window_shape=(3,3)
     new_image = image[:-(image.shape[0]%window_shape[0]),:-(image.shape[1]%window_shape[1])]
 
@@ -46,10 +46,32 @@ def get_glcm_predictors(image):
     X=B.reshape((B.shape[0]*B.shape[1],B.shape[2],B.shape[3]))
     predictor=np.empty((X.shape[0],5))
 
-    for i in range(1000):#X.shape[0]):
+    for i in range(X.shape[0]):
         glcm = greycomatrix(X[i,:,:], [1], [0, np.pi/4, np.pi/2, 3*np.pi/4], 256,symmetric=True)
         GLCM=np.sum(glcm,(2,3))
-        glcmi = [np.mean(GLCM,axis=0)[0],np.std(GLCM)**2,greycoprops(glcm, 'homogeneity')[0,0],greycoprops(glcm, 'dissimilarity')[0,0],greycoprops(glcm, 'correlation')[0, 0]]
+        glcm_mean_ = glcm_mean(GLCM)
+        glcm_variance_ = glcm_variance(GLCM,glcm_mean_)
+        glcmi = [glcm_mean_,
+            glcm_variance_,
+            greycoprops(glcm, 'contrast')[0,0],
+            greycoprops(glcm, 'dissimilarity')[0,0],
+            greycoprops(glcm, 'homogeneity')[0,0],
+            greycoprops(glcm, 'energy')[0,0],
+            greycoprops(glcm, 'correlation')[0, 0],
+            greycoprops(glcm, 'ASM')[0, 0]]
         predictor[i]=glcmi
 
     return(predictor)
+
+def glcm_mean(matrix):
+    # matrix=np.random.random((10,10))
+    meani = np.empty((matrix.shape[0],1))
+    for i in range(matrix.shape[0]):
+        meani[i,0] = i*matrix[i,0]
+    return np.sum(meani)
+
+def glcm_variance(matrix,glcm_mean_):
+    vari = np.empty((matrix.shape[0],1))
+    for i in range(matrix.shape[0]):
+        vari[i,0] = matrix[i,0]*(i-glcm_mean_)**2
+    return np.sum(vari)
