@@ -44,7 +44,7 @@ def glcm_predictors(image):
 
     B=view_as_blocks(new_image, window_shape)
     X=B.reshape((B.shape[0]*B.shape[1],B.shape[2],B.shape[3]))
-    predictor=np.empty((X.shape[0],5))
+    predictor=np.empty((X.shape[0],8))
 
     for i in range(X.shape[0]):
         glcm = greycomatrix(X[i,:,:], [1], [0, np.pi/4, np.pi/2, 3*np.pi/4], 256,symmetric=True)
