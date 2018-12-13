@@ -64,7 +64,7 @@ def sar2sigma_scene(scenes):
         product=set_no_data_value(product)
 
         if (fname+".tif") in listdir(sarOut):
-            logger.debug("product "+fname+".tif already exists: skipping")
+            logger.info("product "+fname+".tif already exists: skipping")
             continue
 
         ProductIO.writeProduct(product,sarOut+"/" + fname,outForm)
@@ -94,7 +94,7 @@ def sar2sigma_subset(scenes):
             productName=product.getName()
 
             if (productName+".finished") in listdir(sarIn):
-                logger.debug("product "+fname+" already processed: skipping")
+                logger.info("product "+productName+" already processed: skipping")
                 continue
 
             # logger.info("processing " + productName)
