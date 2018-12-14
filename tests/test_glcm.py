@@ -5,113 +5,94 @@ import dask.array as da
 from dask import compute, delayed
 import dask.threaded
 from skimage.util.shape import view_as_windows, view_as_blocks
+import buhayra.vegetatedwater as veggie
+from skimage.feature import greycomatrix, greycoprops
+
+window_shape=(3,3)
+levels=256
 
 
-X = np.random.random((500, 500))
-dX = da.random.random((500, 500), chunks=(50, 50))
+def wrap_glcm_dissimilarity(matrix):
+    h, w, leveli, levelj = matrix.shape
+    out=np.empty((h,w,1,1))
+    for i,j in np.ndindex(matrix[:,:,0,0].shape):
+        out[i,j,:,:]=greycoprops(matrix[0,0,:,:].reshape(leveli,levelj,1,1), 'dissimilarity')[0,0]
+    return out
 
-da.map_blocks(view_as_windows,dX,(10,10),chunks=(50,50,10,10),new_axis=[2,3])
-
-
-pcafit=pca.fit(predictors[0])
-# results = compute(pcafit, scheduler='threads')
-time.time()-i
-
-
-eigenvectors = pcafit.components_
-
-# no dask
-
-f=veggie.select_last_tiff()
-with rasterio.open(vegIn + '/' +f,'r') as ds:
-    x=ds.read(1)
+def wrap_glcm_matrix(X,window_shape,levels):
+    h, w, nrows, ncols = X.shape
+    out=np.empty((h,w,levels,levels))
+    for i,j in np.ndindex(X[:,:,0,0].shape):
+        glcm = greycomatrix(X[i,j,:,:], [1], [0, np.pi/4, np.pi/2, 3*np.pi/4], levels,normed=False,symmetric=True)
+        out[i,j,:,:]=np.sum(glcm,(2,3))
+    return out
 
 
-# no dask
+def wrap_mean(X):
+    return np.array([[np.mean(X)]])
+
+X = np.random.random((12, 12))*3
+X=X.astype('uint')
+h, w = X.shape
+nrows=window_shape[0]
+ncols=window_shape[1]
+X=X.reshape(h//nrows, nrows,h*w//(ncols*nrows*(h//nrows)), ncols).swapaxes(1,2)
+
 i=time.time()
-X_std = (x - np.amin(x)) / (np.amax(x) - np.amin(x))
-X_scaled = np.round(X_std * (255 - 0) + 0)
-xuint = X_scaled.astype('uint8')
-results = veggie.glcm_predictors(xuint)
+matrix = wrap_glcm_matrix(X,window_shape,levels)
 time.time()-i
 
 
-########
 
-out=predictor.compute()
-client.close()
+dX = da.random.random((120, 120), chunks=(60, 60))*3
+excess=(dX.shape[0]%window_shape[0],dX.shape[1]%window_shape[1])
+dX = dX[0:(dX.shape[0]-excess[0]),0:(dX.shape[1]-excess[1])]
+dX=dX.astype('uint')
+h, w = dX.shape
+nrows=window_shape[0]
+ncols=window_shape[1]
+dX=dX.reshape(h//nrows, nrows,h*w//(ncols*nrows*(h//nrows)), ncols).swapaxes(1,2)
+lazymatrix = da.map_blocks(wrap_glcm_matrix,dX,window_shape,levels,chunks=(10,10,levels,levels))
+### persist lazy matrix here!!! http://distributed.dask.org/en/latest/memory.html#difference-with-dask-compute
 
-pca = PCA(n_components=3)
-pcafit=pca.fit(x)
-eigenvectors = pcafit.components_
-z=x.mean()
-z.compute()
+lazydiss = da.map_blocks(wrap_glcm_dissimilarity,lazymatrix,chunks=(20,20,1,1))
 
+i=time.time()
+predictor=compute(lazydiss, scheduler='threads')
+time.time()-i
 
-
-# client.close()
-# cluster.close()
-
-# %timeit
-# start0=time.perf_counter()
-with rasterio.open(vegIn + '/' +f,'r') as ds:
-    x=da.from_array(ds.read(1),(round(ds.shape[0]/5), round(ds.shape[1]/5)))
-    lazymean=x.mean()
-    # out.visualize(filename='da_mean.svg')
-# time.perf_counter()-start0
-
-
-
-start0=time.perf_counter()
-out=lazymean.compute()
-time.perf_counter()-start0
-
-out
+predictor[0].shape
 
 
 
 
-with rasterio.open(vegIn + '/' +f,'r') as ds:
-    x=ds.read(1)
 
 
-start0=time.perf_counter()
-out=x.mean()
-time.perf_counter()-start0
+def loadings_and_explained_variance(X,PCA):
+    pca = PCA(n_components=3)
+    pcafit=pca.fit(X)
+    eigenvectors = pcafit.components_
+    var = pcafit.explained_variance_ratio_
+    return eigenvectors, var
 
+        glcm_mean_ = glcm_mean(GLCM)
+        glcm_variance_ = glcm_variance(GLCM,glcm_mean_)
+        glcmi = [glcm_mean_,
+            glcm_variance_,
+            greycoprops(glcm, 'contrast')[0,0],
+            greycoprops(glcm, 'dissimilarity')[0,0],
+            greycoprops(glcm, 'homogeneity')[0,0],
+            greycoprops(glcm, 'energy')[0,0],
+            greycoprops(glcm, 'correlation')[0, 0],
+            greycoprops(glcm, 'ASM')[0, 0]]
+        predictor[i]=glcmi
 
-ds.dtypes
+    return(predictor)
 
-r = da.from_delayed(lazy_raster,ds.shape,ds.dtypes[0])
+def glcm_mean(matrix):
+    i = np.arange(matrix.shape[0])
+    return np.sum(i*matrix[i,0])
 
-r.nbytes/10**9
-
-r.shape
-r=r[0:4000,0:4000]
-
-x = da.from_array(r, chunks=(round(r.shape[0]/4), round(r.shape[1]/4)))
-
-cluster = LocalCluster(processes=False,n_workers=2,threads_per_worker=2, memory_limit='1GB')
-client = Client(cluster)
-
-client.restart()
-
-# r = np.random.rand(4000,4000)
-x = da.from_array(r[], chunks=(5000, 5000))
-
-# x = da.random.random((2000, 2000), chunks=(500, 500))
-start0=time.perf_counter()
-z=scale(r)
-time.perf_counter()-start0
-
-
-
-
-pca = PCA(n_components=2)
-pcafit=pca.fit(da.from_array(z,chunks=(500,500)))
-eigenvectors = pcafit.components_
-
-out=veggie.get_loadings_and_explained_variance(da.from_array(z,chunks=(500,500)),PCA)
-
-client.close()
-cluster.close()
+def glcm_variance(matrix,glcm_mean_):
+    i = np.arange(matrix.shape[0])
+    return np.sum(matrix[i,0]*(i-glcm_mean_)**2)
