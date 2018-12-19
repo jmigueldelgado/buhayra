@@ -7,11 +7,15 @@ import re
 import datetime
 from skimage.util.shape import view_as_windows, view_as_blocks
 from skimage.feature import greycomatrix, greycoprops
+import dask.array as da
 
-def load_raster(f):
-    with rasterio.open(vegIn + '/' + f,'r') as ds:
-        r=ds.read(1)
-        out_transform=ds.transform
+def load_lazy_raster(f):
+    with rasterio.open(vegIn + '/' +f,'r') as ds:
+        r=da.from_array(ds.read(1),(ds.shape[0]//10, ds.shape[1]//10))
+        out_transform = ds.transform
+    # with rasterio.open(vegIn + '/' + f,'r') as ds:
+    #     r=ds.read(1)
+    #     out_transform=ds.transform
     return r, out_transform
 
 
@@ -32,7 +36,7 @@ def select_last_tiff():
 
 def wrap_glcm_matrix(X,window_shape,levels):
     h, w, nrows, ncols = X.shape
-    out=np.empty((h,w,levels,levels))
+    out=np.zeros((h,w,levels,levels),dtype=np.uint8)
     for i,j in np.ndindex(X[:,:,0,0].shape):
         glcm = greycomatrix(X[i,j,:,:], [1], [0, np.pi/4, np.pi/2, 3*np.pi/4], levels,normed=False,symmetric=True)
         out[i,j,:,:]=np.sum(glcm,(2,3))
@@ -83,13 +87,6 @@ def wrap_glcm_homogeneity(matrix):
         out[i,j,:,:]=greycoprops(matrix[i,j,:,:].reshape(leveli,levelj,1,1), 'homogeneity')[0,0]
     return out
 
-def wrap_glcm_matrix(X,window_shape,levels):
-    h, w, nrows, ncols = X.shape
-    out=np.empty((h,w,levels,levels))
-    for i,j in np.ndindex(X[:,:,0,0].shape):
-        glcm = greycomatrix(X[i,j,:,:], [1], [0, np.pi/4, np.pi/2, 3*np.pi/4], levels,normed=False,symmetric=True)
-        out[i,j,:,:]=np.sum(glcm,(2,3))
-    return out
 
 def wrap_mean(matrix):
     matrix=matrix.reshape(matrix.shape[0:2])

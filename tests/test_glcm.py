@@ -4,18 +4,19 @@ import time
 import dask.array as da
 from dask import compute, delayed
 import dask.threaded
-from skimage.util.shape import view_as_windows, view_as_blocks
 from buhayra.vegetatedwater import *
-from skimage.feature import greycomatrix, greycoprops
 from distributed import Client,LocalCluster
+window_shape=(3,3)
+levels=256
 
 
-X = np.random.random((240, 240))*3
+X = np.random.random((isize, jsize))*3
 X=X.astype('uint')
 h, w = X.shape
 nrows=window_shape[0]
 ncols=window_shape[1]
 X=X.reshape(h//nrows, nrows,h*w//(ncols*nrows*(h//nrows)), ncols).swapaxes(1,2)
+
 
 i=time.time()
 matrix = wrap_glcm_matrix(X,window_shape,levels)
@@ -23,39 +24,44 @@ diss=wrap_glcm_dissimilarity(matrix)
 glcm_mean_matrix=wrap_glcm_mean(matrix)
 time.time()-i
 
+f=select_last_tiff()
+(dX,out_transform)=load_lazy_raster(f)
+dX_std = (dX - np.amin(dX)) / (np.amax(dX) - np.amin(dX))
+dX = dask.array.round(dX_std * (255 - 0) + 0)
+dX = dX.astype('uint8')
 
-window_shape=(3,3)
-levels=256
 
-dX = da.random.random((240, 240), chunks=(120, 120))*3
+# dX = da.random.random((isize, jsize), chunks=(isize/2, jsize/2))*3
 excess=(dX.shape[0]%window_shape[0],dX.shape[1]%window_shape[1])
 dX = dX[0:(dX.shape[0]-excess[0]),0:(dX.shape[1]-excess[1])]
-dX=dX.astype('uint')
+# dX=dX.astype('uint')
 h, w = dX.shape
 nrows=window_shape[0]
 ncols=window_shape[1]
 dX=dX.reshape(h//nrows, nrows,h*w//(ncols*nrows*(h//nrows)), ncols).swapaxes(1,2)
-lazymatrix = da.map_blocks(wrap_glcm_matrix,dX,window_shape,levels,chunks=(10,10,levels,levels))
+lazymatrix = da.map_blocks(wrap_glcm_matrix,dX,window_shape,levels,chunks=(h/100,w/100,levels,levels))
 ### persist lazy matrix here!!! http://distributed.dask.org/en/latest/memory.html#difference-with-dask-compute
 
+lazymatrix.nbytes/10**9
+lazymatrix.chunks
+dX.nbytes/10**9
 
-
-c=LocalCluster(processes=False)#,n_workers=1,threads_per_worker=2)
+c=LocalCluster(processes=False,n_workers=2,threads_per_worker=2,memory_limit='1GB')
 client = Client(c)
 
 i=time.time()
 # lazymatrix = client.persist(lazymatrix)
-lazydiss = da.map_blocks(wrap_glcm_dissimilarity,lazymatrix,chunks=(20,20,1,1))
-# lazycontrast = da.map_blocks(wrap_glcm_contrast,lazymatrix,chunks=(20,20,1,1))
-# lazyhomo = da.map_blocks(wrap_glcm_homogeneity,lazymatrix,chunks=(20,20,1,1))
-lazymean = da.map_blocks(wrap_glcm_mean,lazymatrix,chunks=(20,20,1,1))
-# lazyvar = da.map_blocks(wrap_glcm_variance,lazymatrix,lazymean,chunks=(20,20,1,1))
-diss=compute(lazydiss, scheduler='threads')
-glcm_m=compute(lazymean, scheduler='threads')
-# diss=lazydiss.compute()
+lazydiss = da.map_blocks(wrap_glcm_dissimilarity,lazymatrix,chunks=(h/6,w/6,1,1))
+lazymean = da.map_blocks(wrap_glcm_mean,lazymatrix,chunks=(h/6,w/6,1,1))
+# lazycontrast = da.map_blocks(wrap_glcm_contrast,lazymatrix,chunks=(h/6,w/6,1,1))
+# lazyhomo = da.map_blocks(wrap_glcm_homogeneity,lazymatrix,chunks=(h/6,w/6,1,1))
+# lazyvar = da.map_blocks(wrap_glcm_variance,lazymatrix,lazymean,chunks=(h/6,w/6,1,1))
+# diss=compute(lazydiss, scheduler='threads')
+# glcm_m=compute(lazymean, scheduler='threads')
+diss=lazydiss.compute()
+glcm_m=lazymean.compute()
 # contrast=lazycontrast.compute()
 # homo=lazyhomo.compute()
-# glcm_m=lazymean.compute()
 # glcm_v=lazyvar.compute()
 time.time()-i
 
