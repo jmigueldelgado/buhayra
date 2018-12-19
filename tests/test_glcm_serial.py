@@ -19,8 +19,8 @@ def wrap_glcm_matrix_dissimilarity(X,window_shape,levels):
         out[i,j,:,:]=greycoprops(GLCM.reshape(leveli,levelj,1,1), 'dissimilarity')[0,0]
     return out
 
-isize=1000
-jsize=1000
+isize=500
+jsize=500
 
 X = np.random.random((isize, jsize))*3
 excess=(X.shape[0]%window_shape[0],X.shape[1]%window_shape[1])
