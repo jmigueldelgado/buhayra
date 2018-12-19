@@ -44,16 +44,18 @@ c=LocalCluster(processes=False)#,n_workers=1,threads_per_worker=2)
 client = Client(c)
 
 i=time.time()
-lazymatrix = client.persist(lazymatrix)
+# lazymatrix = client.persist(lazymatrix)
 lazydiss = da.map_blocks(wrap_glcm_dissimilarity,lazymatrix,chunks=(20,20,1,1))
 # lazycontrast = da.map_blocks(wrap_glcm_contrast,lazymatrix,chunks=(20,20,1,1))
 # lazyhomo = da.map_blocks(wrap_glcm_homogeneity,lazymatrix,chunks=(20,20,1,1))
 lazymean = da.map_blocks(wrap_glcm_mean,lazymatrix,chunks=(20,20,1,1))
 # lazyvar = da.map_blocks(wrap_glcm_variance,lazymatrix,lazymean,chunks=(20,20,1,1))
-diss=lazydiss.compute()
+diss=compute(lazydiss, scheduler='threads')
+glcm_m=compute(lazymean, scheduler='threads')
+# diss=lazydiss.compute()
 # contrast=lazycontrast.compute()
 # homo=lazyhomo.compute()
-glcm_m=lazymean.compute()
+# glcm_m=lazymean.compute()
 # glcm_v=lazyvar.compute()
 time.time()-i
 
@@ -64,7 +66,6 @@ c.close()
 
 
 i=time.time()
-diss=compute(lazydiss, scheduler='threads')
 time.time()-i
 
 
