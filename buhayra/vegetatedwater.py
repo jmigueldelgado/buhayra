@@ -9,13 +9,19 @@ from skimage.util.shape import view_as_windows, view_as_blocks
 from skimage.feature import greycomatrix, greycoprops
 import dask.array as da
 
+def load_random_lazy(h,w,hchunk,wchunk):
+    return da.random.random((h,w),chunks=(hchunk,wchunk))*3
+
+
 def load_lazy_raster(f):
+    logger = logging.getLogger('root')
     with rasterio.open(vegIn + '/' +f,'r') as ds:
-        r=da.from_array(ds.read(1),(ds.shape[0]//10, ds.shape[1]//10))
+        r=da.from_array(ds.read(1),(2700,2700))
         out_transform = ds.transform
-    # with rasterio.open(vegIn + '/' + f,'r') as ds:
-    #     r=ds.read(1)
-    #     out_transform=ds.transform
+
+    logger.info("Loading tif and creating lazy array")
+    logger.info("Chunked lazy array is "+str(r.nbytes/10**6)+" MB")
+
     return r, out_transform
 
 
@@ -87,7 +93,37 @@ def wrap_glcm_homogeneity(matrix):
         out[i,j,:,:]=greycoprops(matrix[i,j,:,:].reshape(leveli,levelj,1,1), 'homogeneity')[0,0]
     return out
 
+def wrap_glcm_matrix_dissimilarity_mean(X,window_shape,levels):
+    h, w, nrows, ncols = X.shape
+    out=np.zeros((h,w,2,1),dtype=np.uint8)
+    for i,j in np.ndindex(X[:,:,0,0].shape):
+        glcm = greycomatrix(X[i,j,:,:], [1], [0, np.pi/4, np.pi/2, 3*np.pi/4], levels,normed=False,symmetric=True)
+        GLCM=np.sum(glcm,(2,3))
+        leveli, levelj = GLCM.shape
+        out[i,j,0,:]=greycoprops(GLCM.reshape(leveli,levelj,1,1), 'dissimilarity')[0,0]
+        out[i,j,1,:]=glcm_mean(GLCM.reshape(leveli,levelj,1,1))
+    return out
+
+        #
+        # glcm_mean_ = glcm_mean(GLCM)
+        # glcm_variance_ = glcm_variance(GLCM,glcm_mean_)
+        # glcmi = [glcm_mean_,
+        #     glcm_variance_,
+        #     greycoprops(glcm, 'contrast')[0,0],
+        #     greycoprops(glcm, 'dissimilarity')[0,0],
+        #     greycoprops(glcm, 'homogeneity')[0,0],
+        #     greycoprops(glcm, 'energy')[0,0],
+        #     greycoprops(glcm, 'correlation')[0, 0],
+        #     greycoprops(glcm, 'ASM')[0, 0]]
+        # predictor[i]=glcmi
 
 def wrap_mean(matrix):
     matrix=matrix.reshape(matrix.shape[0:2])
     return np.array([np.mean(matrix)])
+
+def loadings_and_explained_variance(X,PCA):
+    pca = PCA(n_components=3)
+    pcafit=pca.fit(X)
+    eigenvectors = pcafit.components_
+    var = pcafit.explained_variance_ratio_
+    return eigenvectors, var

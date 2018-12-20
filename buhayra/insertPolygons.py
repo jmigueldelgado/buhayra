@@ -41,7 +41,7 @@ def insert_loop(tiffs):
             rm = remove_watermask(f,feat_id)
             out.append(rm)
 
-    total=dask.delayed()(out)
+    total=dask.delayed(out)
     total.compute()
 
 def connect_to_NEB():

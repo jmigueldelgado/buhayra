@@ -38,7 +38,7 @@ def main():
             logger.info("There are no scenes to process in "+sarIn+". Exiting")
             raise SystemExit()
         sar.sar2sigma_subset([f])
-        
+
     elif sys.argv[1]=="sar orbit correction":
 
         import sar2watermask.sar as sar
@@ -47,7 +47,7 @@ def main():
             logger.info("There are no scenes to process in "+sarIn+". Exiting")
             raise SystemExit()
         sar.sar_orbit_correction([f])
-        
+
     elif sys.argv[1]=="sar scene":
 
         import sar2watermask.sar as sar
@@ -130,10 +130,20 @@ def main():
         import idepix.classification as ide
         ide.test()
 
-    elif sys.argv[1]=="test parallel":
+    elif sys.argv[1]=="test parallel with matrix":
 
-        import tests.test_parallel as par
-        par.test_dask()
+        import tests.test_glcm_parallel as par
+        par.glcm_with_matrix()
+
+    elif sys.argv[1]=="test parallel without matrix":
+
+        import tests.test_glcm_parallel as par
+        par.glcm_plus_props()
+
+    elif sys.argv[1]=="test serial without matrix":
+
+        import tests.test_glcm_parallel as par
+        par.glcm_serial_props()
 
     elif sys.argv[1]=="run maintenance":
 
