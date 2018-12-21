@@ -88,12 +88,11 @@ def main():
         tiffs=thresh.select_tiffs_year_month(int(sys.argv[2]),int(sys.argv[3]))
         loops.threshold_loop(tiffs)
 
-    elif sys.argv[1]=="insert":
+    elif sys.argv[1]=="insert year month":
 
         logger.info("inserting into mongodb in "+sys.argv[2]+"-"+sys.argv[3])
         import buhayra.insertPolygons as ipol
         tiffs=ipol.select_tiffs_year_month(int(sys.argv[2]),int(sys.argv[3]))
-
 
         ipol.insert_loop(ipol)
 

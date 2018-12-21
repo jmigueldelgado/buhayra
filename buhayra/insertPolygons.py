@@ -6,8 +6,8 @@ import logging
 from buhayra.polygonize import *
 from buhayra.getpaths import *
 from buhayra.credentials import *
-import dask
-from dask.distributed import Client, progress, LocalCluster
+# import dask
+# from dask.distributed import Client, progress, LocalCluster
 
 
 # f=select_tiffs_year_month(2018,4)[0]
@@ -15,16 +15,16 @@ from dask.distributed import Client, progress, LocalCluster
 
 def insert_loop(tiffs):
     logger = logging.getLogger('root')
-    cluster = LocalCluster(processes=False,n_workers=1,threads_per_worker=2)
-    client = Client(cluster)
+    # cluster = LocalCluster(processes=False,n_workers=1,threads_per_worker=2)
+    # client = Client(cluster)
 
-    load_watermask=dask.delayed(load_watermask)
-    load_metadata=dask.delayed(load_metadata)
-    raster2shapely=dask.delayed(raster2shapely)
-    prepareJSON=dask.delayed(prepareJSON)
-    select_intersecting_polys=dask.delayed(select_intersecting_polys)
-    insert_into_NEB=dask.delayed(insert_into_NEB)
-    remove_watermask=dask.delayed(remove_watermask)
+    # load_watermask=dask.delayed(load_watermask)
+    # load_metadata=dask.delayed(load_metadata)
+    # raster2shapely=dask.delayed(raster2shapely)
+    # prepareJSON=dask.delayed(prepareJSON)
+    # select_intersecting_polys=dask.delayed(select_intersecting_polys)
+    # insert_into_NEB=dask.delayed(insert_into_NEB)
+    # remove_watermask=dask.delayed(remove_watermask)
 
     logger = logging.getLogger('root')
     neb = connect_to_NEB()
@@ -41,8 +41,8 @@ def insert_loop(tiffs):
             rm = remove_watermask(f,feat_id)
             out.append(rm)
 
-    total=dask.delayed(out)
-    total.compute()
+    # total=dask.delayed(out)
+    # total.compute()
 
 def connect_to_NEB():
     logger = logging.getLogger('root')
@@ -84,6 +84,31 @@ def write_poly_loop():
             json.dump(feat, fjson)
             os.remove(polOut + '/' + f)
             os.remove(polOut+'/'+f[:-3]+'json')
+
+
+def select_tiffs_year_month(Y,M):
+    logger = logging.getLogger('root')
+    if(len(listdir(polOut))<1):
+        logger.info(polOut+" is empty! Nothing to do. Exiting and returning None.")
+        tiffs_in_ym=None
+    else:
+        timestamp=list()
+        tiffs_in_ym=list()
+        for tif in listdir(polOut):
+            if not tif.startswith('S'):
+                continue
+            stamp=datetime.datetime.strptime(tif.split('_')[4],'%Y%m%dT%H%M%S')
+            if re.search('.tif$',tif) and stamp.year==Y and stamp.month==M:
+                tiffs_in_ym.append(tif)
+                timestamp.append(stamp)
+        if(len(timestamp)<1):
+            logger.info(polOut+" has no tiffs for year "+str(Y)+" and month "+str(M)+"Exiting and returning None.")
+            tiffs_in_ym=None
+    return(tiffs_in_ym)
+
+
+
+
 
 def testMongoConnect():
     logger = logging.getLogger('root')

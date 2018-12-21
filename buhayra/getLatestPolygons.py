@@ -6,11 +6,35 @@ import os
 import sys
 import socket
 from datetime import datetime
-from sshtunnel import SSHTunnelForwarder
+# from sshtunnel import SSHTunnelForwarder
 from buhayra.defAggregations import *
 from buhayra.getpaths import *
 import logging
 import subprocess as sp
+
+
+# ### for testing purposes only, no longer necessary becasue of available port
+# def establishConnectionManually():
+#     if socket.gethostname()!='ubuntuserver':
+#         server = SSHTunnelForwarder(
+#             MONGO_HOST,
+#             ssh_username=MONGO_USER,
+#             ssh_password=MONGO_PASS,
+#             remote_bind_address=('127.0.0.1', MONGO_PORT))
+#
+#         server.start()
+#         print("started ssh tunnel")
+#
+#         client = MongoClient('127.0.0.1', server.local_bind_port) # server.local_bind_port is assigned local port
+#     else:
+#         print("connecting to local host")
+#         client = MongoClient('mongodb://localhost:27017/')
+#
+#
+#     db = client.sar2watermask
+#     s2w = db.sar2watermask ##  collection
+
+
 
 def connect_and_get(x):
     logger = logging.getLogger('root')
@@ -27,7 +51,7 @@ def connect_and_get(x):
             raise
 
     db = client.sar2watermask
-    s2w = db.sar2watermask ##  collection
+    neb = db.neb ##  collection
 
     #TimeSeries = getTimeSeries(s2w)
     #latestIngestionTime = getLatestIngestionTime(s2w)
