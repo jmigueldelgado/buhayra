@@ -94,7 +94,7 @@ def main():
         import buhayra.insertPolygons as ipol
         tiffs=ipol.select_tiffs_year_month(int(sys.argv[2]),int(sys.argv[3]))
 
-        ipol.insert_loop(ipol)
+        ipol.insert_loop(tiffs)
 
     elif sys.argv[1]=="write polygons":
 

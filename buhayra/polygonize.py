@@ -100,9 +100,6 @@ def select_intersecting_polys(feat,wm):
     feat['geometry']=json.loads(s)
     return(feat)
 
-
-tiffs=select_tiffs_year_month(2018,2)
-
 def select_tiffs_year_month(Y,M):
     logger = logging.getLogger('root')
 
