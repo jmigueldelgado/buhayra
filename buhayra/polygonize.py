@@ -52,7 +52,7 @@ def prepareJSON(poly,f,metadata):
         'geometry':geom
         }
 
-    feat['properties']['area']=poly_utm.area
+#    feat['properties']['area']=poly_utm.area
 
     return(feat)
 
@@ -93,11 +93,13 @@ def select_intersecting_polys(feat,wm):
                 inters.append(poly)
         inters = cascaded_union(inters)
         s=json.dumps(mapping(inters))
+        feat['geometry']=json.loads(s)
     else:
         if geom.intersects(refgeom):
             s=json.dumps(mapping(geom))
-
-    feat['geometry']=json.loads(s)
+            feat['geometry']=json.loads(s)
+        else:
+            feat['geometry']=[]
     return(feat)
 
 def select_tiffs_year_month(Y,M):

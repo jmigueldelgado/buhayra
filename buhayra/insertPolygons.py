@@ -64,13 +64,8 @@ def insert_into_NEB(feat,neb):
     # logger.debug("Ingestion Date:%s",feat["properties"]["ingestion_time"])
     #feat_id = neb.update_one({'properties.id_jrc':feat["properties"]["id_jrc"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True).upserted_id
     #logger.debug('Inserted feature ID: %s',feat_id)
-    if feat is not None:
-        result = neb.update_one({'properties.id_jrc':feat["properties"]["id_jrc"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True)
-        id=result.upserted_id
-    # result = neb.insert_one(feat)
-    else:
-        id=None
-    return(id)
+    result = neb.update_one({'properties.id_jrc':feat["properties"]["id_jrc"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True)
+    return(result.upserted_id)
 
 
 def write_poly_loop():
