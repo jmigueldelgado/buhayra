@@ -97,7 +97,7 @@ def select_intersecting_polys(feat,wm):
             feat['geometry']=json.loads(s)
         else:
             feat['geometry']=None
-    else if geom.geom_type == 'Polygon':
+    elif geom.geom_type == 'Polygon':
         if geom.intersects(refgeom):
             s=json.dumps(mapping(geom))
             feat['geometry']=json.loads(s)
