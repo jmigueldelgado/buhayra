@@ -35,8 +35,8 @@ def insert_loop(tiffs):
             metadata = load_metadata(f)
             poly = raster2shapely(r,metadata)
             feat = prepareJSON(poly,f,metadata)
-            feat_out = select_intersecting_polys(feat,wm)
-            feat_id = insert_into_NEB(feat,neb)
+            feat_wm = select_intersecting_polys(feat,wm)
+            feat_id = insert_into_NEB(feat_wm,neb)
             out.append(feat_id)
             rm = remove_watermask(f,feat_id)
             out.append(rm)
@@ -64,10 +64,13 @@ def insert_into_NEB(feat,neb):
     # logger.debug("Ingestion Date:%s",feat["properties"]["ingestion_time"])
     #feat_id = neb.update_one({'properties.id_jrc':feat["properties"]["id_jrc"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True).upserted_id
     #logger.debug('Inserted feature ID: %s',feat_id)
-    result = neb.update_one({'properties.id_jrc':feat["properties"]["id_jrc"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True)
-
+    if feat is not None:
+        result = neb.update_one({'properties.id_jrc':feat["properties"]["id_jrc"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True)
+        id=result.upserted_id
     # result = neb.insert_one(feat)
-    return(result.upserted_id)
+    else:
+        id=None
+    return(id)
 
 
 def write_poly_loop():
