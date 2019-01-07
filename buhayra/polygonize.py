@@ -91,15 +91,18 @@ def select_intersecting_polys(feat,wm):
         for poly in geom:
             if poly.intersects(refgeom):
                 inters.append(poly)
-        inters = cascaded_union(inters)
-        s=json.dumps(mapping(inters))
-        feat['geometry']=json.loads(s)
-    else:
+        if len(inters)>0:
+            inters = cascaded_union(inters)
+            s=json.dumps(mapping(inters))
+            feat['geometry']=json.loads(s)
+        else:
+            feat['geometry']=None
+    else if geom.geom_type == 'Polygon':
         if geom.intersects(refgeom):
             s=json.dumps(mapping(geom))
             feat['geometry']=json.loads(s)
         else:
-            feat['geometry']=[]
+            feat['geometry']=None
     return(feat)
 
 def select_tiffs_year_month(Y,M):
