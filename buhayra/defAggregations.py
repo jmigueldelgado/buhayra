@@ -91,17 +91,6 @@ def aggr2geojson(polys):
         del poly['_id']
         poly['properties']['oid']=oid['$oid']
 
-        ## mixing poly and multiply is not accepted by postgis. we will force Polygon into MultiPolygon
-        if len(poly['geometry']['coordinates'])>0:
-            mp=geojson.MultiPolygon()
-
-        ## now we have to correct syntax of MultiPolygon which was forced from Polygon so it generates valid geojson in the end
-        if poly["geometry"]["type"]=='Polygon':
-            poly["geometry"]["coordinates"]=[poly["geometry"]["coordinates"]]
-        #if len(poly['geometry']['coordinates'])==1:
-        #    mp=geojson.Polygon()
-
-        mp['coordinates']=poly['geometry']['coordinates']
         ### rename to insert into postgis
         if 'platformname' in poly['properties']:
             poly['properties']['source_id'] = poly['properties'].pop('platformname')
@@ -115,7 +104,22 @@ def aggr2geojson(polys):
             print('probably one of the first scenes to be processed, before adding sentinel-2, so it must be sentinel-1! passing 1 as source_id.\n')
             poly['properties']['source_id']=1
 
-        feats.append(geojson.Feature(geometry=mp,properties=poly['properties']))
+        if poly['geometry'] is None:
+            feats.append(geojson.Feature(geometry=None,properties=poly['properties']))
+        else:
+            ## mixing poly and multiply is not accepted by postgis. we will force Polygon into MultiPolygon
+            if len(poly['geometry']['coordinates'])>0:
+                mp=geojson.MultiPolygon()
+                
+            ## now we have to correct syntax of MultiPolygon which was forced from Polygon so it generates valid geojson in the end
+            if poly["geometry"]["type"]=='Polygon':
+                poly["geometry"]["coordinates"]=[poly["geometry"]["coordinates"]]
+            #if len(poly['geometry']['coordinates'])==1:
+            #    mp=geojson.Polygon()
+
+            mp['coordinates']=poly['geometry']['coordinates']
+        
+            feats.append(geojson.Feature(geometry=mp,properties=poly['properties']))
 
     feat_col=geojson.FeatureCollection(feats)
     return(feat_col)
