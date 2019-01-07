@@ -57,7 +57,7 @@ def connect_and_get(x):
     #latestIngestionTime = getLatestIngestionTime(s2w)
 
     ## get polygons from x months ago from mongodb
-    polys = getLatestPolysMinusX(s2w,x)
+    polys = getLatestPolysMinusX(neb,x)
     ## get geojson standard feature collection
     feat_col=aggr2geojson(polys)
 
@@ -68,6 +68,6 @@ def connect_and_get(x):
         f.close()
     else:
         logger.info('writing out to ' + home['home']+'/load_to_postgis/latest-',str(x),'-month.geojson')
-        f=open(home['home']+'/load_to_postgis/latest-',str(x),'-month.geojson','w')
+        f=open(home['home']+'/load_to_postgis/latest-'+str(x)+'-month.geojson','w')
         geojson.dump(feat_col,f)
         f.close()
