@@ -14,11 +14,11 @@ import socket
 ## also for manual use
 def getLatestIngestionTime(s2w):
     pipeline = [
-        { "$sort" : {"properties.id_funceme" : 1, "properties.ingestion_time" : 1 }},
+        { "$sort" : {"properties.id_jrc" : 1, "properties.ingestion_time" : 1 }},
         {
             "$group":
             {
-                "_id" : "$properties.id_funceme",
+                "_id" : "$properties.id_jrc",
                 "latestIngestion" : {
                     "$last":"$properties.ingestion_time"
                 }
@@ -30,7 +30,7 @@ def getLatestIngestionTime(s2w):
     latest=list()
 
     for feat in aggrLatest:
-        poly = s2w.find({'properties.id_funceme' : feat['_id'],'properties.ingestion_time':feat['latestIngestion']},{'properties.id_funceme' : 1,'properties.ingestion_time' : 1})
+        poly = s2w.find({'properties.id_jrc' : feat['_id'],'properties.ingestion_time':feat['latestIngestion']},{'properties.id_jrc' : 1,'properties.ingestion_time' : 1})
         latest.append(poly[0])
     return(latest)
 
@@ -39,11 +39,11 @@ def getLatestPolysMinusX(s2w,x):
     thresh_date=datetime.now() - timedelta(days=x*30)
     pipeline = [
         { "$match" : {"properties.ingestion_time" : {"$lte" : thresh_date}}},
-        { "$sort" : {"properties.id_funceme" : 1, "properties.ingestion_time" : 1 }},
+        { "$sort" : {"properties.id_jrc" : 1, "properties.ingestion_time" : 1 }},
         {
             "$group":
             {
-                "_id" : "$properties.id_funceme",
+                "_id" : "$properties.id_jrc",
                 "latestIngestion" : {
                     "$last":"$properties.ingestion_time"
                 }
@@ -56,7 +56,7 @@ def getLatestPolysMinusX(s2w,x):
     latest=list()
 
     for feat in aggrLatest:
-        poly = s2w.find({'properties.id_funceme' : feat['_id'],'properties.ingestion_time':feat['latestIngestion']})
+        poly = s2w.find({'properties.id_jrc' : feat['_id'],'properties.ingestion_time':feat['latestIngestion']})
         latest.append(poly[0])
     return(latest)
 
@@ -67,7 +67,7 @@ def getTimeSeries(s2w):
         {
             "$group":
             {
-                "_id" : "$properties.id_funceme",
+                "_id" : "$properties.id_jrc",
                 "timeSeries" : { "$push" : { "time" : "$properties.ingestion_time" , "area" : "$properties.area"} }
             }
 
