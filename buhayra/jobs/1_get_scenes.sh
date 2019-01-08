@@ -1,4 +1,5 @@
 #!/bin/bash
 
-source activate buhayra
-python /users/stud09/martinsd/proj/buhayra "get scenes" $1 $2
+source $HOME/local/miniconda3/bin/activate buhayra
+
+$HOME/local/miniconda3/envs/buhayra/bin/python $HOME/proj/buhayra "get scenes" $1 $2
