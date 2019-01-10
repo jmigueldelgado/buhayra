@@ -12,7 +12,7 @@ test*.o*
 dask-worker.e*
 dask-worker.o*
 *.qgs
-
+*.html
 dask-worker-space/
 dask-worker-space/*
 
