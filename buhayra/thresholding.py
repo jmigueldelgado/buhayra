@@ -15,9 +15,13 @@ from functools import partial
 from shapely.ops import transform
 
 
-
 def load_sigma_naught(f):
     logger = logging.getLogger('root')
+    # if os.path.isfile(procOut+'/'+f):
+    #     with rasterio.open(sarOut+'/'+f,'r') as ds:
+    #         out_db=ds.read(1)
+
+
     with rasterio.open(sarOut+'/'+f,'r') as ds:
         # if (f) in listdir(polOut):
         #     logger.info("product "+f+" already exists: skipping")
