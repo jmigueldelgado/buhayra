@@ -20,6 +20,4 @@ def move_proc(Y,M):
                 # os.remove(sarOut+'/'+tif)
                 continue
             os.rename(procOut + '/' + tif,sarOut+'/'+tif)
-            open(sarOut+'/'+f[:-3]+'finished','w').close()
-    if(len(timestamp)<1):
-        logger.info(procOut+" has no tiffs for year "+str(Y)+" and month "+str(M)+"Exiting.")
+            open(sarOut+'/'+tif[:-3]+'finished','w').close()
