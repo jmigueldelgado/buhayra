@@ -147,7 +147,7 @@ def main():
     elif sys.argv[1]=="move stuff around":
 
         import maintenance.move_stuff_around as mnt
-        mnt.move_proc(int(sys.argv[1]),int(sys.argv[2]))
+        mnt.move_proc(int(sys.argv[2]),int(sys.argv[3]))
     else:
 
         logger.error("an argument is needed, for example: get_scenes, sar, threshold, insert, recent polys, 1 month old polys, 2 months old polys, update validation")
