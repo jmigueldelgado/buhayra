@@ -17,7 +17,8 @@ def move_proc():
         if re.search('.tif$',tif) and stamp.year==Y and stamp.month==M:
             timestamp.append(stamp)
             if os.isfile(sarOut+'/'+tif):
-                os.remove(sarOut+'/'+tif)
+                # os.remove(sarOut+'/'+tif)
+                continue
             os.rename(procOut + '/' + tif,sarOut+'/'+tif)
             open(sarOut+'/'+f[:-3]+'finished','w').close()
     if(len(timestamp)<1):
