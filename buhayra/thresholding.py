@@ -43,7 +43,7 @@ def save_originals(f,out_db,metadata,thr):
 def flag_originals(f,out_db,metadata,thr):
     logger = logging.getLogger('root')
     metadata.append(thr)
-    open(sarOut+'/'+f,'w').close()
+    open(sarOut+'/'+f[:-3]+'finished','w').close()
     with open(procOut+'/'+f[:-3]+'json', 'w') as fjson:
         json.dump(metadata, fjson)
     return f
