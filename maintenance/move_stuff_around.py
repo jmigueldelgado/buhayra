@@ -1,16 +1,16 @@
 import os
 from buhayra.getpaths import *
 import sys
+import datetime
+
 def rename_json():
     while(selectPattern(sarOut,'orrjson$')):
         f=selectPattern(sarOut,'orrjson$')
         os.rename(sarOut+'/'+f,sarOut+'/'+f[:-4]+'.json')
 
-def move_proc():
-    Y=int(sys.argv[1])
-    M=int(sys.argv[2])
+def move_proc(Y,M):
     timestamp=list()
-    for tif in listdir(procOut):
+    for tif in os.listdir(procOut):
         if  not tif.startswith('S'):
             continue
         stamp=datetime.datetime.strptime(tif.split('_')[4],'%Y%m%dT%H%M%S')
