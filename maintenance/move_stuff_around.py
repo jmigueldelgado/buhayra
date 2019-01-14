@@ -16,7 +16,7 @@ def move_proc(Y,M):
         stamp=datetime.datetime.strptime(tif.split('_')[4],'%Y%m%dT%H%M%S')
         if re.search('.tif$',tif) and stamp.year==Y and stamp.month==M:
             timestamp.append(stamp)
-            if os.isfile(sarOut+'/'+tif):
+            if os.path.isfile(sarOut+'/'+tif):
                 # os.remove(sarOut+'/'+tif)
                 continue
             os.rename(procOut + '/' + tif,sarOut+'/'+tif)
