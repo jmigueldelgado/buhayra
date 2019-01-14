@@ -17,22 +17,25 @@ from shapely.ops import transform
 
 def load_sigma_naught(f):
     logger = logging.getLogger('root')
-    # if os.path.isfile(procOut+'/'+f):
-    #     with rasterio.open(sarOut+'/'+f,'r') as ds:
-    #         out_db=ds.read(1)
-
-
-    with rasterio.open(sarOut+'/'+f,'r') as ds:
-        # if (f) in listdir(polOut):
-        #     logger.info("product "+f+" already exists: skipping")
-        #     return None
-        out_db=ds.read(1)
+    if os.path.isfile(procOut+'/'+f):
+        with rasterio.open(procOut+'/'+f,'r') as ds:
+            out_db=ds.read(1)
+    else:
+        with rasterio.open(sarOut+'/'+f,'r') as ds:
+            # if (f) in listdir(polOut):
+            #     logger.info("product "+f+" already exists: skipping")
+            #     return None
+            out_db=ds.read(1)
     return out_db
 
 def load_metadata(f):
     logger = logging.getLogger('root')
-    with open(sarOut+'/'+f[:-3]+'json', 'r') as fjson:
-        metadata = json.load(fjson)
+    if os.path.isfile(procOut+'/'+f):
+        with open(procOut+'/'+f[:-3]+'json', 'r') as fjson:
+            metadata = json.load(fjson)
+    else:
+        with open(sarOut+'/'+f[:-3]+'json', 'r') as fjson:
+            metadata = json.load(fjson)
     return list(metadata)
 
 def save_originals(f,out_db,metadata,thr):
