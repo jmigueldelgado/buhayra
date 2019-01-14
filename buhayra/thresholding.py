@@ -17,22 +17,18 @@ from shapely.ops import transform
 
 def load_sigma_naught(f):
     logger = logging.getLogger('root')
-    # if os.path.isfile(procOut+'/'+f):
-    #     with rasterio.open(sarOut+'/'+f,'r') as ds:
-    #         out_db=ds.read(1)
-
-
     with rasterio.open(sarOut+'/'+f,'r') as ds:
-        # if (f) in listdir(polOut):
-        #     logger.info("product "+f+" already exists: skipping")
-        #     return None
         out_db=ds.read(1)
     return out_db
 
 def load_metadata(f):
     logger = logging.getLogger('root')
-    with open(sarOut+'/'+f[:-3]+'json', 'r') as fjson:
-        metadata = json.load(fjson)
+    if os.path.isfile(procOut+'/'+f):
+        with open(procOut+'/'+f[:-3]+'json', 'r') as fjson:
+            metadata = json.load(fjson)
+    else:
+        with open(sarOut+'/'+f[:-3]+'json', 'r') as fjson:
+            metadata = json.load(fjson)
     return list(metadata)
 
 def save_originals(f,out_db,metadata,thr):
@@ -40,6 +36,14 @@ def save_originals(f,out_db,metadata,thr):
     metadata.append(thr)
     with rasterio.open(procOut+'/'+f,'w',driver='GTiff',height=out_db.shape[0],width=out_db.shape[1],count=1,dtype=out_db.dtype) as dsout:
         dsout.write(out_db,1)
+    with open(procOut+'/'+f[:-3]+'json', 'w') as fjson:
+        json.dump(metadata, fjson)
+    return f
+
+def flag_originals(f,out_db,metadata,thr):
+    logger = logging.getLogger('root')
+    metadata.append(thr)
+    open(sarOut+'/'+f[:-3]+'finished','w').close()
     with open(procOut+'/'+f[:-3]+'json', 'w') as fjson:
         json.dump(metadata, fjson)
     return f
@@ -181,22 +185,18 @@ def kittler(nparray):
 
 def select_tiffs_year_month(Y,M):
     logger = logging.getLogger('root')
-    if(len(listdir(sarOut))<1):
-        logger.info(sarOut+" is empty! Nothing to do. Exiting and returning None.")
+    timestamp=list()
+    tiffs_in_ym=list()
+    for tif in listdir(sarOut):
+        if  os.isfile(sarOut+'/'+tif[-3]+'finished') or not tif.startswith('S'):
+            continue
+        stamp=datetime.datetime.strptime(tif.split('_')[4],'%Y%m%dT%H%M%S')
+        if re.search('.tif$',tif) and stamp.year==Y and stamp.month==M:
+            tiffs_in_ym.append(tif)
+            timestamp.append(stamp)
+    if(len(timestamp)<1):
+        logger.info(sarOut+" has no tiffs for year "+str(Y)+" and month "+str(M)+"Exiting and returning None.")
         tiffs_in_ym=None
-    else:
-        timestamp=list()
-        tiffs_in_ym=list()
-        for tif in listdir(sarOut):
-            if not tif.startswith('S'):
-                continue
-            stamp=datetime.datetime.strptime(tif.split('_')[4],'%Y%m%dT%H%M%S')
-            if re.search('.tif$',tif) and stamp.year==Y and stamp.month==M:
-                tiffs_in_ym.append(tif)
-                timestamp.append(stamp)
-        if(len(timestamp)<1):
-            logger.info(sarOut+" has no tiffs for year "+str(Y)+" and month "+str(M)+"Exiting and returning None.")
-            tiffs_in_ym=None
     return(tiffs_in_ym)
 
 def select_n_last_tiffs(n):

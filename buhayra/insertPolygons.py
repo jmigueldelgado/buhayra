@@ -3,7 +3,6 @@ import os
 import sys
 from datetime import datetime
 import logging
-from buhayra.polygonize import *
 from buhayra.getpaths import *
 from buhayra.credentials import *
 # import dask
@@ -13,36 +12,6 @@ from buhayra.credentials import *
 # f=select_tiffs_year_month(2018,4)[0]
 # wm=fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r')
 
-def insert_loop(tiffs):
-    logger = logging.getLogger('root')
-    # cluster = LocalCluster(processes=False,n_workers=1,threads_per_worker=2)
-    # client = Client(cluster)
-
-    # load_watermask=dask.delayed(load_watermask)
-    # load_metadata=dask.delayed(load_metadata)
-    # raster2shapely=dask.delayed(raster2shapely)
-    # prepareJSON=dask.delayed(prepareJSON)
-    # select_intersecting_polys=dask.delayed(select_intersecting_polys)
-    # insert_into_NEB=dask.delayed(insert_into_NEB)
-    # remove_watermask=dask.delayed(remove_watermask)
-
-    logger = logging.getLogger('root')
-    neb = connect_to_NEB()
-    out=list()
-    with fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r') as wm:
-        for f in tiffs:
-            r = load_watermask(f)
-            metadata = load_metadata(f)
-            poly = raster2shapely(r,metadata)
-            feat = prepareJSON(poly,f,metadata)
-            feat_wm = select_intersecting_polys(feat,wm)
-            feat_id = insert_into_NEB(feat_wm,neb)
-            out.append(feat_id)
-            rm = remove_watermask(f,feat_id)
-            out.append(rm)
-
-    # total=dask.delayed(out)
-    # total.compute()
 
 def connect_to_NEB():
     logger = logging.getLogger('root')

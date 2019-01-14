@@ -94,7 +94,7 @@ def main():
         import buhayra.insertPolygons as ipol
         tiffs=ipol.select_tiffs_year_month(int(sys.argv[2]),int(sys.argv[3]))
 
-        ipol.insert_loop(tiffs)
+        loops.insert_loop(tiffs)
 
     elif sys.argv[1]=="write polygons":
 
@@ -143,11 +143,6 @@ def main():
 
         import tests.test_glcm_parallel as par
         par.glcm_serial_props()
-
-    elif sys.argv[1]=="run maintenance":
-
-        import maintenance.run_rename as rnm
-        rnm.rename_json()
 
     else:
 
