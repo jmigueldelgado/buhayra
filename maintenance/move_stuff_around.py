@@ -1,12 +1,14 @@
 import os
 from buhayra.getpaths import *
-
+import sys
 def rename_json():
     while(selectPattern(sarOut,'orrjson$')):
         f=selectPattern(sarOut,'orrjson$')
         os.rename(sarOut+'/'+f,sarOut+'/'+f[:-4]+'.json')
 
-def move_proc(int(sys.argv[1]),int(sys.argv[2])):
+def move_proc():
+    Y=int(sys.argv[1])
+    M=int(sys.argv[2])
     timestamp=list()
     for tif in listdir(procOut):
         if  not tif.startswith('S'):
