@@ -15,7 +15,7 @@ dask-worker.o*
 *.html
 dask-worker-space/
 dask-worker-space/*
-
+wm_jrc.geojson
 # Sentinel data and test data
 
 test_data/

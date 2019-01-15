@@ -1,6 +1,12 @@
+# from here: https://github.com/python-visualization/folium/blob/master/examples/WMS_and_WMTS.ipynb
+
+import os
 import folium
 
-m = folium.Map([60, 10], tiles='Mapbox Bright', zoom_start=5)
-folium.Circle([60, 10], 150000, fill=True).add_child(folium.Popup('My name is Circle')).add_to(m)
+print(folium.__version__)
+m = folium.Map(location=[-5, -38],zoom_start=8)
 
-m.save('test.html')
+folium.raster_layers.WmsTileLayer(url='http://141.89.96.184/latestwms?',layers='watermask',name='buhayra',version='1.3.0',fmt='image/png',transparent=True,srs='EPSG:4326',bbox='-2.8125,-45,0,-42.1875').add_to(m)
+folium.LayerControl().add_to(m)
+
+m.save(os.path.join('viz', 'buhayra.html'))
