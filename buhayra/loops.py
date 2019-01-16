@@ -14,8 +14,9 @@ import time
 import rasterio
 import geojson
 import fiona
+import os
 
-filename = 'S1A_IW_GRDH_1SDV_20180104T081748_20180104T081813_020002_02212B_EE92_26238.tif'
+# filename = 'S1A_IW_GRDH_1SDV_20180104T081748_20180104T081813_020002_02212B_EE92_26238.tif'
 
 def thresh_pol_insert(tiffs):
     logger = logging.getLogger('root')
@@ -32,8 +33,8 @@ def thresh_pol_insert(tiffs):
             pol_in_jrc = poly.select_intersecting_polys(pol,wm,filename)
             feat = poly.prepareJSON(pol_in_jrc,filename,metadata)
             gj = poly.json2geojson(feat)
-            while open(os.path.join(polOut,filename[:-3]+'geojson'),'w') as f:
-                geojson.dump(feat,f)
+            with open(os.path.join(polOut,filename[:-3]+'geojson'),'w') as f:
+                geojson.dump(gj,f)
 
             response = insert.insert_into_postgres_NEB(os.path.join(polOut,filename[:-3]+'geojson'))
 
