@@ -92,9 +92,17 @@ def main():
 
         logger.info("inserting into mongodb in "+sys.argv[2]+"-"+sys.argv[3])
         import buhayra.insertPolygons as ipol
+        import buhayra.loops as loops
         tiffs=ipol.select_tiffs_year_month(int(sys.argv[2]),int(sys.argv[3]))
-
         loops.insert_loop(tiffs)
+
+    elif sys.argv[1]=="threshold+insert year month":
+
+        logger.info("inserting into mongodb in "+sys.argv[2]+"-"+sys.argv[3])
+        import buhayra.thresholding as thresh
+        import buhayra.loops as loops
+        tiffs=thresh.select_tiffs_year_month(int(sys.argv[2]),int(sys.argv[3]))
+        loops.thresh_pol_insert(tiffs)
 
     elif sys.argv[1]=="write polygons":
 

@@ -7,7 +7,7 @@ from buhayra.getpaths import *
 from buhayra.credentials import *
 # import dask
 # from dask.distributed import Client, progress, LocalCluster
-
+import subprocess
 
 # f=select_tiffs_year_month(2018,4)[0]
 # wm=fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r')
@@ -36,6 +36,10 @@ def insert_into_NEB(feat,neb):
     result = neb.update_one({'properties.id_jrc':feat["properties"]["id_jrc"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True)
     return(result.upserted_id)
 
+def insert_into_postgres_NEB(loadfile):
+    logger = logging.getLogger('root')
+    cmd=["ogr2ogr","-f","PostgreSQL" ,"PG:\"host="+postgis_host+" dbname=watermasks user=" +postgis_user+" password="+postgis_pass+"\"",loadfile,"-nln","neb","-append","-skipfailures"]
+    return subprocess.check_call( cmd )
 
 def write_poly_loop():
     logger = logging.getLogger('root')

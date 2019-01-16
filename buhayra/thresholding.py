@@ -40,7 +40,7 @@ def save_originals(f,out_db,metadata,thr):
         json.dump(metadata, fjson)
     return f
 
-def flag_originals(f,out_db,metadata,thr):
+def flag_originals(f,metadata,thr):
     logger = logging.getLogger('root')
     metadata.append(thr)
     open(sarOut+'/'+f[:-3]+'finished','w').close()
@@ -57,6 +57,7 @@ def save_watermask(f,openwater,metadata,thr):
         with open(polOut+'/'+f[:-3]+'json', 'w') as fjson:
             json.dump(metadata, fjson)
     return f
+
 
 def remove_sigma_naught(f):
     logger = logging.getLogger('root')

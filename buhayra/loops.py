@@ -6,14 +6,39 @@ import buhayra.vegetatedwater as veggie
 import numpy as np
 import logging
 import time
-import dask.array as da
-# from dask_ml.decomposition import PCA
-from sklearn.decomposition import PCA
-from dask import compute, delayed
-import dask.threaded
+# import dask.array as da
+# # from dask_ml.decomposition import PCA
+# from sklearn.decomposition import PCA
+# from dask import compute, delayed
+# import dask.threaded
 import rasterio
+import geojson
 
-f=veggie.select_last_tiff()
+
+
+
+def thresh_pol_insert(tiffs):
+    logger = logging.getLogger('root')
+    out=list()
+    with fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r') as wm:
+        for filename in tiffs:
+            sigma_naught=thresh.load_sigma_naught(filename)
+            metadata=thresh.load_metadata(filename)
+
+            splt = thresh.subset_200x200(sigma_naught)
+            thr = thresh.determine_threshold_in_tif(splt)
+            openwater = thresh.threshold(sigma_naught,thr)
+            poly = poly.raster2shapely(openwater.astype(rasterio.int32),metadata)
+            poly_in_jrc = poly.select_intersecting_polys(poly,wm,filename)
+            feat = poly.prepareJSON(poly_in_jrc,filename,metadata)
+            gj = poly.json2geojson(feat)
+            while open(os.path.join(polOut,filename[:-3]+'geojson'),'w') as f:
+                geojson.dump(feat,f)
+
+            response = insert.insert_into_postgres_NEB(os.path.join(polOut,filename[:-3]+'geojson'))
+
+
+# f=veggie.select_last_tiff()
 def glcm_loop(scenes):
     window_shape=(3,3)
     logger = logging.getLogger('root')
@@ -51,7 +76,7 @@ def threshold_loop(tiffs):
         openwater = thresh.threshold(sigma_naught,thr)
 
         # orig = thresh.save_originals(f,original,metadata,thr)
-        orig = thresh.flag_originals(f,original,metadata,thr)
+        orig = thresh.flag_originals(f,metadata,thr)
         out.append(orig)
         wm = thresh.save_watermask(orig,openwater,metadata,thr)
         out.append(wm)
@@ -85,9 +110,10 @@ def insert_loop(tiffs):
             feat = poly.prepareJSON(poly,f,metadata)
             feat_wm = poly.select_intersecting_polys(feat,wm)
             feat_id = insert.insert_into_NEB(feat_wm,neb)
+
             out.append(feat_id)
             rm = poly.remove_watermask(f,feat_id)
             out.append(rm)
 
-    # total=dask.delayed(out)
-    # total.compute()
+            # orig = thresh.flag_originals(f,metadata,thr)
+            # out.append(orig)

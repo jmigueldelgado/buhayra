@@ -33,6 +33,44 @@ def raster2shapely(r,metadata):
     return cascaded_union(polys)
 
 
+def select_intersecting_polys(geom,wm,f):
+    metalist=f[:-4].split('_')
+
+    project = partial(
+        pyproj.transform,
+        pyproj.Proj(init='epsg:4326'),
+        pyproj.Proj(init='epsg:32724'))
+
+    geom=geom.buffer(0)
+    geom=transform(project,geom)
+
+    for wm_feat in wm:
+        if int(wm_feat['id'])==int(metadata[6]):
+            refgeom=shape(wm_feat['geometry'])
+            refgeom=refgeom.buffer(0)
+            break
+
+    inters=list()
+    if geom.geom_type == 'MultiPolygon':
+        for poly in geom:
+            if poly.intersects(refgeom):
+                inters.append(poly)
+        if len(inters)>0:
+            geom_out = cascaded_union(inters)
+            # s=json.dumps(mapping(inters))
+            # feat['geometry']=json.loads(s)
+        else:
+            geom_out=None
+    elif geom.geom_type == 'Polygon':
+        if geom.intersects(refgeom):
+            geom_out=geom
+            # s=json.dumps(mapping(geom))
+            # feat['geometry']=json.loads(s)
+        else:
+            geom_out=None
+    return(geom_out)
+
+
 def prepareJSON(poly,f,metadata):
     metalist=f[:-4].split('_')
     sentx=metalist[0]
@@ -41,20 +79,51 @@ def prepareJSON(poly,f,metadata):
         'ingestion_time':datetime.datetime.strptime(metalist[4],'%Y%m%dT%H%M%S'),
         'id_jrc':int(metalist[9]),
         'threshold':int(metadata[6]),}
-    s=json.dumps(mapping(poly))
+
+    project = partial(
+        pyproj.transform,
+        pyproj.Proj(init='epsg:32724'),
+        pyproj.Proj(init='epsg:4326'))
+
+    geom=geom.buffer(0)
+
+    poly_wgs=transform(project,poly)
+
+    s=json.dumps(mapping(poly_wgs))
     geom=json.loads(s)
 
-    poly_utm=wgs2utm(poly)
 
     feat={
         'type':'Feature',
         'properties':props,
         'geometry':geom
         }
+    feat['properties']['area']=poly.area
 
-#    feat['properties']['area']=poly_utm.area
+    return feat
 
-    return(feat)
+
+def json2geojson(dict):
+
+    feats=[]
+    if dict['geometry'] is None:
+        feats.append(geojson.Feature(geometry=None,properties=dict['properties']))
+    else:
+        ## mixing poly and multipoly is not accepted by postgis. we will force Polygon into MultiPolygon
+        if len(dict['geometry']['coordinates'])>0:
+            mp=geojson.MultiPolygon()
+
+        ## now we have to correct syntax of MultiPolygon which was forced from Polygon so it generates valid geojson in the end
+        if dict["geometry"]["type"]=='Polygon':
+            dict["geometry"]["coordinates"]=[dict["geometry"]["coordinates"]]
+        #if len(poly['geometry']['coordinates'])==1:
+        #    mp=geojson.Polygon()
+
+        mp['coordinates']=dict['geometry']['coordinates']
+        feats.append(geojson.Feature(geometry=mp,properties=dict['properties']))
+
+    return geojson.FeatureCollection(feats)
+
 
 def remove_watermask(f,feat_id):
     logger = logging.getLogger('root')
@@ -70,40 +139,6 @@ def wgs2utm(geom):
     geom_utm=transform(project,geom)
     return(geom_utm)
 
-def select_intersecting_polys(feat,wm):
-    geom=shape(feat['geometry'])
-    geom=geom.buffer(0)
-
-    project = partial(
-        pyproj.transform,
-        pyproj.Proj(init='epsg:32724'),
-        pyproj.Proj(init='epsg:4326'))
-
-    for wm_feat in wm:
-        if int(wm_feat['id'])==feat['properties']['id_jrc']:
-            refgeom=shape(wm_feat['geometry'])
-            refgeom=refgeom.buffer(0)
-            refgeom=transform(project,refgeom)
-            break
-
-    inters=list()
-    if geom.geom_type == 'MultiPolygon':
-        for poly in geom:
-            if poly.intersects(refgeom):
-                inters.append(poly)
-        if len(inters)>0:
-            inters = cascaded_union(inters)
-            s=json.dumps(mapping(inters))
-            feat['geometry']=json.loads(s)
-        else:
-            feat['geometry']=None
-    elif geom.geom_type == 'Polygon':
-        if geom.intersects(refgeom):
-            s=json.dumps(mapping(geom))
-            feat['geometry']=json.loads(s)
-        else:
-            feat['geometry']=None
-    return(feat)
 
 def select_tiffs_year_month(Y,M):
     logger = logging.getLogger('root')
