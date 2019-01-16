@@ -12,6 +12,7 @@ import json
 from functools import partial
 import pyproj
 from numpy import amax
+import geojson
 
 def load_metadata(f):
     with open(polOut+'/'+f[:-3]+'json', 'r') as fjson:
