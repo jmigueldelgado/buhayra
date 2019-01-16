@@ -105,6 +105,9 @@ def prepareJSON(poly,f,metadata):
 
 
 def json2geojson(dict):
+    dttm=dict['properties']['ingestion_time']
+    dttmstr=dttm.strftime("%Y-%m-%d %H:%M:%S")
+    dict['properties']['ingestion_time']=dttmstr
 
     feats=[]
     if dict['geometry'] is None:
@@ -122,6 +125,8 @@ def json2geojson(dict):
 
         mp['coordinates']=dict['geometry']['coordinates']
         feats.append(geojson.Feature(geometry=mp,properties=dict['properties']))
+
+
 
     return geojson.FeatureCollection(feats)
 
