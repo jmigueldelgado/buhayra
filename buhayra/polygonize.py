@@ -45,7 +45,7 @@ def select_intersecting_polys(geom,wm,f):
     geom=transform(project,geom)
 
     for wm_feat in wm:
-        if int(wm_feat['id'])==int(metadata[6]):
+        if int(wm_feat['id'])==int(metalist[9]):
             refgeom=shape(wm_feat['geometry'])
             refgeom=refgeom.buffer(0)
             break

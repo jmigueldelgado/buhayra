@@ -1,7 +1,7 @@
 from buhayra.getpaths import *
 import buhayra.thresholding as thresh
-import from buhayra.polygonize as poly
-import from buhayra.insertPolygons as insert
+import buhayra.polygonize as poly
+import buhayra.insertPolygons as insert
 import buhayra.vegetatedwater as veggie
 import numpy as np
 import logging
@@ -13,9 +13,9 @@ import time
 # import dask.threaded
 import rasterio
 import geojson
+import fiona
 
-
-
+filename = 'S1A_IW_GRDH_1SDV_20180104T081748_20180104T081813_020002_02212B_EE92_26238.tif'
 
 def thresh_pol_insert(tiffs):
     logger = logging.getLogger('root')
@@ -28,9 +28,9 @@ def thresh_pol_insert(tiffs):
             splt = thresh.subset_200x200(sigma_naught)
             thr = thresh.determine_threshold_in_tif(splt)
             openwater = thresh.threshold(sigma_naught,thr)
-            poly = poly.raster2shapely(openwater.astype(rasterio.int32),metadata)
-            poly_in_jrc = poly.select_intersecting_polys(poly,wm,filename)
-            feat = poly.prepareJSON(poly_in_jrc,filename,metadata)
+            pol = poly.raster2shapely(openwater.astype(rasterio.int32),metadata)
+            pol_in_jrc = poly.select_intersecting_polys(pol,wm,filename)
+            feat = poly.prepareJSON(pol_in_jrc,filename,metadata)
             gj = poly.json2geojson(feat)
             while open(os.path.join(polOut,filename[:-3]+'geojson'),'w') as f:
                 geojson.dump(feat,f)
