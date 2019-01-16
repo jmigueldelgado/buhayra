@@ -85,7 +85,7 @@ def prepareJSON(poly,f,metadata):
         pyproj.Proj(init='epsg:32724'),
         pyproj.Proj(init='epsg:4326'))
 
-    geom=geom.buffer(0)
+    poly=poly.buffer(0)
 
     poly_wgs=transform(project,poly)
 
