@@ -75,7 +75,7 @@ def select_intersecting_polys(geom,wm,f):
 def prepareJSON(poly,f,metadata):
     metalist=f[:-4].split('_')
     sentx=metalist[0]
-    if np.isnan(metadata[6]):
+    if numpy.isnan(metadata[6]):
         metadata[6]=0
     props={
         'source_id':sentx[1],
