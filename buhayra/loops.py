@@ -5,7 +5,6 @@ import buhayra.insertPolygons as insert
 import buhayra.vegetatedwater as veggie
 import numpy as np
 import logging
-import time
 # import dask.array as da
 # # from dask_ml.decomposition import PCA
 # from sklearn.decomposition import PCA
@@ -16,7 +15,6 @@ import geojson
 import fiona
 import os
 import subprocess
-import time
 # filename = 'S1A_IW_GRDH_1SDV_20180104T081748_20180104T081813_020002_02212B_EE92_18085.tif'
 # filename='S1A_IW_GRDH_1SDV_20180422T081723_20180422T081748_021577_0252FF_65E0_21234.tif'
 # filename='S1A_IW_GRDH_1SDV_20180116T081657_20180116T081722_020177_0226BC_9E7A_1349.tif'
@@ -27,7 +25,7 @@ import time
 def thresh_pol_insert(tiffs):
     logger = logging.getLogger('root')
     o_std = open(os.path.join(home['home'],'ogr2ogr.log'), 'a')
-    o_err = open(os.path.join(home['home'], 'ogr2ogr.err', 'a')
+    o_err = open(os.path.join(home['home'], 'ogr2ogr.err'), 'a')
     with fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r') as wm:
         for filename in tiffs:
             sigma_naught=thresh.load_sigma_naught(filename)
