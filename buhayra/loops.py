@@ -5,11 +5,6 @@ import buhayra.insertPolygons as insert
 import buhayra.vegetatedwater as veggie
 import numpy as np
 import logging
-# import dask.array as da
-# # from dask_ml.decomposition import PCA
-# from sklearn.decomposition import PCA
-# from dask import compute, delayed
-# import dask.threaded
 import rasterio
 import geojson
 import fiona
@@ -24,9 +19,7 @@ import subprocess
 
 def thresh_pol_insert(tiffs):
     logger = logging.getLogger('root')
-    o_std = open(os.path.join(home['home'],'ogr2ogr.log'), 'a')
-    o_err = open(os.path.join(home['home'], 'ogr2ogr.err'), 'a')
-    with fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r') as wm:
+    with open(os.path.join(home['home'],'ogr2ogr.log'), 'a') as o_std, open(os.path.join(home['home'], 'ogr2ogr.err'), 'a') as o_err, fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r') as wm:
         for filename in tiffs:
             sigma_naught=thresh.load_sigma_naught(filename)
             metadata=thresh.load_metadata(filename)
@@ -39,8 +32,10 @@ def thresh_pol_insert(tiffs):
             feat = poly.prepareJSON(pol_in_jrc,filename,metadata)
             gj = poly.json2geojson(feat)
             gj_path=os.path.join(polOut,filename[:-3]+'geojson')
+
             with open(gj_path,'w') as f:
                 geojson.dump(gj,f)
+
             insert.insert_into_postgres_NEB(os.path.join(polOut,filename[:-3]+'geojson'),o_std,o_err)
 
 
