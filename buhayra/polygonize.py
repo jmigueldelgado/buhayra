@@ -61,20 +61,22 @@ def select_intersecting_polys(geom,wm,f):
             # s=json.dumps(mapping(inters))
             # feat['geometry']=json.loads(s)
         else:
-            geom_out=None
+            geom_out=Polygon().buffer(0)
     elif geom.geom_type == 'Polygon':
         if geom.intersects(refgeom):
             geom_out=geom
             # s=json.dumps(mapping(geom))
             # feat['geometry']=json.loads(s)
         else:
-            geom_out=None
+            geom_out=Polygon().buffer(0)
     return(geom_out)
 
 
 def prepareJSON(poly,f,metadata):
     metalist=f[:-4].split('_')
     sentx=metalist[0]
+    if np.isnan(metadata[6]):
+        metadata[6]=0
     props={
         'source_id':sentx[1],
         'ingestion_time':datetime.datetime.strptime(metalist[4],'%Y%m%dT%H%M%S'),

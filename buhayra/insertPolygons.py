@@ -36,10 +36,10 @@ def insert_into_NEB(feat,neb):
     result = neb.update_one({'properties.id_jrc':feat["properties"]["id_jrc"] , 'properties.ingestion_time' :feat["properties"]["ingestion_time"] },{'$set':feat},upsert=True)
     return(result.upserted_id)
 
-def insert_into_postgres_NEB(loadfile):
+def insert_into_postgres_NEB(src_path,o_std,o_err):
     logger = logging.getLogger('root')
-    cmd=["ogr2ogr","-f","PostgreSQL" ,"PG:\"host="+postgis_host+" dbname=watermasks user=" +postgis_user+" password="+postgis_pass+"\"",loadfile,"-nln","neb","-append","-skipfailures"]
-    return subprocess.check_call( cmd )
+    call=['nohup','ogr2ogr','-f','PostgreSQL' ,'PG:\"host='+postgis_host+' dbname=watermasks user=' +postgis_user+' password='+postgis_pass+'\"',src_path,'-nln','neb','-append','-skipfailures']
+    r = subprocess.Popen(call, stdout=o_std, stderr=o_err, preexec_fn=os.setpgrp)
 
 def write_poly_loop():
     logger = logging.getLogger('root')
