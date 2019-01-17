@@ -7,7 +7,16 @@ import sys
 from datetime import datetime,timedelta
 from buhayra.getpaths import *
 import socket
+import subprocess
 # from sshtunnel import SSHTunnelForwarder
+
+
+def ogr_getLatestIngestionTime():
+    with open(os.path.join(home['home'],'ogr_query.log'), 'a') as o_std, open(os.path.join(home['home'], 'ogr_query.err'), 'a') as o_err:
+        # ogr2ogr -f "GeoJSON" myogrdump PG:"host=localhost user=sar2water dbname=watermasks password=eg_BertS101" -sql
+        query = ''
+        call=['nohup','ogr2ogr','-f','GeoJSON' ,'latest-watermask.geojson', 'PG:host='+postgis_host+' dbname=watermasks user=' +postgis_user+' password='+postgis_pass,'-sql','SELECT * FROM neb LIMIT 1']
+        r = subprocess.Popen(call, stdout=o_std, stderr=o_err, preexec_fn=os.setpgrp)
 
 
 
@@ -110,7 +119,7 @@ def aggr2geojson(polys):
             ## mixing poly and multiply is not accepted by postgis. we will force Polygon into MultiPolygon
             if len(poly['geometry']['coordinates'])>0:
                 mp=geojson.MultiPolygon()
-                
+
             ## now we have to correct syntax of MultiPolygon which was forced from Polygon so it generates valid geojson in the end
             if poly["geometry"]["type"]=='Polygon':
                 poly["geometry"]["coordinates"]=[poly["geometry"]["coordinates"]]
@@ -118,7 +127,7 @@ def aggr2geojson(polys):
             #    mp=geojson.Polygon()
 
             mp['coordinates']=poly['geometry']['coordinates']
-        
+
             feats.append(geojson.Feature(geometry=mp,properties=poly['properties']))
 
     feat_col=geojson.FeatureCollection(feats)

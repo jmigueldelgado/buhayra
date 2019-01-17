@@ -98,7 +98,7 @@ def main():
 
     elif sys.argv[1]=="threshold+insert year month":
 
-        logger.info("inserting into mongodb in "+sys.argv[2]+"-"+sys.argv[3])
+        logger.info("inserting into postgreSQL in "+sys.argv[2]+"-"+sys.argv[3])
         import buhayra.thresholding as thresh
         import buhayra.loops as loops
         tiffs=thresh.select_tiffs_year_month(int(sys.argv[2]),int(sys.argv[3]))
