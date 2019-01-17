@@ -112,12 +112,11 @@ def json2geojson(dict):
     dict['properties']['ingestion_time']=dttmstr
 
     feats=[]
-    if dict['geometry'] is None:
+    if dict['geometry'] is None or len(dict['geometry']['coordinates']==0):
         feats.append(geojson.Feature(geometry=None,properties=dict['properties']))
     else:
         ## mixing poly and multipoly is not accepted by postgis. we will force Polygon into MultiPolygon
-        if len(dict['geometry']['coordinates'])>0:
-            mp=geojson.MultiPolygon()
+        mp=geojson.MultiPolygon()
 
         ## now we have to correct syntax of MultiPolygon which was forced from Polygon so it generates valid geojson in the end
         if dict["geometry"]["type"]=='Polygon':
