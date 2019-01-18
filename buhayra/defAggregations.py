@@ -14,8 +14,8 @@ import subprocess
 def ogr_getLatestIngestionTime():
     with open(os.path.join(home['home'],'ogr_query.log'), 'a') as o_std, open(os.path.join(home['home'], 'ogr_query.err'), 'a') as o_err:
         # ogr2ogr -f "GeoJSON" myogrdump PG:"host=localhost user=sar2water dbname=watermasks password=eg_BertS101" -sql
-        query = ''
-        call=['nohup','ogr2ogr','-f','GeoJSON' ,'latest-watermask.geojson', 'PG:host='+postgis_host+' dbname=watermasks user=' +postgis_user+' password='+postgis_pass,'-sql','SELECT * FROM neb LIMIT 1']
+        query = 'geom from (select distinct on (id_jrc) id_jrc, ingestion_time, area, geom, id from neb order by id_jrc, ingestion_time desc) as subquery using unique id using srid=4326'
+        call=['nohup','ogr2ogr','-f','GeoJSON' ,os.path.join(home['home'],'latest-watermask.geojson'), 'PG:host='+postgis_host+' dbname=watermasks user=' +postgis_user+' password='+postgis_pass,'-sql',query]
         r = subprocess.Popen(call, stdout=o_std, stderr=o_err, preexec_fn=os.setpgrp)
 
 
