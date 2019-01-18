@@ -18,6 +18,9 @@ dask-worker-space/*
 wm_jrc.geojson
 postgisStuff.txt
 latestWMS.map
+JRC_neb.geojson
+
+
 # Sentinel data and test data
 
 test_data/
