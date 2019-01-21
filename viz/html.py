@@ -8,7 +8,7 @@ from buhayra.getpaths import *
 from shapely.geometry import mapping, Polygon, shape
 import datetime
 import geojson
-# import buhayra.defAggregations as aggr
+import buhayra.defAggregations as aggr
 #
 #
 # aggr.ogr_getLatestIngestionTime()
@@ -65,4 +65,4 @@ def make_html():
 
     folium.LayerControl().add_to(m)
 
-    m.save(os.path.join('viz', 'index.html'))
+    m.save(os.path.join(home['home'], 'index.html'))
