@@ -10,15 +10,32 @@ import socket
 import subprocess
 # from sshtunnel import SSHTunnelForwarder
 
+def pid_exists(pid):
+    """ Check for the existence of a unix pid. """
+    try:
+        os.kill(pid, 0)
+    except OSError:
+        return False
+    else:
+        return True
+
+
+
 
 def ogr_getLatestIngestionTime():
-    if os.path.isfile(os.path.join(home['home'],'latest-watermask.geojson')):
-        os.remove(os.path.join(home['home'],'latest-watermask.geojson'))
+    path_to_geojson = os.path.join(home['home'],'latest-watermask'+datetime.today().strftime('%Y-%m-%d')+'.geojson')
+    if os.path.isfile(path_to_geojson):
+        os.remove(path_to_geojson)
     with open(os.path.join(home['home'],'ogr_query.log'), 'a') as o_std, open(os.path.join(home['home'], 'ogr_query.err'), 'a') as o_err:
         #query = 'geom from (select distinct on (id_jrc) id_jrc, ingestion_time, area, geom, id from neb order by id_jrc, ingestion_time desc) as subquery using unique id using srid=4326'
         query = 'select distinct on (id_jrc) id_jrc, ingestion_time, area, geom, id from neb order by id_jrc, ingestion_time desc'
-        call=['nohup','ogr2ogr','-f','GeoJSON' ,os.path.join(home['home'],'latest-watermask.geojson'), 'PG:host='+postgis_host+' dbname=watermasks user=' +postgis_user+' password='+postgis_pass,'-sql',query]
-        r = subprocess.Popen(call, stdout=o_std, stderr=o_err, preexec_fn=os.setpgrp)
+        call=['nohup','ogr2ogr','-f','GeoJSON' ,path_to_geojson, 'PG:host='+postgis_host+' dbname=watermasks user=' +postgis_user+' password='+postgis_pass,'-sql',query]
+        p = subprocess.Popen(call, stdout=o_std, stderr=o_err, preexec_fn=os.setpgrp)
+        while pid_exists(p.pid):
+            pass
+
+    return path_to_geojson
+
 
 
 
