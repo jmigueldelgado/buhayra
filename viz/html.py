@@ -65,4 +65,4 @@ def make_html():
 
     folium.LayerControl().add_to(m)
 
-    m.save(os.path.join('viz', 'buhayra.html'))
+    m.save(os.path.join('viz', 'index.html'))
