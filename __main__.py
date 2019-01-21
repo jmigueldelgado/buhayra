@@ -116,6 +116,12 @@ def main():
         import buhayra.getLatestPolygons as gLP
         gLP.connect_and_get(int(sys.argv[2]))
 
+    elif sys.argv[1]=="make html":
+
+        logger.info("creating html")
+        import viz.html as viz
+        viz.make_html()
+
     elif sys.argv[1]=="update validation":
 
         logger.info("obtain validation dataset from funceme api")
