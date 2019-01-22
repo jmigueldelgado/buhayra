@@ -20,27 +20,35 @@ import datetime
 
 def thresh_pol_insert(tiffs):
     logger = logging.getLogger('root')
+
+    sizeofslice=1000
+    nslices = len(tiffs)//sizeofslice
+    tiffslices = list()
+    for i in range(nslices):
+        tiffslices.append(tiffs[i*sizeofslice:(i*sizeofslice+sizeofslice)])
+        print(str(i),'\n')
+    tiffslices.append(tiffs[(nslices*sizeofslice):len(tiffs)])
+
     with open(os.path.join(home['home'],'ogr2ogr.log'), 'a') as o_std, open(os.path.join(home['home'], 'ogr2ogr.err'), 'a') as o_err, fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r') as wm:
         ls = list()
-        for tiffslice in tiffs:
-            for filename in tiffslice:
-                sigma_naught=thresh.load_sigma_naught(filename)
-                metadata=thresh.load_metadata(filename)
+        for filename in tiffslices:
+            sigma_naught=thresh.load_sigma_naught(filename)
+            metadata=thresh.load_metadata(filename)
 
-                splt = thresh.subset_200x200(sigma_naught)
-                thr = thresh.determine_threshold_in_tif(splt)
-                openwater = thresh.threshold(sigma_naught,thr)
-                pol = poly.raster2shapely(openwater.astype(rasterio.int32),metadata)
-                pol_in_jrc = poly.select_intersecting_polys(pol,wm,filename)
-                ls.append(poly.prepareDict(pol_in_jrc,filename,metadata))
+            splt = thresh.subset_200x200(sigma_naught)
+            thr = thresh.determine_threshold_in_tif(splt)
+            openwater = thresh.threshold(sigma_naught,thr)
+            pol = poly.raster2shapely(openwater.astype(rasterio.int32),metadata)
+            pol_in_jrc = poly.select_intersecting_polys(pol,wm,filename)
+            ls.append(poly.prepareDict(pol_in_jrc,filename,metadata))
 
-            featcoll = poly.json2geojson(ls)
-            gj_path = os.path.join(polOut,'watermask-tmp-'+datetime.datetime.today().strftime('%Y-%m-%d_%H%M%S')+'.geojson')
+        featcoll = poly.json2geojson(ls)
+        gj_path = os.path.join(polOut,'watermask-tmp-'+datetime.datetime.today().strftime('%Y-%m-%d_%H%M%S')+'.geojson')
 
-            with open(gj_path,'w') as f:
-                geojson.dump(featcoll,f)
+        with open(gj_path,'w') as f:
+            geojson.dump(featcoll,f)
 
-            insert.insert_into_postgres_NEB(gj_path,o_std,o_err)
+        insert.insert_into_postgres_NEB(gj_path,o_std,o_err)
 
 
 # f=veggie.select_last_tiff()
