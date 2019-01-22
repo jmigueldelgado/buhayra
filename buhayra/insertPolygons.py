@@ -38,7 +38,7 @@ def insert_into_NEB(feat,neb):
 
 def insert_into_postgres_NEB(src_path,o_std,o_err):
     logger = logging.getLogger('root')
-    call=['nohup','ogr2ogr','-f','PostgreSQL' ,'PG:host='+postgis_host+' dbname=watermasks user=' +postgis_user+' password='+postgis_pass,src_path,'-nln','neb','-append','-skipfailures']
+    call=['nohup','ogr2ogr','-f','PostgreSQL' ,'PG:host='+postgis_host+' dbname=watermasks user=' +postgis_user+' password='+postgis_pass,src_path,'-nln','neb','PG_USE_COPY=YES','-append','-skipfailures']
     r = subprocess.Popen(call, stdout=o_std, stderr=o_err, preexec_fn=os.setpgrp)
 
 def write_poly_loop():

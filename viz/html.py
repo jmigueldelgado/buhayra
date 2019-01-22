@@ -18,21 +18,18 @@ def update_metadata():
     path_to_geojson = aggr.ogr_getLatestIngestionTime()
     with fiona.open(path_to_geojson,'r') as latest:
         feats=list()
+
         for feat in latest:
             if feat['geometry'] is None:
                 continue
-            centroid = shape(feat['geometry']).buffer(0).centroid
             pnt = geojson.Point()
-            geom = mapping(centroid)
-
-            pnt['coordinates']=geom['coordinates']
+            pnt['coordinates']=feat['geometry']['coordinates']
             feats.append(geojson.Feature(geometry=pnt,properties=feat['properties']))
 
-    featcoll = geojson.FeatureCollection(feats)
-    return(featcoll)
+    return geojson.FeatureCollection(feats)
 
 def make_html():
-    m = folium.Map(location=[-5, -38],zoom_start=8)
+    m = folium.Map(location=[-5, -38],zoom_start=12)
     # folium.map.Icon(color='green',)
     # folium.GeoJson('./buhayra/auxdata/unidades-hidrograficas-CE.geojson',name='geojson',tooltip=folium.features.GeoJsonTooltip(fields=['UHE_NM'],aliases=['unidade hidrográfica'],labels=True,localize=True)).add_to(m)
     # mkrs=folium.GeoJson('./viz/latest-markers.geojson',name='geojson',tooltip=folium.features.GeoJsonTooltip(fields=['ingestion_time'],aliases=['ingestion time'],labels=True,localize=True,sticky=True))
@@ -43,13 +40,14 @@ def make_html():
         control=False,
         # icon_create_function=None
     )
-
     featcoll = update_metadata()
     for feat in featcoll['features']:
 
         location =feat['geometry']['coordinates'][1],feat['geometry']['coordinates'][0]
-        marker = folium.Marker(location=location)
-        popup = 'id: {}<br>Area: {} ha<br>Ingestion Time: {}'.format( str(feat['properties']['id_jrc']),str(feat['properties']['area']/10000), str(feat['properties']['ingestion_time']))
+        marker = folium.Marker(location=location,icon=folium.map.Icon('fa-angle-down'))
+        popup = ('id: {:6d}'.format( feat['properties']['id_jrc'])+
+            '<br>Area: {:.2f} ha'.format(feat['properties']['area']/10000)+
+            '<br>Ingestion Time: {}'.format(feat['properties']['ingestion_time']))
         folium.Popup(popup).add_to(marker)
         marker_cluster.add_child(marker)
 

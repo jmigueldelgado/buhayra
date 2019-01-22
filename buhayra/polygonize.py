@@ -72,7 +72,7 @@ def select_intersecting_polys(geom,wm,f):
     return(geom_out)
 
 
-def prepareJSON(poly,f,metadata):
+def prepareDict(poly,f,metadata):
     metalist=f[:-4].split('_')
     sentx=metalist[0]
     if np.isnan(metadata[6]):
@@ -106,26 +106,27 @@ def prepareJSON(poly,f,metadata):
     return feat
 
 
-def json2geojson(dict):
-    dttm=dict['properties']['ingestion_time']
-    dttmstr=dttm.strftime("%Y-%m-%d %H:%M:%S")
-    dict['properties']['ingestion_time']=dttmstr
-
+def json2geojson(ls):
     feats=[]
-    if dict['geometry'] is None or len(dict['geometry']['coordinates'])==0:
-        feats.append(geojson.Feature(geometry=None,properties=dict['properties']))
-    else:
-        ## mixing poly and multipoly is not accepted by postgis. we will force Polygon into MultiPolygon
-        mp=geojson.MultiPolygon()
+    for dict in ls:
+        dttm=dict['properties']['ingestion_time']
+        dttmstr=dttm.strftime("%Y-%m-%d %H:%M:%S")
+        dict['properties']['ingestion_time']=dttmstr
 
-        ## now we have to correct syntax of MultiPolygon which was forced from Polygon so it generates valid geojson in the end
-        if dict["geometry"]["type"]=='Polygon':
-            dict["geometry"]["coordinates"]=[dict["geometry"]["coordinates"]]
-        #if len(poly['geometry']['coordinates'])==1:
-        #    mp=geojson.Polygon()
+        if dict['geometry'] is None or len(dict['geometry']['coordinates'])==0:
+            feats.append(geojson.Feature(geometry=None,properties=dict['properties']))
+        else:
+            ## mixing poly and multipoly is not accepted by postgis. we will force Polygon into MultiPolygon
+            mp=geojson.MultiPolygon()
 
-        mp['coordinates']=dict['geometry']['coordinates']
-        feats.append(geojson.Feature(geometry=mp,properties=dict['properties']))
+            ## now we have to correct syntax of MultiPolygon which was forced from Polygon so it generates valid geojson in the end
+            if dict["geometry"]["type"]=='Polygon':
+                dict["geometry"]["coordinates"]=[dict["geometry"]["coordinates"]]
+            #if len(poly['geometry']['coordinates'])==1:
+            #    mp=geojson.Polygon()
+
+            mp['coordinates']=dict['geometry']['coordinates']
+            feats.append(geojson.Feature(geometry=mp,properties=dict['properties']))
 
 
 
