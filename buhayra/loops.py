@@ -42,10 +42,9 @@ def thresh_pol_insert(tiffs):
                 splt = thresh.subset_200x200(sigma_naught)
                 thr = thresh.determine_threshold_in_tif(splt)
                 openwater = thresh.threshold(sigma_naught,thr)
-                metadata[6] = thr
                 pol = poly.raster2shapely(openwater.astype(rasterio.int32),metadata)
                 pol_in_jrc = poly.select_intersecting_polys(pol,wm,filename)
-                ls.append(poly.prepareDict(pol_in_jrc,filename,metadata))
+                ls.append(poly.prepareDict(pol_in_jrc,filename,thr))
 
             featcoll = poly.json2geojson(ls)
 

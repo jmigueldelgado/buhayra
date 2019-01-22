@@ -72,16 +72,16 @@ def select_intersecting_polys(geom,wm,f):
     return(geom_out)
 
 
-def prepareDict(poly,f,metadata):
+def prepareDict(poly,f,thr):
     metalist=f[:-4].split('_')
     sentx=metalist[0]
-    if np.isnan(metadata[6]):
-        metadata[6]=0
+    if np.isnan(thr):
+        thr=0
     props={
         'source_id':sentx[1],
         'ingestion_time':datetime.datetime.strptime(metalist[4],'%Y%m%dT%H%M%S'),
         'id_jrc':int(metalist[9]),
-        'threshold':int(metadata[6]),}
+        'threshold':thr,}
 
     project = partial(
         pyproj.transform,
