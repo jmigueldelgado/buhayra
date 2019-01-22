@@ -45,6 +45,8 @@ def select_intersecting_polys(geom,wm,f):
     geom=geom.buffer(0)
     geom=transform(project,geom)
 
+
+    ## replace this with some kind of `find`
     for wm_feat in wm:
         if int(wm_feat['id'])==int(metalist[9]):
             refgeom=shape(wm_feat['geometry'])
@@ -69,8 +71,9 @@ def select_intersecting_polys(geom,wm,f):
             # feat['geometry']=json.loads(s)
         else:
             geom_out=Polygon().buffer(0)
-    return(geom_out)
 
+    xgeom = refgeom.intersection(geom_out)
+    return geom_out, intersection_area
 
 def prepareDict(poly,f,thr):
     metalist=f[:-4].split('_')
