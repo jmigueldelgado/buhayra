@@ -28,6 +28,8 @@ def thresh_pol_insert(tiffs):
         tiffslices.append(tiffs[i*sizeofslice:(i*sizeofslice+sizeofslice)])
     tiffslices.append(tiffs[(nslices*sizeofslice):len(tiffs)])
 
+
+
     with open(os.path.join(home['home'],'ogr2ogr.log'), 'a') as o_std, open(os.path.join(home['home'], 'ogr2ogr.err'), 'a') as o_err, fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r') as wm:
         ls = list()
         for slice in tiffslices:

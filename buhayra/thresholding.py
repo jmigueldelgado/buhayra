@@ -96,13 +96,16 @@ def threshold(nparray,thr):
 
     if np.isnan(thr):
         band[:]=ma.masked
-    elif(np.amax(nparray)< -1300): # all cells in raster are open water
-        band.data.fill(1)
-    elif(thr < -1300):          # there is a threshold and it is a valid threshold
+    # elif(np.amax(nparray)< -1300): # all cells in raster are open water
+    #     band.data.fill(1)
+    # elif(thr < -1300):          # there is a threshold and it is a valid threshold
+    #     band[band>thr]=ma.masked
+    #     band.data.fill(1)
+    # else: # the threshold is too large to be a valid threshold
+    #     band[:]=ma.masked
+    else:          # there is a threshold and it is a valid threshold
         band[band>thr]=ma.masked
         band.data.fill(1)
-    else: # the threshold is too large to be a valid threshold
-        band[:]=ma.masked
 
     band.data[band.mask]=0
 
