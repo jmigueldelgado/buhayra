@@ -1,7 +1,7 @@
 from os.path import expanduser,exists
 import sys
 import socket
-from os import listdir
+import os
 import re
 import logging
 
@@ -84,7 +84,7 @@ def select_tiffs_year_month(Y,M,folders_in_ym):
     else:
         for folder in folders_in_ym:
             searchDir = os.path.join(folder,folder)
-            for tif in listdir(searchDir):
+            for tif in os.listdir(searchDir):
                 if  os.path.isfile(searchDir+'/'+tif[-3]+'finished') or not tif.startswith('S'):
                     continue
                 stamp=datetime.datetime.strptime(tif.split('_')[4],'%Y%m%dT%H%M%S')
@@ -115,10 +115,10 @@ def select_folders_year_month(Y,M,src_path):
 
 def selectTiff(dir):
     logger = logging.getLogger('root')
-    if(len(listdir(dir))<1):
+    if(len(os.listdir(dir))<1):
         logger.info(dir+" is empty! Nothing to do. Exiting and returning None.")
         return False
-    l=listdir(dir)
+    l=os.listdir(dir)
     for s in l:
         if re.search('.tif$',s):
             return(s)
@@ -126,10 +126,10 @@ def selectTiff(dir):
 
 def selectPattern(dir,pattern):
     logger = logging.getLogger('root')
-    if(len(listdir(dir))<1):
+    if(len(os.listdir(dir))<1):
         logger.info(dir+" is empty! Nothing to do. Exiting and returning None.")
         return False
-    l=listdir(dir)
+    l=os.listdir(dir)
     for s in l:
         if re.search(pattern,s):
             return(s)
