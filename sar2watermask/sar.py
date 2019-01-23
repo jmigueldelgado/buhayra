@@ -112,9 +112,11 @@ def sar2sigma_subset(scenes):
 #            product=sigma_naught(product)
 
             logger.info("starting loop on reservoirs")
+            targetdir = os.path.join(sarOut,productName)
+            os.mkdir(targetdir)
             for i in range(0,len(id_in_scene)):
                 fname=productName + "_" + str(id_in_scene[i])
-                if (fname+".tif") in listdir(sarOut):
+                if (fname+".tif") in listdir(targetdir):
                     logger.debug("product "+fname+".tif already exists: skipping")
                     continue
 
@@ -122,10 +124,10 @@ def sar2sigma_subset(scenes):
                 product_subset=subsetProduct(product,wm_in_scene[i])
 
                 logger.debug("writing product "+ str(id_in_scene[i]))
-                ProductIO.writeProduct(product_subset,sarOut+"/" + fname + "_locked",outForm)
+                ProductIO.writeProduct(product_subset,os.path.join(targetdir,fname + "_locked"),outForm)
                 product_subset.dispose()
 
-                compress_tiff(sarOut+'/'+fname+'_locked.tif',sarOut+'/'+fname+'.tif')
+                compress_tiff(os.path.join(targetdir,fname+'_locked.tif',os.path.join(targetdir,fname+'.tif')
 
             product.dispose()
 

@@ -73,9 +73,10 @@ def select_intersecting_polys(geom,wm,f):
             geom_out=Polygon().buffer(0)
 
     xgeom = refgeom.intersection(geom_out)
-    return geom_out, intersection_area
 
-def prepareDict(poly,f,thr):
+    return geom_out, xgeom.area
+
+def prepareDict(poly,f,thr,intersection_area):
     metalist=f[:-4].split('_')
     sentx=metalist[0]
     if np.isnan(thr):
@@ -84,7 +85,8 @@ def prepareDict(poly,f,thr):
         'source_id':sentx[1],
         'ingestion_time':datetime.datetime.strptime(metalist[4],'%Y%m%dT%H%M%S'),
         'id_jrc':int(metalist[9]),
-        'threshold':thr,}
+        'threshold':thr,
+        'wmxjrc_area':intersection_area,}
 
     project = partial(
         pyproj.transform,

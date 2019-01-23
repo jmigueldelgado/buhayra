@@ -187,21 +187,39 @@ def kittler(nparray):
 
         return threshold
 
-def select_tiffs_year_month(Y,M):
+def select_tiffs_year_month(folders_in_ym,Y,M):
     logger = logging.getLogger('root')
     timestamp=list()
     tiffs_in_ym=list()
-    for tif in listdir(sarOut):
-        if  os.path.isfile(sarOut+'/'+tif[-3]+'finished') or not tif.startswith('S'):
-            continue
-        stamp=datetime.datetime.strptime(tif.split('_')[4],'%Y%m%dT%H%M%S')
-        if re.search('.tif$',tif) and stamp.year==Y and stamp.month==M:
-            tiffs_in_ym.append(tif)
-            timestamp.append(stamp)
+    for folder in folders_in_ym:
+        searchDir = os.path.join(sarOut,folder)
+        for tif in listdir(searchDir):
+            if  os.path.isfile(searchDir+'/'+tif[-3]+'finished') or not tif.startswith('S'):
+                continue
+            stamp=datetime.datetime.strptime(tif.split('_')[4],'%Y%m%dT%H%M%S')
+            if re.search('.tif$',tif) and stamp.year==Y and stamp.month==M:
+                tiffs_in_ym.append(os.path.join(folder,tif))
+                timestamp.append(stamp)
     if(len(timestamp)<1):
         logger.info(sarOut+" has no tiffs for year "+str(Y)+" and month "+str(M)+"Exiting and returning None.")
         tiffs_in_ym=None
     return(tiffs_in_ym)
+
+def select_folders_year_month(Y,M):
+    logger = logging.getLogger('root')
+    timestamp=list()
+    allfolders = [ name for name in os.listdir(sarOut) if os.path.isdir(os.path.join(sarOut, name)) ]
+    folders_in_ym=list()
+
+    for folder in allfolders:
+        stamp=datetime.datetime.strptime(folder.split('_')[4],'%Y%m%dT%H%M%S')
+        if stamp.year==Y and stamp.month==M:
+            folders_in_ym.append(folder)
+    if(len(folders_in_ym)<1):
+        logger.info(sarOut+" has no scenes for year "+str(Y)+" and month "+str(M)+"Exiting and returning None.")
+        folders_in_ym=None
+    return folders_in_ym
+
 
 def select_n_last_tiffs(n):
     logger = logging.getLogger('root')

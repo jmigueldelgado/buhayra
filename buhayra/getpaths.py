@@ -75,6 +75,44 @@ sys.path.insert(0, home['parameters'])
 if exists(home['proj']+'/buhayra/credentials.py'):
     from buhayra.credentials import *
 
+def select_tiffs_year_month(Y,M,folders_in_ym):
+    logger = logging.getLogger('root')
+    tiffs_in_ym=list()
+
+    if folders_in_ym is None:
+        pass
+    else:
+        for folder in folders_in_ym:
+            searchDir = os.path.join(folder,folder)
+            for tif in listdir(searchDir):
+                if  os.path.isfile(searchDir+'/'+tif[-3]+'finished') or not tif.startswith('S'):
+                    continue
+                stamp=datetime.datetime.strptime(tif.split('_')[4],'%Y%m%dT%H%M%S')
+                if re.search('.tif$',tif) and stamp.year==Y and stamp.month==M:
+                    tiffs_in_ym.append(os.path.join(folder,tif))
+    if(len(tiffs_in_ym)<1):
+        logger.info("The selected folders have no tiffs for year "+str(Y)+" and month "+str(M)+"Exiting and returning None.")
+        tiffs_in_ym=None
+    return(tiffs_in_ym)
+
+def select_folders_year_month(Y,M,src_path):
+    logger = logging.getLogger('root')
+    timestamp=list()
+    allfolders = [ name for name in os.listdir(src_path) if os.path.isdir(os.path.join(src_path, name)) ]
+    folders_in_ym=list()
+
+    for folder in allfolders:
+        stamp=datetime.datetime.strptime(folder.split('_')[4],'%Y%m%dT%H%M%S')
+        if stamp.year==Y and stamp.month==M:
+            folders_in_ym.append(folder)
+    if(len(folders_in_ym)<1):
+        logger.info(src_path+" has no scenes for year "+str(Y)+" and month "+str(M)+"Exiting and returning None.")
+        folders_in_ym=None
+    return folders_in_ym
+
+
+
+
 def selectTiff(dir):
     logger = logging.getLogger('root')
     if(len(listdir(dir))<1):

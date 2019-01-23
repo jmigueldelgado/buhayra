@@ -1,10 +1,9 @@
 import sys
 import logging
-# import logging.config
-from logging.config import dictConfig
 import os
 import json
 import buhayra.log as log
+from buhayra.getpaths import *
 
 logger = log.setup_custom_logger('root','INFO')
 
@@ -83,9 +82,9 @@ def main():
     elif sys.argv[1]=="threshold year month":
 
         logger.info("computing thresholds for all tiffs in "+sys.argv[2]+"-"+sys.argv[3])
-        import buhayra.thresholding as thresh
         import buhayra.loops as loops
-        tiffs=thresh.select_tiffs_year_month(int(sys.argv[2]),int(sys.argv[3]))
+        folders_in_ym = select_folders_year_month(int(sys.argv[2]),int(sys.argv[3]),sarOut)
+        tiffs=select_tiffs_year_month(int(sys.argv[2]),int(sys.argv[3]),folders_in_ym)
         loops.threshold_loop(tiffs)
 
     elif sys.argv[1]=="insert year month":
@@ -99,9 +98,9 @@ def main():
     elif sys.argv[1]=="threshold+insert year month":
 
         logger.info("inserting into postgreSQL in "+sys.argv[2]+"-"+sys.argv[3])
-        import buhayra.thresholding as thresh
         import buhayra.loops as loops
-        tiffs=thresh.select_tiffs_year_month(int(sys.argv[2]),int(sys.argv[3]))
+        folders_in_ym = select_folders_year_month(int(sys.argv[2]),int(sys.argv[3]),sarOut)
+        tiffs=select_tiffs_year_month(int(sys.argv[2]),int(sys.argv[3]),folders_in_ym)
         loops.thresh_pol_insert(tiffs)
 
     elif sys.argv[1]=="write polygons":
@@ -128,21 +127,6 @@ def main():
         import buhayra.funceme as fcm
         fcm.insert_insitu_monitoring()
 
-    elif sys.argv[1]=="test insert":
-
-        import buhayra.tests as tests
-        tests.testMongoConnect()
-
-    elif sys.argv[1]=="test logging":
-
-        import buhayra.testlog as tl
-        tl.testing_logging()
-
-    elif sys.argv[1]=="test idepix":
-
-        import idepix.classification as ide
-        ide.test()
-
     elif sys.argv[1]=="test parallel with matrix":
 
         import tests.test_glcm_parallel as par
@@ -161,7 +145,8 @@ def main():
     elif sys.argv[1]=="move stuff around":
 
         import maintenance.move_stuff_around as mnt
-        mnt.move_proc(int(sys.argv[2]),int(sys.argv[3]))
+        mnt.move_tifs_to_folders()
+        # move_proc(int(sys.argv[2]),int(sys.argv[3]))
     else:
 
         logger.error("an argument is needed, for example: get_scenes, sar, threshold, insert, recent polys, 1 month old polys, 2 months old polys, update validation")

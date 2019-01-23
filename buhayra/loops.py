@@ -11,12 +11,6 @@ import fiona
 import os
 import subprocess
 import datetime
-# filename = 'S1A_IW_GRDH_1SDV_20180104T081748_20180104T081813_020002_02212B_EE92_18085.tif'
-# filename='S1A_IW_GRDH_1SDV_20180422T081723_20180422T081748_021577_0252FF_65E0_21234.tif'
-# filename='S1A_IW_GRDH_1SDV_20180116T081657_20180116T081722_020177_0226BC_9E7A_1349.tif'
-# filename='S1A_IW_GRDH_1SDV_20180710T080940_20180710T081005_022729_027695_F3B0_40194.tif'
-# filename='S1A_IW_GRDH_1SDV_20180920T080944_20180920T081009_023779_0297F7_2249_38646.tif'
-# wm=fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r')
 
 def thresh_pol_insert(tiffs):
     logger = logging.getLogger('root')
@@ -43,8 +37,8 @@ def thresh_pol_insert(tiffs):
                 thr = thresh.determine_threshold_in_tif(splt)
                 openwater = thresh.threshold(sigma_naught,thr)
                 pol = poly.raster2shapely(openwater.astype(rasterio.int32),metadata)
-                pol_in_jrc = poly.select_intersecting_polys(pol,wm,filename)
-                ls.append(poly.prepareDict(pol_in_jrc,filename,thr))
+                pol_in_jrc, intersection_area = poly.select_intersecting_polys(pol,wm,filename)
+                ls.append(poly.prepareDict(pol_in_jrc,filename,thr,intersection_area))
 
             featcoll = poly.json2geojson(ls)
 
