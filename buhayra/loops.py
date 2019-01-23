@@ -15,7 +15,7 @@ import datetime
 def thresh_pol_insert(tiffs):
     logger = logging.getLogger('root')
 
-    sizeofslice=1000
+    sizeofslice=20
     nslices = len(tiffs)//sizeofslice
     tiffslices = list()
     for i in range(nslices):
@@ -39,6 +39,7 @@ def thresh_pol_insert(tiffs):
                 pol = poly.raster2shapely(openwater.astype(rasterio.int32),metadata)
                 pol_in_jrc, intersection_area = poly.select_intersecting_polys(pol,wm,filename)
                 ls.append(poly.prepareDict(pol_in_jrc,filename,thr,intersection_area))
+                open(os.path.join(sarOut,f[:-3]+'finished'),'w').close()
 
             featcoll = poly.json2geojson(ls)
 

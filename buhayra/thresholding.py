@@ -17,35 +17,30 @@ from shapely.ops import transform
 
 def load_sigma_naught(f):
     logger = logging.getLogger('root')
-    with rasterio.open(sarOut+'/'+f,'r') as ds:
+    with rasterio.open(os.path.join(sarOut,f),'r') as ds:
         out_db=ds.read(1)
     return out_db
 
 def load_metadata(f):
     logger = logging.getLogger('root')
-    if os.path.isfile(procOut+'/'+f):
-        with open(procOut+'/'+f[:-3]+'json', 'r') as fjson:
-            metadata = json.load(fjson)
-    else:
-        with open(sarOut+'/'+f[:-3]+'json', 'r') as fjson:
-            metadata = json.load(fjson)
+    with open(os.path.join(sarOut,f[:-3]+'json'), 'r') as fjson:
+        metadata = json.load(fjson)
     return list(metadata)
 
-def save_originals(f,out_db,metadata,thr):
-    logger = logging.getLogger('root')
-    metadata.append(thr)
-    with rasterio.open(procOut+'/'+f,'w',driver='GTiff',height=out_db.shape[0],width=out_db.shape[1],count=1,dtype=out_db.dtype) as dsout:
-        dsout.write(out_db,1)
-    with open(procOut+'/'+f[:-3]+'json', 'w') as fjson:
-        json.dump(metadata, fjson)
-    return f
+# def save_originals(f,out_db,metadata,thr):
+#     logger = logging.getLogger('root')
+#     metadata.append(thr)
+#     with rasterio.open(procOut+'/'+f,'w',driver='GTiff',height=out_db.shape[0],width=out_db.shape[1],count=1,dtype=out_db.dtype) as dsout:
+#         dsout.write(out_db,1)
+#     with open(procOut+'/'+f[:-3]+'json', 'w') as fjson:
+#         json.dump(metadata, fjson)
+#     return f
 
-def flag_originals(f,metadata,thr):
+def flag_originals(f):
     logger = logging.getLogger('root')
-    metadata.append(thr)
-    open(sarOut+'/'+f[:-3]+'finished','w').close()
-    with open(procOut+'/'+f[:-3]+'json', 'w') as fjson:
-        json.dump(metadata, fjson)
+    open(os.path.join(sarOut,f[:-3]+'finished'),'w').close()
+    # with open(procOut+'/'+f[:-3]+'json', 'w') as fjson:
+    #     json.dump(metadata, fjson)
     return f
 
 def save_watermask(f,openwater,metadata,thr):
@@ -59,11 +54,11 @@ def save_watermask(f,openwater,metadata,thr):
     return f
 
 
-def remove_sigma_naught(f):
-    logger = logging.getLogger('root')
-    os.remove(sarOut+'/'+f)
-    os.remove(sarOut+'/'+f[:-3]+'json')
-    return f
+# def remove_sigma_naught(f):
+#     logger = logging.getLogger('root')
+#     os.remove(sarOut+'/'+f)
+#     os.remove(sarOut+'/'+f[:-3]+'json')
+#     return f
 
 
 def determine_threshold_in_tif(splt):
