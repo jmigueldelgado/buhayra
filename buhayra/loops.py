@@ -17,7 +17,7 @@ def thresh_pol_insert(tiffs,refgeoms):
 
     with open(os.path.join(home['home'],'ogr2ogr.log'), 'a') as o_std, open(os.path.join(home['home'], 'ogr2ogr.err'), 'a') as o_err:
         ls = list()
-        gj_path = os.path.join(polOut,'watermask-tmp-'+datetime.datetime.today().strftime('%Y-%m-%d_%H%M%S')+'.geojson')
+        gj_path = os.path.join(polOut,'watermask-tmp-'+datetime.datetime.today().strftime('%Y-%m-%d_%H%M%S%f')+'.geojson')
 
         for abs_path in tiffs:
             filename = abs_path.split('/')[-1]

@@ -112,7 +112,7 @@ def main():
                 refgeoms[int(wm_feat['id'])] = refgeom.buffer(0)
 
         # slice list of tiffs
-        sizeofslice=200
+        sizeofslice=2000
         nslices = len(tiffs)//sizeofslice
         tiffslices = list()
         for i in range(nslices):
