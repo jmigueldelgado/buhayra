@@ -104,7 +104,7 @@ def select_folders_year_month(Y,M,src_path):
     for folder in allfolders:
         stamp=datetime.datetime.strptime(folder.split('_')[4],'%Y%m%dT%H%M%S')
         if stamp.year==Y and stamp.month==M:
-            folders_in_ym.append(folder)
+            folders_in_ym.append(os.path.join(src_path,folder))
     if(len(folders_in_ym)<1):
         logger.info(src_path+" has no scenes for year "+str(Y)+" and month "+str(M)+"Exiting and returning None.")
         folders_in_ym=None
