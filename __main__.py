@@ -4,6 +4,8 @@ import os
 import json
 import buhayra.log as log
 from buhayra.getpaths import *
+from shapely.geometry import mapping, Polygon, shape
+import fiona
 
 logger = log.setup_custom_logger('root','INFO')
 
@@ -101,7 +103,25 @@ def main():
         import buhayra.loops as loops
         folders_in_ym = select_folders_year_month(int(sys.argv[2]),int(sys.argv[3]),sarOut)
         tiffs=select_tiffs_year_month(int(sys.argv[2]),int(sys.argv[3]),folders_in_ym)
-        loops.thresh_pol_insert(tiffs)
+
+        # prepare list of reference geometries
+        with fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r') as wm:
+            refgeoms = dict()
+            for wm_feat in wm:
+                refgeom=shape(wm_feat['geometry'])
+                refgeoms[int(wm_feat['id'])] = refgeom.buffer(0)
+
+        # slice list of tiffs
+        sizeofslice=200
+        nslices = len(tiffs)//sizeofslice
+        tiffslices = list()
+        for i in range(nslices):
+            tiffslices.append(tiffs[i*sizeofslice:(i*sizeofslice+sizeofslice)])
+        tiffslices.append(tiffs[(nslices*sizeofslice):len(tiffs)])
+
+        for tiffs in tiffslices:
+            logger.info('thresholding '+str(sizeofslice) + ' tiffs and inserting')
+            loops.thresh_pol_insert(tiffs,refgeoms)
 
     elif sys.argv[1]=="write polygons":
 

@@ -34,7 +34,7 @@ def raster2shapely(r,metadata):
     return cascaded_union(polys)
 
 
-def select_intersecting_polys(geom,wm,f):
+def select_intersecting_polys(geom,refgeoms,f):
     metalist=f[:-4].split('_')
 
     project = partial(
@@ -45,13 +45,7 @@ def select_intersecting_polys(geom,wm,f):
     geom=geom.buffer(0)
     geom=transform(project,geom)
 
-
-    ## replace this with some kind of `find`
-    for wm_feat in wm:
-        if int(wm_feat['id'])==int(metalist[9]):
-            refgeom=shape(wm_feat['geometry'])
-            refgeom=refgeom.buffer(0)
-            break
+    refgeom = refgeoms[int(metalist[9])]
 
     inters=list()
     if geom.geom_type == 'MultiPolygon':
