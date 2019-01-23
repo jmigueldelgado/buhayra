@@ -17,13 +17,13 @@ from shapely.ops import transform
 
 def load_sigma_naught(f):
     logger = logging.getLogger('root')
-    with rasterio.open(os.path.join(sarOut,f),'r') as ds:
+    with rasterio.open(f,'r') as ds:
         out_db=ds.read(1)
     return out_db
 
 def load_metadata(f):
     logger = logging.getLogger('root')
-    with open(os.path.join(sarOut,f[:-3]+'json'), 'r') as fjson:
+    with open(f[:-3]+'json', 'r') as fjson:
         metadata = json.load(fjson)
     return list(metadata)
 

@@ -29,9 +29,11 @@ def thresh_pol_insert(tiffs):
         for slice in tiffslices:
             gj_path = os.path.join(polOut,'watermask-tmp-'+datetime.datetime.today().strftime('%Y-%m-%d_%H%M%S')+'.geojson')
             logger.info('thresholding '+str(sizeofslice) + ' tiffs and saving to '+gj_path)
-            for filename in slice:
-                sigma_naught=thresh.load_sigma_naught(filename)
-                metadata=thresh.load_metadata(filename)
+            for abs_path in slice:
+                filename = abs_path.split('/')[-1]
+                foldername = abs_path.split('/')[-2]
+                sigma_naught=thresh.load_sigma_naught(abs_path)
+                metadata=thresh.load_metadata(abs_path)
 
                 splt = thresh.subset_200x200(sigma_naught)
                 thr = thresh.determine_threshold_in_tif(splt)
@@ -39,7 +41,7 @@ def thresh_pol_insert(tiffs):
                 pol = poly.raster2shapely(openwater.astype(rasterio.int32),metadata)
                 pol_in_jrc, intersection_area = poly.select_intersecting_polys(pol,wm,filename)
                 ls.append(poly.prepareDict(pol_in_jrc,filename,thr,intersection_area))
-                open(os.path.join(sarOut,f[:-3]+'finished'),'w').close()
+                open(os.path.join(abs_path[:-3]+'finished'),'w').close()
 
             featcoll = poly.json2geojson(ls)
 

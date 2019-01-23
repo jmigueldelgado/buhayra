@@ -85,7 +85,7 @@ def select_tiffs_year_month(Y,M,folders_in_ym):
     else:
         for searchDir in folders_in_ym:
             for tif in os.listdir(searchDir):
-                if  os.path.isfile(searchDir+'/'+tif[-3]+'finished') or not tif.startswith('S'):
+                if  os.path.isfile(os.path.join(searchDir,tif[-3]+'finished')) or not tif.startswith('S'):
                     continue
                 stamp=datetime.datetime.strptime(tif.split('_')[4],'%Y%m%dT%H%M%S')
                 if re.search('.tif$',tif) and stamp.year==Y and stamp.month==M:
