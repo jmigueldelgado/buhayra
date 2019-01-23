@@ -15,7 +15,7 @@ import datetime
 def thresh_pol_insert(tiffs):
     logger = logging.getLogger('root')
 
-    sizeofslice=20
+    sizeofslice=200
     nslices = len(tiffs)//sizeofslice
     tiffslices = list()
     for i in range(nslices):
