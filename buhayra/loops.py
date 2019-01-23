@@ -18,6 +18,7 @@ def thresh_pol_insert(tiffs,refgeoms):
     with open(os.path.join(home['home'],'ogr2ogr.log'), 'a') as o_std, open(os.path.join(home['home'], 'ogr2ogr.err'), 'a') as o_err:
         ls = list()
         gj_path = os.path.join(polOut,'watermask-tmp-'+datetime.datetime.today().strftime('%Y-%m-%d_%H%M%S%f')+'.geojson')
+        logger.info('polygonizing and saving to '+gj_path)
 
         for abs_path in tiffs:
             filename = abs_path.split('/')[-1]
@@ -39,9 +40,8 @@ def thresh_pol_insert(tiffs,refgeoms):
             with open(gj_path,'w') as f:
                 geojson.dump(featcoll,f)
 
-            logger.info('inserting ' + gj_path)
             insert.insert_into_postgres_NEB(gj_path,o_std,o_err)
-            logger.info('finished insert ' + gj_path)
+        logger.info('finished inserting '+gj_path)
 
 
 # f=veggie.select_last_tiff()
