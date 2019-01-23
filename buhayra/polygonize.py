@@ -86,7 +86,7 @@ def prepareDict(poly,f,thr,intersection_area):
         'ingestion_time':datetime.datetime.strptime(metalist[4],'%Y%m%dT%H%M%S'),
         'id_jrc':int(metalist[9]),
         'threshold':thr,
-        'wmxjrc_area':intersection_area,}
+        'wmXjrc_area':intersection_area,}
 
     project = partial(
         pyproj.transform,

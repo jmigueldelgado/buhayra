@@ -27,8 +27,12 @@ def move_tifs_to_folders():
     outtifs = os.listdir(sarOut)
     proctifs = os.listdir(procOut)
     for scene in scenes:
-        os.mkdir(os.path.join(sarOut,scene[:-4]))
-        os.mkdir(os.path.join(procOut,scene[:-4]))
+        if scene.endswith('.finished'):
+            continue
+        if not os.path.isdir(os.path.join(sarOut,scene[:-4])):
+            os.mkdir(os.path.join(sarOut,scene[:-4]))
+        if not os.path.isdir(os.path.join(procOut,scene[:-4])):
+            os.mkdir(os.path.join(procOut,scene[:-4]))
         for filename in outtifs:
             if re.search(scene[:-4],filename):
                 src = os.path.join(sarOut,filename)
