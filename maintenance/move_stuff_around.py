@@ -10,7 +10,7 @@ def rename_json():
         os.rename(sarOut+'/'+f,sarOut+'/'+f[:-4]+'.json')
 
 def move_proc(Y,M):
-    folders = select_folders_year_month(Y,M,procOut):
+    folders = select_folders_year_month(Y,M,procOut)
     for folder in folders:
         if  not folder.startswith('S'):
             continue
