@@ -34,12 +34,12 @@ def move_tifs_to_folders():
         if not os.path.isdir(os.path.join(procOut,scene[:-4])):
             os.mkdir(os.path.join(procOut,scene[:-4]))
         for filename in outtifs:
-            if re.search(scene[:-4],filename):
+            if filename.startswith(scene[:-4]) and (filename.endswith('.tif') or filename.endswith('.json') or filename.endswith('.finished')):
                 src = os.path.join(sarOut,filename)
                 trg = os.path.join(sarOut,scene[:-4],filename)
                 os.rename(src,trg)
         for filename in proctifs:
-            if re.search(scene[:-4],filename):
+            if filename.startswith(scene[:-4]) and (filename.endswith('.tif') or filename.endswith('.json') or filename.endswith('.finished')):
                 src = os.path.join(procOut,filename)
                 trg = os.path.join(procOut,scene[:-4],filename)
                 os.rename(src,trg)
