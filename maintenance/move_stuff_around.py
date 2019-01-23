@@ -2,6 +2,7 @@ import os
 from buhayra.getpaths import *
 import datetime
 import re
+from buhayra.getpaths import *
 
 def rename_json():
     while(selectPattern(sarOut,'orrjson$')):
@@ -9,18 +10,20 @@ def rename_json():
         os.rename(sarOut+'/'+f,sarOut+'/'+f[:-4]+'.json')
 
 def move_proc(Y,M):
-    timestamp=list()
-    for tif in os.listdir(procOut):
-        if  not tif.startswith('S'):
+    folders = select_folders_year_month(Y,M,procOut):
+    for folder in folders:
+        if  not folder.startswith('S'):
             continue
-        stamp=datetime.datetime.strptime(tif.split('_')[4],'%Y%m%dT%H%M%S')
-        if re.search('.tif$',tif) and stamp.year==Y and stamp.month==M:
-            timestamp.append(stamp)
-            if os.path.isfile(sarOut+'/'+tif):
-                # os.remove(sarOut+'/'+tif)
-                continue
-            os.rename(procOut + '/' + tif,sarOut+'/'+tif)
-            open(sarOut+'/'+tif[:-3]+'finished','w').close()
+        if not os.path.isdir(os.path.join(procOut,folder)):
+            continue
+        for filename in os.listdir(os.path.join(procOut,folder)):
+            if filename.endswith('.tif'):
+                if not os.path.isfile(os.path.join(sarOut,folder,filename)):
+                    os.rename(os.path.join(procOut,folder,filename),os.path.join(sarOut,folder,filename))
+                if not os.path.isfile(os.path.join(sarOut,folder,filename[:-3]+'json')):
+                    os.rename(os.path.join(procOut,folder,filename[:-3]+'json'),os.path.join(sarOut,folder,filename[:-3]+'json'))
+                if not os.path.exists(os.path.join(sarOut,folder,filename[:-3]+'finished')):
+                    open(os.path.join(sarOut,folder,filename[:-3]+'finished','w')).close()
 
 def move_tifs_to_folders():
     scenes=os.listdir(sarIn)
