@@ -40,7 +40,9 @@ def thresh_pol_insert(tiffs):
                 openwater = thresh.threshold(sigma_naught,thr)
                 pol = poly.raster2shapely(openwater.astype(rasterio.int32),metadata)
                 pol_in_jrc, intersection_area = poly.select_intersecting_polys(pol,wm,filename)
-                ls.append(poly.prepareDict(pol_in_jrc,filename,thr,intersection_area))
+                dict = poly.prepareDict(pol_in_jrc,filename,thr,intersection_area)
+                logger.info(type(dict['properties']['ingestion_time']))
+                ls.append(dict)
                 open(os.path.join(abs_path[:-3]+'finished'),'w').close()
 
             featcoll = poly.json2geojson(ls)
