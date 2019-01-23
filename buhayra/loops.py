@@ -19,7 +19,7 @@ def thresh_pol_insert(tiffs,refgeoms):
         ls = list()
         gj_path = os.path.join(polOut,'watermask-tmp-'+datetime.datetime.today().strftime('%Y-%m-%d_%H%M%S')+'.geojson')
 
-        for abs_path in slice:
+        for abs_path in tiffs:
             filename = abs_path.split('/')[-1]
             foldername = abs_path.split('/')[-2]
             sigma_naught=thresh.load_sigma_naught(abs_path)
