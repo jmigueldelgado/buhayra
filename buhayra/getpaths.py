@@ -4,6 +4,7 @@ import socket
 import os
 import re
 import logging
+import datetime
 
 if socket.gethostname()=='vouga':
     home = {
