@@ -83,14 +83,13 @@ def select_tiffs_year_month(Y,M,folders_in_ym):
     if folders_in_ym is None:
         pass
     else:
-        for folder in folders_in_ym:
-            searchDir = os.path.join(folder,folder)
+        for searchDir in folders_in_ym:
             for tif in os.listdir(searchDir):
                 if  os.path.isfile(searchDir+'/'+tif[-3]+'finished') or not tif.startswith('S'):
                     continue
                 stamp=datetime.datetime.strptime(tif.split('_')[4],'%Y%m%dT%H%M%S')
                 if re.search('.tif$',tif) and stamp.year==Y and stamp.month==M:
-                    tiffs_in_ym.append(os.path.join(folder,tif))
+                    tiffs_in_ym.append(os.path.join(searchDir,tif))
     if(len(tiffs_in_ym)<1):
         logger.info("The selected folders have no tiffs for year "+str(Y)+" and month "+str(M)+"Exiting and returning None.")
         tiffs_in_ym=None
