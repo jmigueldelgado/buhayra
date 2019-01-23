@@ -23,7 +23,7 @@ def move_proc(Y,M):
                 if not os.path.exists(os.path.join(sarOut,folder,filename[:-3]+'finished')):
                     open(os.path.join(sarOut,folder,filename[:-3]+'finished','w')).close()
             if filename.endswith('.json'):
-                if not os.path.isfile(os.path.join(sarOut,folder,filename')):
+                if not os.path.isfile(os.path.join(sarOut,folder,filename)):
                     os.rename(os.path.join(procOut,folder,filename),os.path.join(sarOut,folder,filename))
 
 
