@@ -41,7 +41,6 @@ def thresh_pol_insert(tiffs):
                 pol = poly.raster2shapely(openwater.astype(rasterio.int32),metadata)
                 pol_in_jrc, intersection_area = poly.select_intersecting_polys(pol,wm,filename)
                 dict = poly.prepareDict(pol_in_jrc,filename,thr,intersection_area)
-                logger.info(type(dict['properties']['ingestion_time']))
                 ls.append(dict)
                 open(os.path.join(abs_path[:-3]+'finished'),'w').close()
 

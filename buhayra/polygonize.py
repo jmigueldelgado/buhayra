@@ -112,9 +112,12 @@ def prepareDict(poly,f,thr,intersection_area):
 
 
 def json2geojson(ls):
+    logger = logging.getLogger('root')
     feats=[]
     for dict in ls:
         dttm=dict['properties']['ingestion_time']
+        logger.info(dttm)
+        logger.info(type(dttm))
         dttmstr=dttm.strftime("%Y-%m-%d %H:%M:%S")
         dict['properties']['ingestion_time']=dttmstr
 
