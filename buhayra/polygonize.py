@@ -115,11 +115,10 @@ def json2geojson(ls):
     logger = logging.getLogger('root')
     feats=[]
     for dict in ls:
-        dttm=dict['properties']['ingestion_time']
-        logger.info(dttm)
-        logger.info(type(dttm))
-        dttmstr=dttm.strftime("%Y-%m-%d %H:%M:%S")
-        dict['properties']['ingestion_time']=dttmstr
+        if type(dict['properties']['ingestion_time']) == datetime.datetime:
+            dttm=dict['properties']['ingestion_time']
+            dttmstr=dttm.strftime("%Y-%m-%d %H:%M:%S")
+            dict['properties']['ingestion_time']=dttmstr
 
         if dict['geometry'] is None or len(dict['geometry']['coordinates'])==0:
             feats.append(geojson.Feature(geometry=None,properties=dict['properties']))
