@@ -14,7 +14,7 @@ import buhayra.defAggregations as aggr
 
 
 def update_metadata():
-    bbox = Polygon([[-39.60,-3.56], [-39.03,-3.56], [-39.03,-4.20], [-39.60,-4.20]])
+    bbox = Polygon([[-40.20,-3.0], [-38.3,-3.0], [-38.3,-4.50], [-40.20,-4.50]])
     path_to_geojson = aggr.ogr_getLatestIngestionTime()
     with fiona.open(path_to_geojson,'r') as latest:
         feats=list()
@@ -29,7 +29,7 @@ def update_metadata():
     return geojson.FeatureCollection(feats)
 
 def make_html():
-    m = folium.Map(location=[-3.9058, -39.4626],zoom_start=12)
+    m = folium.Map(location=[-3.9058, -39.4626],zoom_start=10)
     # folium.map.Icon(color='green',)
     # folium.GeoJson('./buhayra/auxdata/unidades-hidrograficas-CE.geojson',name='geojson',tooltip=folium.features.GeoJsonTooltip(fields=['UHE_NM'],aliases=['unidade hidrográfica'],labels=True,localize=True)).add_to(m)
     # mkrs=folium.GeoJson('./viz/latest-markers.geojson',name='geojson',tooltip=folium.features.GeoJsonTooltip(fields=['ingestion_time'],aliases=['ingestion time'],labels=True,localize=True,sticky=True))
