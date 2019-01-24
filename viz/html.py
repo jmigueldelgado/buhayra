@@ -16,11 +16,12 @@ import buhayra.defAggregations as aggr
 
 def update_metadata():
     path_to_geojson = aggr.ogr_getLatestIngestionTime()
+    bbox = Polygon([[-3.56, -39.60], [-3.56, -39.03], [-4.20, -39.03], [-4.20, -39.60]])
     with fiona.open(path_to_geojson,'r') as latest:
         feats=list()
 
         for feat in latest:
-            if feat['geometry'] is None:
+            if feat['geometry'] is None or not shape(feat['geometry']).within(bbox):
                 continue
             pnt = geojson.Point()
             pnt['coordinates']=feat['geometry']['coordinates']
@@ -29,15 +30,15 @@ def update_metadata():
     return geojson.FeatureCollection(feats)
 
 def make_html():
-    m = folium.Map(location=[-5, -38],zoom_start=12)
+    m = folium.Map(location=[-3.9058, -39.4626],zoom_start=12)
     # folium.map.Icon(color='green',)
     # folium.GeoJson('./buhayra/auxdata/unidades-hidrograficas-CE.geojson',name='geojson',tooltip=folium.features.GeoJsonTooltip(fields=['UHE_NM'],aliases=['unidade hidrográfica'],labels=True,localize=True)).add_to(m)
     # mkrs=folium.GeoJson('./viz/latest-markers.geojson',name='geojson',tooltip=folium.features.GeoJsonTooltip(fields=['ingestion_time'],aliases=['ingestion time'],labels=True,localize=True,sticky=True))
 
     marker_cluster = MarkerCluster(
-        name='1000 clustered icons',
+        name='Reservoir Area and Ingestion Time',
         overlay=True,
-        control=False,
+        control=True,
         # icon_create_function=None
     )
     featcoll = update_metadata()
