@@ -6,7 +6,6 @@ from folium.plugins import FastMarkerCluster, MarkerCluster
 import fiona
 from buhayra.getpaths import *
 from shapely.geometry import mapping, Polygon, shape
-import datetime
 import geojson
 import buhayra.defAggregations as aggr
 #

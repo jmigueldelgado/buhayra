@@ -4,15 +4,13 @@ import geojson
 from bson import json_util
 import os
 import sys
-from datetime import datetime,timedelta
+import datetime
 from buhayra.getpaths import *
 import socket
 import subprocess
-# from sshtunnel import SSHTunnelForwarder
-
 
 def ogr_getLatestIngestionTime():
-    path_to_geojson = os.path.join(home['home'],'latest-watermask'+datetime.today().strftime('%Y-%m-%d')+'.geojson')
+    path_to_geojson = os.path.join(home['home'],'latest-watermask'+ datetime.datetime.today().strftime('%Y-%m-%d')+'.geojson')
     if os.path.isfile(path_to_geojson):
         pass
     else:
@@ -54,7 +52,7 @@ def getLatestIngestionTime(s2w):
 
 
 def getLatestPolysMinusX(s2w,x):
-    thresh_date=datetime.now() - timedelta(days=x*30)
+    thresh_date=datetime.datetime.now() - datetime.timedelta(days=x*30)
     pipeline = [
         { "$match" : {"properties.ingestion_time" : {"$lte" : thresh_date}}},
         { "$sort" : {"properties.id_jrc" : 1, "properties.ingestion_time" : 1 }},
