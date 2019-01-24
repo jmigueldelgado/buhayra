@@ -14,8 +14,8 @@ import buhayra.defAggregations as aggr
 
 
 def update_metadata():
+    bbox = Polygon([[-39.60,-3.56], [-39.03,-3.56], [-39.03,-4.20], [-39.60,-4.20]])
     path_to_geojson = aggr.ogr_getLatestIngestionTime()
-    bbox = Polygon([[-3.56, -39.60], [-3.56, -39.03], [-4.20, -39.03], [-4.20, -39.60]])
     with fiona.open(path_to_geojson,'r') as latest:
         feats=list()
 
@@ -56,8 +56,22 @@ def make_html():
 
     # FastMarkerCluster(data=mkrs.data).add_to(m)
 
-    folium.raster_layers.WmsTileLayer(url='http://141.89.96.184/latestwms?',layers='watermask',name='buhayra',version='1.3.0',fmt='image/png',transparent=True,srs='EPSG:4326',bbox='-2.8125,-45,0,-42.1875').add_to(m)
-    folium.raster_layers.WmsTileLayer(url='http://141.89.96.184/latestwms?',layers='JRC-Global-Water-Bodies',name='JRC Global Water Bodies',version='1.3.0',fmt='image/png',transparent=True,srs='EPSG:4326',bbox='-2.8125,-45,0,-42.1875').add_to(m)
+    folium.raster_layers.WmsTileLayer(url='http://141.89.96.184/latestwms?',
+        layers='watermask',
+        name='SAR Watermasks',
+        version='1.3.0',
+        fmt='image/png',
+        transparent=True,
+        srs='EPSG:4326',
+        bbox='-2.8125,-45,0,-42.1875').add_to(m)
+    folium.raster_layers.WmsTileLayer(url='http://141.89.96.184/latestwms?',
+        layers='JRC-Global-Water-Bodies',
+        name='JRC Static Water Bodies',
+        version='1.3.0',
+        fmt='image/png',
+        transparent=True,
+        srs='EPSG:4326',
+        bbox='-2.8125,-45,0,-42.1875').add_to(m)
 
 
 
