@@ -101,8 +101,10 @@ def main():
 
         logger.info("inserting into postgreSQL in "+sys.argv[2]+"-"+sys.argv[3])
         import buhayra.loops as loops
-        folders_in_ym = select_folders_year_month(int(sys.argv[2]),int(sys.argv[3]),sarOut)
-        tiffs=select_tiffs_year_month(int(sys.argv[2]),int(sys.argv[3]),folders_in_ym)
+        Y = int(sys.argv[2])
+        M = int(sys.argv[3])
+        folders_in_ym = select_folders_year_month(Y,M,sarOut)
+        tiffs=select_tiffs_year_month(Y,M,folders_in_ym)
 
         # prepare list of reference geometries
         with fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r') as wm:
@@ -119,9 +121,9 @@ def main():
             tiffslices.append(tiffs[i*sizeofslice:(i*sizeofslice+sizeofslice)])
         tiffslices.append(tiffs[(nslices*sizeofslice):len(tiffs)])
 
-        for tiffs in tiffslices:
+        for slice in tiffslices:
             logger.info('thresholding '+str(sizeofslice) + ' tiffs and inserting')
-            loops.thresh_pol_insert(tiffs,refgeoms)
+            loops.thresh_pol_insert(slice,refgeoms)
 
     elif sys.argv[1]=="write polygons":
 

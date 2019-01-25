@@ -40,7 +40,7 @@ def thresh_pol_insert(tiffs,refgeoms):
             with open(gj_path,'w') as f:
                 geojson.dump(featcoll,f)
 
-            insert.insert_into_postgres_NEB(gj_path,o_std,o_err)
+        insert.insert_into_postgres_NEB(gj_path,o_std,o_err)
         logger.info('finished inserting '+gj_path)
 
 
