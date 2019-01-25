@@ -121,9 +121,12 @@ def main():
             tiffslices.append(tiffs[i*sizeofslice:(i*sizeofslice+sizeofslice)])
         tiffslices.append(tiffs[(nslices*sizeofslice):len(tiffs)])
 
+        COUNT = 0
         for slice in tiffslices:
-            logger.info('thresholding '+str(sizeofslice) + ' tiffs and inserting')
+            logger.info('thresholding '+str(sizeofslice) + ' tiffs and inserting. '+str(COUNT)+'of '+str(len(tiffs))+' done.')
             loops.thresh_pol_insert(slice,refgeoms)
+            COUNT = COUNT + sizeofslice
+
 
     elif sys.argv[1]=="write polygons":
 
