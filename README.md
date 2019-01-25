@@ -6,7 +6,7 @@ Buhayra (from al-buhayra) is a prototype application aiming at obtaining **water
 
 Read about configurations and setup on the [wiki](https://github.com/jmigueldelgado/buhayra/wiki)
 
-The scripts are suited to work on a PBS cluster. There is a crontab that schedules the jobs to run once a week or more often. Although there are [conda environment files](https://conda.io/docs/user-guide/tasks/manage-environments.html#sharing-an-environment) to go with this repo, some libraries are quite machine specific!
+The scripts are suited to work on a PBS cluster or at least a dedicated machine with large RAM. There is a crontab that schedules the jobs to run once a week or more often. Although there are [conda environment files](https://conda.io/docs/user-guide/tasks/manage-environments.html#sharing-an-environment) to go with this repo, some libraries are quite machine specific and the currently used environments evolve a lot due to the experimental nature of this repo. Please contact me in case youi want to use any of this.
 
 ## What it does
 
@@ -20,15 +20,15 @@ In short, the following steps are done sequentially:
 
 - apply [minimum error thresholding(https://www.sciencedirect.com/science/article/abs/pii/0031320386900300)
 
-- polygonize and insert into mongodb and PostGIS (still running these two in parallel, not sure which one will survive)
+- polygonize and insert into PostGIS
 
-## Visualization is being provided by a dedicated [website in development](http://141.89.96.184/) and by the drought forecast tool [seca-vista](http://seca-vista.geo.uni-potsdam.de/).
+## Visualization is being provided by a dedicated [website in development](http://141.89.96.184/index.html) and by the drought forecast tool [seca-vista](http://seca-vista.geo.uni-potsdam.de/).
 
 ![example output](https://raw.githubusercontent.com/jmigueldelgado/buhayra/master/documents/screenshot.png)
 
 ## Preliminary Results
 
-Preliminary results can be seen [here](http://141.89.96.184)
+Preliminary results can be seen [here](http://141.89.96.184/index.html)
 
 An evaluation of the results is given by [valbuhayra](https://github.com/jmigueldelgado/valbuhayra)
 
