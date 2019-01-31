@@ -9,6 +9,20 @@ from buhayra.getpaths import *
 import socket
 import subprocess
 
+def ogr_getJRC():
+    path_to_geojson = os.path.join(home['home'],'JRC.geojson')
+    if os.path.isfile(path_to_geojson):
+        pass
+    else:
+        with open(os.path.join(home['home'],'ogr_query.log'), 'a') as o_std, open(os.path.join(home['home'], 'ogr_query.err'), 'a') as o_err:
+            #query = 'geom from (select distinct on (id_jrc) id_jrc, ingestion_time, area, geom, id from neb order by id_jrc, ingestion_time desc) as subquery using unique id using srid=4326'
+            query = 'select distinct on (id_jrc) * from jrc_neb order by id_jrc desc'
+            call=['nohup','ogr2ogr','-f','GeoJSON' ,path_to_geojson, 'PG:host='+postgis_host+' dbname=watermasks user=' +postgis_user+' password='+postgis_pass,'-sql',query]
+            p = subprocess.Popen(call, stdout=o_std, stderr=o_err, preexec_fn=os.setpgrp)
+            while p.wait()!=0:
+                pass
+    return path_to_geojson
+
 def ogr_getLatestIngestionTime():
     path_to_geojson = os.path.join(home['home'],'latest-watermask'+ datetime.datetime.today().strftime('%Y-%m-%d')+'.geojson')
     if os.path.isfile(path_to_geojson):
