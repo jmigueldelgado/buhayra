@@ -1,0 +1,173 @@
+---
+title: Large scale monitoring of reservoirs from space
+author: JM Delgado
+date: February 1, 2019
+output: slidy_presentation
+---
+
+```{r echo=FALSE,warning=FALSE, message=FALSE,results='hide',include=FALSE}
+library(sf)
+library(dplyr)
+library(ggplot2)
+
+dataset = st_read('/home/delgado/proj/buhayra/test_data/time-series-2019-01-31.geojson')
+dataset_sf = dataset %>% as_data_frame
+st_geometry(dataset) = NULL
+
+ref = st_read('/home/delgado/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg')
+ref_ds = ref %>% mutate(ref_area=st_area(ref)) %>% rename(id_jrc=id)
+ref_ll = ref %>% st_transform(.,crs=4326)
+st_geometry(ref_ds) = NULL
+
+watermasks = dataset %>%
+  select(id_jrc,ingestion_time,area,wmxjrc_area) %>%
+  left_join(.,ref_ds)
+```
+
+---
+
+# Aim
+
+* Detection of water surface of reservoirs with SAR imagery from the sentinel mission.
+* Derive time series of water availability for each reservoir
+
+---
+
+# Method
+
+* fetch sentinel-1 scenes
+* correct, calibrate, speckle filter etc.
+* subset scenes based on JRC dataset
+* threshold subsets
+* polygonize
+* store in database
+
+Go to the [buhayra repo](https://github.com/jmigueldelgado/buhayra#buhayra) for more details
+
+---
+
+# Results
+ <!-- ids = watermasks %>% select(id_jrc,wmxjrc_area,area,ref_area) %>% filter(wmxjrc_area>0) %>% group_by(id_jrc) %>% summarise(id=first(id_jrc),wmxjrc_index=mean(wmxjrc_area/area)) %>% filter(wmxjrc_index>0.5) %>% .$id %>% sample(.,10) -->
+
+* [leaflet visualization](http://141.89.96.184/index.html)
+* some plots in this presentation
+
+---
+
+## Time series of water extent
+
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+ids = c(5402,6821,6547,2194,6520,5469)
+
+watermasks %>% filter(id_jrc %in% ids) %>%
+  group_by(id_jrc) %>%
+  mutate(area_index = area/ref_area) %>%
+  filter(area_index<3) %>%
+  ggplot + geom_point(aes(x=ingestion_time,y=area_index)) + facet_wrap(id_jrc~.)
+```
+
+---
+
+## Time series continued
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+ids=c(3555,4181,5918,5463,3040,265,2689)
+watermasks %>% filter(id_jrc %in% ids) %>%
+  group_by(id_jrc) %>%
+  mutate(area_index = area/ref_area) %>%
+  filter(area_index<3) %>%
+  ggplot + geom_point(aes(x=ingestion_time,y=area_index)) + facet_wrap(id_jrc~.)
+```
+
+---
+
+## Example 1
+
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+ID = 6821
+dataset_sf %>%
+  filter(id_jrc==ID) %>%
+  filter(area>0) %>%
+  arrange(ingestion_time) %>%
+  ggplot(.) +
+  geom_sf() +
+  geom_sf(data=filter(ref_ll,id==ID),fill=NA,color='orange') +
+  facet_wrap(.~ingestion_time) +
+  ggtitle(ID)
+```
+
+---
+
+## Example 2
+
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+ID = 5402
+dataset_sf %>%
+  filter(id_jrc==ID) %>%
+  filter(area>0) %>%
+  arrange(ingestion_time) %>%
+  ggplot(.) +
+  geom_sf() +
+  geom_sf(data=filter(ref_ll,id==ID),fill=NA,color='orange') +
+  facet_wrap(.~ingestion_time) +
+  ggtitle(ID)
+```
+
+---
+
+## Example 3
+
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+ID = 265
+dataset_sf %>%
+  filter(id_jrc==ID) %>%
+  filter(area>0) %>%
+  arrange(ingestion_time) %>%
+  ggplot(.) +
+  geom_sf() +
+  geom_sf(data=filter(ref_ll,id==ID),fill=NA,color='orange') +
+  facet_wrap(.~ingestion_time) +
+  ggtitle(ID)
+```
+
+---
+
+## Example 4
+
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+ID = 2194
+dataset_sf %>%
+  filter(id_jrc==ID) %>%
+  filter(area>0) %>%
+  arrange(ingestion_time) %>%
+  ggplot(.) +
+  geom_sf() +
+  geom_sf(data=filter(ref_ll,id==ID),fill=NA,color='orange') +
+  facet_wrap(.~ingestion_time) +
+  ggtitle(ID)
+```
+
+---
+
+## Example 5
+
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+ID = 3040
+dataset_sf %>%
+  filter(id_jrc==ID) %>%
+  filter(area>0) %>%
+  arrange(ingestion_time) %>%
+  ggplot(.) +
+  geom_sf() +
+  geom_sf(data=filter(ref_ll,id==ID),fill=NA,color='orange') +
+  facet_wrap(.~ingestion_time) +
+  ggtitle(ID)
+```
+
+---
+
+# Further steps
+* explain reservoirs of area zero
+  - by cleaning threshold module
+  - by implementing an assimilation approach like a Kalman filter
+* integrate with tdx2hav
+* vegetated areas?

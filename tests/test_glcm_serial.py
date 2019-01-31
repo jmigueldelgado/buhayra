@@ -8,11 +8,11 @@ from distributed import Client,LocalCluster
 window_shape=(3,3)
 levels=256
 from skimage.feature import greycomatrix, greycoprops
+from buhayra.vegetatedwater import wrap_glcm_matrix_dissimilarity_mean
 
 
-
-isize=1000
-jsize=1000
+isize=100
+jsize=100
 
 X = np.random.random((isize, jsize))*3
 excess=(X.shape[0]%window_shape[0],X.shape[1]%window_shape[1])
@@ -24,5 +24,5 @@ ncols=window_shape[1]
 X=X.reshape(h//nrows, nrows,h*w//(ncols*nrows*(h//nrows)), ncols).swapaxes(1,2)
 
 i=time.time()
-diss = wrap_glcm_matrix_dissimilarity(X,window_shape,levels)
+diss = wrap_glcm_matrix_dissimilarity_mean(X,window_shape,levels)
 time.time()-i

@@ -18,7 +18,7 @@ In short, the following steps are done sequentially:
 
 - subset based on a [global surface water database](https://global-surface-water.appspot.com/faq) from JRC using google's [earth engine code editor](https://code.earthengine.google.com/)
 
-- apply [minimum error thresholding(https://www.sciencedirect.com/science/article/abs/pii/0031320386900300)
+- apply [minimum error thresholding](https://www.sciencedirect.com/science/article/abs/pii/0031320386900300)
 
 - polygonize and insert into PostGIS
 
