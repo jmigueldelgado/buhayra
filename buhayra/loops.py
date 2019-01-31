@@ -23,8 +23,15 @@ def thresh_pol_insert(tiffs,refgeoms):
         for abs_path in tiffs:
             filename = abs_path.split('/')[-1]
             foldername = abs_path.split('/')[-2]
-            sigma_naught=thresh.load_sigma_naught(abs_path)
-            metadata=thresh.load_metadata(abs_path)
+            try:
+                sigma_naught=thresh.load_sigma_naught(abs_path)
+                metadata=thresh.load_metadata(abs_path)
+            except OSError as err:
+                logger.info( 'Error {}'.format(err)+" when opening "+abs_path)
+                continue
+            except:
+                logger.info("Unexpected error: "+ sys.exc_info()[0]+" when opening "+abs_path)
+                continue
 
             splt = thresh.subset_200x200(sigma_naught)
             thr = thresh.determine_threshold_in_tif(splt)

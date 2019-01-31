@@ -27,3 +27,5 @@ with rasterio.open(f,'r') as ds:
         pyproj.transform,
         pyproj.Proj(init='epsg:4326'),
         pyproj.Proj(init='epsg:32629'))
+
+    jrc_spt_utm=transform(project,jrc_featcoll)
