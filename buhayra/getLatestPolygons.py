@@ -15,6 +15,6 @@ def getRandomSubset():
         for feat in latest:
             if not shape(feat['geometry']).within(bbox):
                 continue
-            ids.append({}.format(feat['properties']['id_jrc']))
+            ids.append('{}'.format(feat['properties']['id_jrc']))
 
     path_to_geojson = aggr.ogr_getRandomSubset(ids)
