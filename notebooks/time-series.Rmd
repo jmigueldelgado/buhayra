@@ -22,6 +22,8 @@ st_geometry(ref_ds) = NULL
 watermasks = dataset %>%
   select(id_jrc,ingestion_time,area,wmxjrc_area) %>%
   left_join(.,ref_ds)
+
+theme_set(theme_gray(base_size = 18))
 ```
 
 ---
@@ -134,7 +136,7 @@ dataset_sf %>%
 ## Example 4
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
-ID = 2194
+ID = 6547
 dataset_sf %>%
   filter(id_jrc==ID) %>%
   filter(area>0) %>%
@@ -151,7 +153,25 @@ dataset_sf %>%
 ## Example 5
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
-ID = 3040
+ID = 2194
+dataset_sf %>%
+  filter(id_jrc==ID) %>%
+  filter(area>0) %>%
+  arrange(ingestion_time) %>%
+  ggplot(.) +
+  geom_sf() +
+  geom_sf(data=filter(ref_ll,id==ID),fill=NA,color='orange') +
+  facet_wrap(.~ingestion_time) +
+  ggtitle(ID)
+```
+
+---
+
+
+## Example 6
+
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+ID = 5918
 dataset_sf %>%
   filter(id_jrc==ID) %>%
   filter(area>0) %>%
