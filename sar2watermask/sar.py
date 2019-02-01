@@ -190,7 +190,7 @@ def sar2sigma_265():
                     ProductIO.writeProduct(product_subset,os.path.join(targetdir,fname + "_locked"),outForm)
                     product_subset.dispose()
 
-                    # compress_tiff(os.path.join(targetdir,fname+'_locked.tif',os.path.join(targetdir,fname+'.tif')
+                    compress_tiff(os.path.join(targetdir,fname+'_locked.tif',os.path.join(targetdir,fname+'.tif')
                 else:
                     continue
 
