@@ -164,7 +164,7 @@ def sar2sigma_265():
 
             wm_in_scene,id_in_scene = getWMinScene(rect_utm,wm)
 
-            # product=orbit_correction(product)
+            product=orbit_correction(product)
             product=remove_border_noise(product)
             product=thermal_noise_removal(product)
             product=calibration(product)
