@@ -170,14 +170,14 @@ def sar2sigma_265():
             product=calibration(product)
             product=speckle_filtering(product)
             product=geom_correction(product)
-            # product=set_no_data_value(product)
-#            product=sigma_naught(product)
+            product=set_no_data_value(product)
+            # product=sigma_naught(product)
 
             logger.info("starting loop on reservoirs")
             targetdir = os.path.join('/home/delgado/test01022019',productName)
             os.mkdir(targetdir)
             for i in range(0,len(id_in_scene)):
-                if id_in_scene[i]==3040:
+                if id_in_scene[i]==265:
                     fname=productName + "_" + str(id_in_scene[i])
                     if (fname+".tif") in listdir(targetdir):
                         logger.debug("product "+fname+".tif already exists: skipping")
