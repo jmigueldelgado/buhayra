@@ -172,6 +172,10 @@ def main():
         import maintenance.move_stuff_around as mnt
         # mnt.move_tifs_to_folders()
         mnt.move_proc(int(sys.argv[2]),int(sys.argv[3]))
+    elif sys.argv[1]=="test 265":
+        import sar2watermask.sar as sar
+        sar.sar2sigma_265()
+
     else:
 
         logger.error("an argument is needed, for example: get_scenes, sar, threshold, insert, recent polys, 1 month old polys, 2 months old polys, update validation")
