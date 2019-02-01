@@ -177,7 +177,7 @@ def sar2sigma_265():
             targetdir = os.path.join('/home/delgado/test01022019',productName)
             os.mkdir(targetdir)
             for i in range(0,len(id_in_scene)):
-                if id_in_scene[i]==265:
+                if id_in_scene[i]==3040:
                     fname=productName + "_" + str(id_in_scene[i])
                     if (fname+".tif") in listdir(targetdir):
                         logger.debug("product "+fname+".tif already exists: skipping")
