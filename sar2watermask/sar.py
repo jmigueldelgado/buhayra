@@ -171,7 +171,7 @@ def sar2sigma_265():
             product=speckle_filtering(product)
             product=geom_correction(product)
             product=set_no_data_value(product)
-            product=sigma_naught(product)
+            # product=sigma_naught(product)
 
             logger.info("starting loop on reservoirs")
             targetdir = os.path.join('/home/delgado/test01022019',productName)
@@ -190,7 +190,7 @@ def sar2sigma_265():
                     ProductIO.writeProduct(product_subset,os.path.join(targetdir,fname + "_locked"),outForm)
                     product_subset.dispose()
 
-                    compress_tiff(os.path.join(targetdir,fname+'_locked.tif',os.path.join(targetdir,fname+'.tif')))
+                    compress_tiff(os.path.join(targetdir,fname+'_locked.tif'),os.path.join(targetdir,fname+'.tif'))
                 else:
                     continue
 
