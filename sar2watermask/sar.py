@@ -171,7 +171,7 @@ def sar2sigma_265():
             product=speckle_filtering(product)
             product=geom_correction(product)
             product=set_no_data_value(product)
-            # product=sigma_naught(product)
+            product=sigma_naught(product)
 
             logger.info("starting loop on reservoirs")
             targetdir = os.path.join('/home/delgado/test01022019',productName)
