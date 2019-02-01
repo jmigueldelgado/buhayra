@@ -144,7 +144,7 @@ def sar2sigma_subset(scenes):
 
 
 def sar2sigma_265():
-    scenes=['S1A_IW_GRDH_1SDV_20180209T081657_20180209T081722_020527_0231DD_EAE0.zip','S1A_IW_GRDH_1SDV_20180329T081657_20180329T081722_021227_024813_6BE7.zip','S1A_IW_GRDH_1SDV_20180422T081658_20180422T081723_021577_0252FF_BDAE.zip']
+    scenes=['S1A_IW_GRDH_1SDV_20180329T081657_20180329T081722_021227_024813_6BE7.zip']
     logger = logging.getLogger('root')
     time0=time.process_time()
     outForm='GeoTIFF+XML'
@@ -177,22 +177,19 @@ def sar2sigma_265():
             targetdir = os.path.join('/home/delgado/test01022019',productName)
             os.mkdir(targetdir)
             for i in range(0,len(id_in_scene)):
-                if id_in_scene[i]==265:
-                    fname=productName + "_" + str(id_in_scene[i])
-                    if (fname+".tif") in listdir(targetdir):
-                        logger.debug("product "+fname+".tif already exists: skipping")
-                        continue
-
-                    logger.debug("subsetting product "+ str(id_in_scene[i]))
-                    product_subset=subsetProduct(product,wm_in_scene[i])
-
-                    logger.debug("writing product "+ str(id_in_scene[i]))
-                    ProductIO.writeProduct(product_subset,os.path.join(targetdir,fname + "_locked"),outForm)
-                    product_subset.dispose()
-
-                    compress_tiff(os.path.join(targetdir,fname+'_locked.tif'),os.path.join(targetdir,fname+'.tif'))
-                else:
+                fname=productName + "_" + str(id_in_scene[i])
+                if (fname+".tif") in listdir(targetdir):
+                    logger.debug("product "+fname+".tif already exists: skipping")
                     continue
+
+                logger.debug("subsetting product "+ str(id_in_scene[i]))
+                product_subset=subsetProduct(product,wm_in_scene[i])
+
+                logger.debug("writing product "+ str(id_in_scene[i]))
+                ProductIO.writeProduct(product_subset,os.path.join(targetdir,fname + "_locked"),outForm)
+                product_subset.dispose()
+
+                compress_tiff(os.path.join(targetdir,fname+'_locked.tif'),os.path.join(targetdir,fname+'.tif'))
 
             product.dispose()
 
