@@ -45,43 +45,6 @@ def sar_orbit_correction(scenes):
         logger.info("**** " + f  + " processed in "+str((time.process_time()-time0)/60)+" minutes****")
     System.gc()
 
-def sar2sigma_scene(scenes):
-    logger = logging.getLogger('root')
-    time0=time.process_time()
-    outForm='GeoTIFF-BigTIFF'
-    finished=0
-    for f in scenes:
-        logger.info("processing " + f)
-        product = ProductIO.readProduct(sarIn+"/"+f)
-        fname=product.getName()
-
-        product=orbit_correction(product)
-        product=remove_border_noise(product)
-        product=thermal_noise_removal(product)
-        product=calibration(product)
-        product=speckle_filtering(product)
-        product=geom_correction(product)
-        product=set_no_data_value(product)
-
-        if (fname+".tif") in listdir(sarOut):
-            logger.info("product "+fname+".tif already exists: skipping")
-            continue
-
-        ProductIO.writeProduct(product,sarOut+"/" + fname,outForm)
-        product.dispose()
-
-        ### remove scene from folder
-        # logger.info("REMOVING " + f)
-        # if os.path.isfile(sarIn+"/"+f):
-        #     os.remove(sarIn+"/"+f)
-        open(fname + '.finished','w').close()
-        finished=finished+1
-        logger.info("**** " + f  + " processed in "+str((time.process_time()-time0)/60)+" minutes****")
-        logger.info("**** processed " +str(finished)+" of "+ str(len(scenes))+" in loop ****")
-    System.gc()
-    logger.info("******************** finished loop: "+ str(len(scenes))+" scenes **")
-
-
 def sar2sigma_subset(scenes):
     logger = logging.getLogger('root')
     time0=time.process_time()
