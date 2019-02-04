@@ -11,12 +11,15 @@ from rasterio.features import sieve, shapes
 f= '/home/delgado/proj/buhayra/preprocessing/occurrence_40W_0N.tif'
 
 
+f= '/home/delgado/proj/buhayra/preprocessing/occurrence_50W_0N.tif'
+
+
 with rasterio.open(f,'r') as ds:
     src=ds.read(1)
     src[src>1]=1
-    sieved = sieve(src, 10, out=np.zeros(src.shape, src.dtypes[0]))
-    with rasterio.open(f[:-4]+'_bin.tif','w',driver='GTiff',height=src.shape[0],width=src.shape[1],count=1,dtype=rasterio.ubyte,transform=ds.transform) as dsout:
-        dsout.write(src.astype(rasterio.ubyte),1)
+    sieved = sieve(src, 10, out=np.zeros(src.shape, src.dtype))
+    with rasterio.open(f[:-4]+'_bin_sieved.tif','w',driver='GTiff',height=src.shape[0],width=src.shape[1],count=1,dtype=rasterio.ubyte,transform=ds.transform) as dsout:
+        dsout.write(sieved.astype(rasterio.ubyte),1)
 
     # polys=list()
     #

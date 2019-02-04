@@ -34,7 +34,9 @@ s1a_scenes/
 *.tif.aux.xml
 *.gml
 *.xsd
-*.gpkg*
+buhayra/auxdata/wm_utm_simplf.gpkg
+*-shm
+*-wal
 
 # auxdata
 
