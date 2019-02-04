@@ -6,19 +6,19 @@ import fiona
 import rasterio
 import numpy as np
 from buhayra.getpaths import *
-
+from rasterio.features import sieve, shapes
 
 f= '/home/delgado/proj/buhayra/preprocessing/occurrence_40W_0N.tif'
 
 
 with rasterio.open(f,'r') as ds:
-    r=ds.read(1)
-    r[r>1]=1
+    src=ds.read(1)
+    src[src>1]=1
+    sieved = sieve(src, 10, out=np.zeros(src.shape, src.dtypes[0]))
+    with rasterio.open(f[:-4]+'_bin.tif','w',driver='GTiff',height=src.shape[0],width=src.shape[1],count=1,dtype=rasterio.ubyte,transform=ds.transform) as dsout:
+        dsout.write(src.astype(rasterio.ubyte),1)
 
-    with rasterio.open(f[:-4]+'_bin.tif','w',driver='GTiff',height=r.shape[0],width=r.shape[1],count=1,dtype=rasterio.ubyte,transform=ds.transform) as dsout:
-        dsout.write(r.astype(rasterio.ubyte),1)
-
-    polys=list()
+    # polys=list()
     #
     # for pol, value in features.shapes(r, transform=ds.transform):
     #     if value==1:
