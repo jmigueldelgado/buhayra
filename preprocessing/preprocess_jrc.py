@@ -8,6 +8,7 @@ import numpy as np
 from buhayra.getpaths import *
 from rasterio.features import sieve, shapes
 from rasterio.mask import mask
+from rasterio.merge import merge
 import numpy as np
 
 
@@ -33,7 +34,20 @@ for path_i in jrc_paths:
 # open, merge, and save
 src=list()
 for path_i in jrc_paths:
-    src.append(rasterio.open(path_i,'r'))
+    src.append(rasterio.open(path_i[:-4]+'_bin_sieved.tif','r'))
+
+out_rast,out_transform = merge(src,indexes=1)
+
+for i in src:
+    i.close()
+
+out_raster = out_rast[0]
+
+with rasterio.open('/home/delgado/proj/buhayra/preprocessing/occurrence_semiarido_bin_sieved.tif','w',driver='GTiff',height=out_raster.shape[0],width=out_raster.shape[1],count=1,dtype=rasterio.ubyte,transform=out_transform) as dsout:
+    dsout.write(out_raster.astype(rasterio.ubyte),1)
+
+# open, burn masks, polygonize, and save
+
 
     # polys=list()
     #
