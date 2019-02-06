@@ -9,10 +9,8 @@ from buhayra.getpaths import *
 from rasterio.features import sieve, shapes
 
 f= '/home/delgado/proj/buhayra/preprocessing/occurrence_40W_0N.tif'
-
-
 f= '/home/delgado/proj/buhayra/preprocessing/occurrence_50W_0N.tif'
-
+f= '/home/delgado/proj/buhayra/preprocessing/occurrence_50W_0N.tif'
 
 with rasterio.open(f,'r') as ds:
     src=ds.read(1)
