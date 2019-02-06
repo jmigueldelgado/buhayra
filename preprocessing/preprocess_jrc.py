@@ -19,6 +19,7 @@ jrc_paths = ['/home/delgado/proj/buhayra/preprocessing/occurrence_40W_0N.tif',
 with fiona.open('/home/delgado/proj/buhayra/preprocessing/semiarido.gpkg','r') as fio:
     semiarido=shape(next(iter(fio))['geometry'])
 
+# open, crop, and sieve
 for path_i in jrc_paths:
     with rasterio.open(path_i,'r') as src:
         out_image, out_transform = mask(src,semiarido,all_touched=True,crop=True)
@@ -28,6 +29,11 @@ for path_i in jrc_paths:
     sieved = sieve(raster, 10, out=np.zeros(raster.shape, raster.dtype))
     with rasterio.open(path_i[:-4]+'_bin_sieved.tif','w',driver='GTiff',height=raster.shape[0],width=raster.shape[1],count=1,dtype=rasterio.ubyte,transform=out_transform) as dsout:
         dsout.write(sieved.astype(rasterio.ubyte),1)
+
+# open, merge, and save
+src=list()
+for path_i in jrc_paths:
+    src.append(rasterio.open(path_i,'r'))
 
     # polys=list()
     #
