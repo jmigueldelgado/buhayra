@@ -7,16 +7,26 @@ import rasterio
 import numpy as np
 from buhayra.getpaths import *
 from rasterio.features import sieve, shapes
+from rasterio.mask import mask
+import numpy as np
 
-f= '/home/delgado/proj/buhayra/preprocessing/occurrence_40W_0N.tif'
-f= '/home/delgado/proj/buhayra/preprocessing/occurrence_50W_0N.tif'
-f= '/home/delgado/proj/buhayra/preprocessing/occurrence_50W_0N.tif'
 
-with rasterio.open(f,'r') as ds:
-    src=ds.read(1)
-    src[src>1]=1
-    sieved = sieve(src, 10, out=np.zeros(src.shape, src.dtype))
-    with rasterio.open(f[:-4]+'_bin_sieved.tif','w',driver='GTiff',height=src.shape[0],width=src.shape[1],count=1,dtype=rasterio.ubyte,transform=ds.transform) as dsout:
+jrc_paths = ['/home/delgado/proj/buhayra/preprocessing/occurrence_40W_0N.tif',
+    '/home/delgado/proj/buhayra/preprocessing/occurrence_50W_0N.tif',
+    '/home/delgado/proj/buhayra/preprocessing/occurrence_40W_10S.tif',
+    '/home/delgado/proj/buhayra/preprocessing/occurrence_50W_10S.tif']
+
+with fiona.open('/home/delgado/proj/buhayra/preprocessing/semiarido.gpkg','r') as fio:
+    semiarido=shape(next(iter(fio))['geometry'])
+
+for path_i in jrc_paths:
+    with rasterio.open(path_i,'r') as src:
+        out_image, out_transform = mask(src,semiarido,all_touched=True,crop=True)
+        out_meta = src.meta
+    out_image[np.where(out_image>1)]=1
+    raster = out_image[0]
+    sieved = sieve(raster, 10, out=np.zeros(raster.shape, raster.dtype))
+    with rasterio.open(path_i[:-4]+'_bin_sieved.tif','w',driver='GTiff',height=raster.shape[0],width=raster.shape[1],count=1,dtype=rasterio.ubyte,transform=out_transform) as dsout:
         dsout.write(sieved.astype(rasterio.ubyte),1)
 
     # polys=list()
