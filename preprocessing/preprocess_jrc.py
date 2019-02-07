@@ -6,10 +6,11 @@ import fiona
 import rasterio
 import numpy as np
 from buhayra.getpaths import *
-from rasterio.features import sieve, shapes
+from rasterio.features import sieve, shapes, rasterize
 from rasterio.mask import mask
 from rasterio.merge import merge
 import numpy as np
+import geojson
 
 
 jrc_paths = ['/home/delgado/proj/buhayra/preprocessing/occurrence_40W_0N.tif',
@@ -46,21 +47,30 @@ out_raster = out_rast[0]
 with rasterio.open('/home/delgado/proj/buhayra/preprocessing/occurrence_semiarido_bin_sieved.tif','w',driver='GTiff',height=out_raster.shape[0],width=out_raster.shape[1],count=1,dtype=rasterio.ubyte,transform=out_transform) as dsout:
     dsout.write(out_raster.astype(rasterio.ubyte),1)
 
-# open, burn masks, polygonize, and save
+
+# burn river masks with gdal
+'gdal_rasterize -at -burn 0 ~/proj/buhayra/preprocessing/mask_rivers.gpkg /home/delgado/proj/buhayra/preprocessing/occurrence_40W_0N_burned.tif'
+
+# polygonize
+'gdal_polygonize.py  ~/proj/buhayra/preprocessing/occurrence_40W_0N_burned.tif -f GPKG ~/proj/buhayra/preprocessing/wm_40W_0N.gpkg'
+
+# merge feature collections
+ogr2ogr -f 'GPKG' -update -append /home/delgado/proj/buhayra/preprocessing/jrc_ref.gpkg /home/delgado/proj/buhayra/preprocessing/wm_50W_0N.gpkg
+ogr2ogr -f 'GPKG' -update -append /home/delgado/proj/buhayra/preprocessing/jrc_ref.gpkg /home/delgado/proj/buhayra/preprocessing/wm_50W_10S.gpkg -nln merge
+ogr2ogr -f 'GPKG' -update -append /home/delgado/proj/buhayra/preprocessing/jrc_ref.gpkg /home/delgado/proj/buhayra/preprocessing/wm_40W_10S.gpkg -nln merge
+ogr2ogr -f 'GPKG' -update -append /home/delgado/proj/buhayra/preprocessing/jrc_ref.gpkg /home/delgado/proj/buhayra/preprocessing/wm_40W_0N.gpkg -nln merge
 
 
-    # polys=list()
-    #
-    # for pol, value in features.shapes(r, transform=ds.transform):
-    #     if value==1:
-    #         polys.append(shape(pol))
-    #
-    # jrc_featcoll = cascaded_union(polys)
-    #
-    #
-    # project = partial(
-    #     pyproj.transform,
-    #     pyproj.Proj(init='epsg:4326'),
-    #     pyproj.Proj(init='epsg:32629'))
-    #
-    # jrc_spt_utm=transform(project,jrc_featcoll)
+ref_path = '/home/delgado/proj/buhayra/preprocessing/jrc_ref.gpkg'
+
+# clean reference dataset
+featcoll = list()
+with fiona.open(ref_path,'r') as fio:
+    for feat in iter(fio):
+        if feat['properties']['DN']==1:
+            props={}
+            props['id']=int(feat['id'])
+            featcoll.append(geojson.Feature(geometry=feat['geometry'],properties=props))
+    gj=geojson.FeatureCollection(featcoll)
+
+# insert into postgres
