@@ -103,7 +103,7 @@ def sar2sigma_subset(scenes):
             finished=finished+1
             logger.info("**** " + f  + " processed in "+str((time.process_time()-time0)/60)+" minutes****")
             logger.info("**** processed " +str(finished)+" of "+ str(len(scenes))+" in loop ****")
-    System.gc()
+        System.gc()
     logger.info("******************** finished loop: "+ str(len(scenes))+" scenes **")
 
 
