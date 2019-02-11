@@ -52,9 +52,8 @@ def main():
     elif sys.argv[1]=="sar scene":
 
         import sar2watermask.sar as sar
-        scene=sys.argv[2]
-        sar.sar2sigma_subset([scene])
-        
+        sar.sar2sigma_subset([sys.argv[2]])
+
     elif sys.argv[1]=="sar2sigma year month":
 
         import sar2watermask.sar as sar
