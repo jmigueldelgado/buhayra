@@ -19,6 +19,11 @@ postgisStuff.txt
 latestWMS.map
 JRC_neb.geojson
 latest-watermask.geojson
+preprocessing/wm_40W_0N.gpkg
+preprocessing/wm_40W_10S.gpkg
+preprocessing/wm_50W_0N.gpkg
+preprocessing/wm_50W_10S.gpkg
+preprocessing/jrc_ref.geojson
 
 # Sentinel data and test data
 

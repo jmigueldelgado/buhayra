@@ -54,23 +54,28 @@ with rasterio.open('/home/delgado/proj/buhayra/preprocessing/occurrence_semiarid
 # polygonize
 'gdal_polygonize.py  ~/proj/buhayra/preprocessing/occurrence_40W_0N_burned.tif -f GPKG ~/proj/buhayra/preprocessing/wm_40W_0N.gpkg'
 
-# merge feature collections
-ogr2ogr -f 'GPKG' -update -append /home/delgado/proj/buhayra/preprocessing/jrc_ref.gpkg /home/delgado/proj/buhayra/preprocessing/wm_50W_0N.gpkg
-ogr2ogr -f 'GPKG' -update -append /home/delgado/proj/buhayra/preprocessing/jrc_ref.gpkg /home/delgado/proj/buhayra/preprocessing/wm_50W_10S.gpkg -nln merge
-ogr2ogr -f 'GPKG' -update -append /home/delgado/proj/buhayra/preprocessing/jrc_ref.gpkg /home/delgado/proj/buhayra/preprocessing/wm_40W_10S.gpkg -nln merge
-ogr2ogr -f 'GPKG' -update -append /home/delgado/proj/buhayra/preprocessing/jrc_ref.gpkg /home/delgado/proj/buhayra/preprocessing/wm_40W_0N.gpkg -nln merge
+# merge and clean feature collections
 
+wms=['/home/delgado/proj/buhayra/preprocessing/wm_50W_0N.gpkg',
+    '/home/delgado/proj/buhayra/preprocessing/wm_50W_10S.gpkg',
+    '/home/delgado/proj/buhayra/preprocessing/wm_40W_10S.gpkg',
+    '/home/delgado/proj/buhayra/preprocessing/wm_40W_0N.gpkg']
 
 ref_path = '/home/delgado/proj/buhayra/preprocessing/jrc_ref.gpkg'
 
-# clean reference dataset
 featcoll = list()
-with fiona.open(ref_path,'r') as fio:
-    for feat in iter(fio):
-        if feat['properties']['DN']==1:
-            props={}
-            props['id']=int(feat['id'])
-            featcoll.append(geojson.Feature(geometry=feat['geometry'],properties=props))
-    gj=geojson.FeatureCollection(featcoll)
+id=0
+for wm_path in wms:
+    with fiona.open(wm_path,'r') as fio:
+        for feat in iter(fio):
+            if feat['properties']['DN']==1:
+                props={}
+                id=id+1
+                props['id']=id
+                featcoll.append(geojson.Feature(geometry=feat['geometry'],properties=props))
+gj=geojson.FeatureCollection(featcoll)
+
+with open(ref_path[:-4]+'geojson', 'w') as outfile:
+      geojson.dump(gj, outfile)
 
 # insert into postgres
