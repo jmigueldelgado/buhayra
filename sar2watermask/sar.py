@@ -81,7 +81,7 @@ def sar2sigma_subset(scenes):
             for i in range(0,len(id_in_scene)):
                 fname=productName + "_" + str(id_in_scene[i])
                 if (fname+".tif") in listdir(targetdir):
-                    logger.info("product "+fname+".tif already exists: skipping")
+                    logger.debug("product "+fname+".tif already exists: skipping")
                     continue
 
                 logger.debug("subsetting product "+ str(id_in_scene[i]))
