@@ -52,12 +52,9 @@ def main():
     elif sys.argv[1]=="sar scene":
 
         import sar2watermask.sar as sar
-        f=sar.select_last_scene()
-        if f is None:
-            logger.info("There are no scenes to process in "+sarIn+". Exiting")
-            raise SystemExit()
-        sar.sar2sigma_scene([f])
-
+        scene=sys.argv[2]
+        sar.sar2sigma_subset([scene])
+        
     elif sys.argv[1]=="sar2sigma year month":
 
         import sar2watermask.sar as sar
