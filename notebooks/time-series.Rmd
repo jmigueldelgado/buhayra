@@ -10,7 +10,7 @@ library(sf)
 library(dplyr)
 library(ggplot2)
 
-dataset = st_read('/home/delgado/proj/buhayra/test_data/time-series-2019-01-31.geojson')
+dataset = st_read('/home/delgado/proj/buhayra/notebooks/time-series-2019-02-11.geojson')
 dataset_sf = dataset %>% as_data_frame
 st_geometry(dataset) = NULL
 

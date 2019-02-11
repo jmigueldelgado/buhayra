@@ -25,7 +25,7 @@ preprocessing/wm_50W_0N.gpkg
 preprocessing/wm_50W_10S.gpkg
 preprocessing/jrc_ref.geojson
 preprocessing/jrc_ref.gpkg
-
+notebooks/time-series-*.geojson
 # Sentinel data and test data
 
 test_data/
