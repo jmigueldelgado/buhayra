@@ -50,6 +50,7 @@ def main():
         sar.sar_orbit_correction([f])
 
     elif sys.argv[1]=="sar scene":
+        logger.info(sys.argv[2])
 
         import sar2watermask.sar as sar
         sar.sar2sigma_subset([sys.argv[2]])
