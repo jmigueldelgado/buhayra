@@ -76,7 +76,8 @@ def sar2sigma_subset(scenes):
 
             logger.info("starting loop on reservoirs")
             targetdir = os.path.join(sarOut,productName)
-            os.mkdir(targetdir)
+            if not os.path.exists(targetdir):
+                os.mkdir(targetdir)
             for i in range(0,len(id_in_scene)):
                 fname=productName + "_" + str(id_in_scene[i])
                 if (fname+".tif") in listdir(targetdir):
