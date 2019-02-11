@@ -2,7 +2,6 @@ from buhayra.getpaths import *
 import buhayra.thresholding as thresh
 import buhayra.polygonize as poly
 import buhayra.insertPolygons as insert
-import buhayra.vegetatedwater as veggie
 import numpy as np
 import logging
 import rasterio
@@ -49,30 +48,6 @@ def thresh_pol_insert(tiffs,refgeoms):
 
         insert.insert_into_postgres_NEB(gj_path,o_std,o_err)
         logger.info('finished inserting '+gj_path)
-
-
-# f=veggie.select_last_tiff()
-def glcm_loop(scenes):
-    window_shape=(3,3)
-    logger = logging.getLogger('root')
-    for f in scenes:
-        with rasterio.open(vegIn + '/' +f,'r') as ds:
-            x=da.from_array(ds.read(1),(round(ds.shape[0]/5), round(ds.shape[1]/5)))
-        X_std = (x - np.amin(x)) / (np.amax(x) - np.amin(x))
-        X_scaled = dask.array.round(X_std * (255 - 0) + 0)
-        xuint = X_scaled.astype('uint8')
-        new_image = image[:-(image.shape[0]%window_shape[0]),:-(image.shape[1]%window_shape[1])]
-
-        #calculate dimensions of list of 3x3 blocks
-        newshape = new_image.shape
-        nblocks = int(newshape[0]/3) * (newshape[1]/3)
-
-        lazypredictors = da.map_blocks(veggie.glcm_predictors,xuint,window_shape,chunks=(round(nblocks/25),8))
-        predictors = compute(lazypredictors, scheduler='threads')
-
-        pca = PCA(n_components=5)
-        lazypca=pca.fit(lazypredictors)
-
 
 
 def threshold_loop(tiffs):
