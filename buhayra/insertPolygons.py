@@ -1,31 +1,10 @@
-from pymongo import MongoClient
 import os
 import sys
 from datetime import datetime
 import logging
 from buhayra.getpaths import *
 from buhayra.credentials import *
-# import dask
-# from dask.distributed import Client, progress, LocalCluster
 import subprocess
-
-# f=select_tiffs_year_month(2018,4)[0]
-# wm=fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r')
-
-
-def connect_to_NEB():
-    logger = logging.getLogger('root')
-
-    # client = MongoClient('127.0.0.1', server.local_bind_port) # server.local_bind_port is assigned local port
-    client = MongoClient('mongodb://'+ MONGO_USER + ':' + MONGO_PASS + '@' + MONGO_HOST + '/' + MONGO_DB)
-    logger.info("%s",client)
-    db = client.sar2watermask
-    neb = db.neb ##  collection
-    logger.info("Connected to mongodb:")
-    logger.info("%s",neb)
-
-    return neb
-
 
 def insert_into_NEB(feat,neb):
     logger = logging.getLogger('root')
