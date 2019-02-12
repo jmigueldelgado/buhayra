@@ -114,9 +114,9 @@ def get_thr(nparray):
         e = sys.exc_info()[0]
         logger.info( "Error in kittler: %s" % e )
         thr=np.nan # there was an error computing the threshold, check the error message
-    if(thr > -1300): # threshold is too large to be a valid water-land threshold
+    if(thr > -1000): # threshold is too large to be a valid water-land threshold
         thr=np.nan
-    if(np.amax(nparray)< -1300): # all cells in raster are open water
+    if(np.amax(nparray)< -1000): # all cells in raster are open water
         thr=np.nan
     return(thr)
 

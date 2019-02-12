@@ -10,10 +10,10 @@ library(sf)
 library(dplyr)
 library(ggplot2)
 
-dataset = st_read('/home/delgado/proj/buhayra/notebooks/time-series-2019-02-11.geojson')
+dataset = st_read('/home/delgado/proj/buhayra/notebooks/time-series-2019-02-12.geojson')
 dataset_sf = dataset %>% as_data_frame
 st_geometry(dataset) = NULL
-dataset %>% head
+dataset %>% tail
 
 ref = st_read('/home/delgado/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg')
 ref_ds = ref %>% mutate(ref_area=st_area(ref)) %>% rename(id_jrc=id)
