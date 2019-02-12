@@ -74,7 +74,6 @@ def determine_threshold_in_tif(splt):
 
 def subset_200x200(nparray):
     logger = logging.getLogger('root')
-
     splt=list()
     n=np.ceil(nparray.shape[0]/20)
     splt0=np.array_split(nparray,n,0)
@@ -82,7 +81,7 @@ def subset_200x200(nparray):
         m=np.ceil(chunk.shape[1]/20)
         splt1=np.array_split(chunk,m,1)
         splt.append(splt1)
-        return(splt)
+    return(splt)
 
 def threshold(nparray,thr):
     logger = logging.getLogger('root')
