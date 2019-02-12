@@ -72,13 +72,13 @@ def determine_threshold_in_tif(splt):
     thrmedian=np.nanmedian(npthr)
     return thrmedian
 
-def subset_400x400(nparray):
+def subset_500x500(nparray):
     logger = logging.getLogger('root')
     splt=list()
-    n=np.ceil(nparray.shape[0]/40)
+    n=np.ceil(nparray.shape[0]/50)
     splt0=np.array_split(nparray,n,0)
     for chunk in splt0:
-        m=np.ceil(chunk.shape[1]/40)
+        m=np.ceil(chunk.shape[1]/50)
         splt1=np.array_split(chunk,m,1)
         splt.append(splt1)
     return(splt)
@@ -113,7 +113,7 @@ def get_thr(nparray):
         e = sys.exc_info()[0]
         logger.info( "Error in kittler: %s" % e )
         thr=np.nan # there was an error computing the threshold, check the error message
-    if(thr > -1000): # threshold is too large to be a valid water-land threshold
+    if(thr > -1100): # threshold is too large to be a valid water-land threshold
         thr=np.nan
     if(np.amax(nparray)< -1300): # all cells in raster are open water
         thr=np.nan

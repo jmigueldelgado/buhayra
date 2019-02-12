@@ -32,7 +32,7 @@ def thresh_pol_insert(tiffs,refgeoms):
                 logger.info("Unexpected error: "+ sys.exc_info()[0]+" when opening "+abs_path)
                 continue
 
-            splt = thresh.subset_400x400(sigma_naught)
+            splt = thresh.subset_500x500(sigma_naught)
             thr = thresh.determine_threshold_in_tif(splt)
             openwater = thresh.threshold(sigma_naught,thr)
             pol = poly.raster2shapely(openwater.astype(rasterio.int32),metadata)
