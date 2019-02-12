@@ -219,10 +219,10 @@ def sigma_naught(product):
     return(result)
 
 def subsetProduct(product,pol):
-    if pol.area<1000:
-        buff=pol.buffer(5*(pol.area)**0.5)
-    else:
-        buff=pol.buffer(2*(pol.area)**0.5)
+    # if pol.area<1000:
+    buff=pol.buffer((pol.area)**0.5)
+    # else:
+        # buff=pol.buffer((pol.area)**0.5)
 
     bb=getBoundingBoxWM(buff)
     project = partial(
