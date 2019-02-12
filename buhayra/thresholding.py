@@ -72,13 +72,13 @@ def determine_threshold_in_tif(splt):
     thrmedian=np.nanmedian(npthr)
     return thrmedian
 
-def subset_200x200(nparray):
+def subset_400x400(nparray):
     logger = logging.getLogger('root')
     splt=list()
-    n=np.ceil(nparray.shape[0]/20)
+    n=np.ceil(nparray.shape[0]/40)
     splt0=np.array_split(nparray,n,0)
     for chunk in splt0:
-        m=np.ceil(chunk.shape[1]/20)
+        m=np.ceil(chunk.shape[1]/40)
         splt1=np.array_split(chunk,m,1)
         splt.append(splt1)
     return(splt)
