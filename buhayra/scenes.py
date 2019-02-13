@@ -8,7 +8,7 @@ import logging
 from bs4 import BeautifulSoup
 import requests
 import urllib
-
+from buhayra.location import *
 
 
 def get_s1_orbits(t0,tf):
