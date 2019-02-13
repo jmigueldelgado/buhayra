@@ -15,7 +15,7 @@ dataset_sf = dataset %>% as_data_frame
 st_geometry(dataset) = NULL
 dataset %>% tail
 
-ref = st_read('/home/delgado/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg')
+ref = st_read('/home/delgado/proj/buhayra/buhayra/auxdata/wm_utm_neb.gpkg')
 ref_ds = ref %>% mutate(ref_area=st_area(ref)) %>% rename(id_jrc=id)
 ref_ll = ref %>% st_transform(.,crs=4326)
 st_geometry(ref_ds) = NULL

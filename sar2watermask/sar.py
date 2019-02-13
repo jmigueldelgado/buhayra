@@ -37,7 +37,7 @@ def sar2sigma_subset(scenes):
     time0=time.process_time()
     outForm='GeoTIFF+XML'
     finished=0
-    with fiona.open(home['proj']+'/buhayra/auxdata/wm_utm_simplf.gpkg','r') as wm:
+    with fiona.open(home['proj']+'/buhayra/auxdata/wm_utm_'+location['region']+'.gpkg','r') as wm:
         for f in scenes:
             logger.info("processing " + f)
             product = ProductIO.readProduct(sarIn+"/"+f)
