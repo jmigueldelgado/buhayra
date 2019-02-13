@@ -25,6 +25,7 @@ preprocessing/wm_50W_0N.gpkg
 preprocessing/wm_50W_10S.gpkg
 preprocessing/jrc_ref.geojson
 preprocessing/jrc_ref.gpkg
+preprocessing/wm_sib.gpkg
 notebooks/time-series-*.geojson
 # Sentinel data and test data
 
@@ -39,16 +40,12 @@ s1a_scenes/
 *.tif.aux.xml
 *.gml
 *.xsd
-buhayra/auxdata/wm_utm_simplf.gpkg
 *-shm
 *-wal
 
 # auxdata
 
-# auxdata
-
-cogerh*
-dfd2*
+buhayra/auxdata
 
 # Credentials
 
