@@ -5,17 +5,18 @@ import logging
 import re
 import datetime
 from buhayra.getpaths import *
+from shapely.ops import transform
 
 def select_scenes_year_month(Y,M,src_path):
     logger = logging.getLogger('root')
 
-    if(len(listdir(src_path))<1):
+    if(len(os.listdir(src_path))<1):
         logger.info(src_path+" is empty! Nothing to do. Exiting and returning None.")
         scenes_in_ym=None
     else:
         timestamp=list()
         scenes_in_ym=list()
-        for scn in listdir(src_path):
+        for scn in os.listdir(src_path):
             stamp=datetime.datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S')
             if re.search('.zip$',scn) and stamp.year==Y and stamp.month==M:
                 scenes_in_ym.append(scn)
@@ -27,13 +28,13 @@ def select_scenes_year_month(Y,M,src_path):
 
 def select_last_scene(src_path):
     logger = logging.getLogger('root')
-    if(len(listdir(src_path))<1):
+    if(len(os.listdir(src_path))<1):
         logger.info(src_path+" is empty! Nothing to do. Exiting and returning None.")
         f=None
     else:
         timestamp=list()
         scenes=list()
-        for scn in listdir(src_path):
+        for scn in os.listdir(src_path):
             if re.search('.zip$',scn):
                 scenes.append(scn)
                 timestamp.append(datetime.datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S'))
@@ -44,13 +45,13 @@ def select_last_scene(src_path):
 def select_past_scene(Y,M,src_path):
     logger = logging.getLogger('root')
 
-    if(len(listdir(src_path))<1):
+    if(len(os.listdir(src_path))<1):
         logger.info(src_path+" is empty! Nothing to do. Exiting and returning None.")
         f=None
     else:
         timestamp=list()
         scenes_in_ym=list()
-        for scn in listdir(src_path):
+        for scn in os.listdir(src_path):
             stamp=datetime.datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S')
             if re.search('.zip$',scn) and stamp.year==Y and stamp.month==M:
                 scenes_in_ym.append(scn)
