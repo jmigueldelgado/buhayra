@@ -2,7 +2,7 @@ from os.path import expanduser,exists
 import sys
 import socket
 import yaml
-
+import os
 ### add your hostname and things will run smoothly
 
 if socket.gethostname()=='vouga':
@@ -26,12 +26,13 @@ else:
         'home' : expanduser("~"),
         'scratch' : '/mnt/scratch/martinsd'}
 
+home['parameters'] = os.path.join(home['proj'],'buhayra','parameters')
+
 with open(os.path.join(home['parameters'],'location.yml'), 'r') as stream:
     location=yaml.load(stream)
 
 home['proj'] =os.path.join(home['home'],'proj','buhayra'+'_'+location['region'])
-home['parameters'] = os.path.join(home['proj'],'buhayra','parameters')
-home['scratch'] =home['scratch']+'_'+location['region'])
+home['scratch'] =home['scratch']+'_'+location['region']
 
 sardir=os.path.join(home['scratch'],'s1a_scenes')
 
