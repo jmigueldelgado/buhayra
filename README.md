@@ -4,7 +4,7 @@ Buhayra (from al-buhayra) is a prototype application aiming at obtaining **water
 
 ## Before you start...
 
-Read about configurations and setup on the [wiki](https://github.com/jmigueldelgado/buhayra/wiki)
+Read about configurations and setup on the [wiki](https://github.com/jmigueldelgado/buhayra/wiki) and create and configure your location file accordingly (in `buhayra/parameters/location.yml`).
 
 The scripts are suited to work on a PBS cluster or at least a dedicated machine with large RAM. There is a crontab that schedules the jobs to run once a week or more often. Although there are [conda environment files](https://conda.io/docs/user-guide/tasks/manage-environments.html#sharing-an-environment) to go with this repo, some libraries are quite machine specific and the currently used environments evolve a lot due to the experimental nature of this repo. Please contact me in case youi want to use any of this.
 
