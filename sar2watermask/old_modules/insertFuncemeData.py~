@@ -1,3 +1,0 @@
-from defFuncemeApi import *
-from getPaths import *
-

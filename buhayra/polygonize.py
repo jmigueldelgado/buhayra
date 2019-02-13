@@ -1,5 +1,6 @@
 import os
 from buhayra.getpaths import *
+import buhayra.utils as utils
 import logging
 import rasterio
 from rasterio import features
@@ -9,8 +10,6 @@ from shapely.ops import cascaded_union, transform
 import fiona
 import datetime
 import json
-from functools import partial
-import pyproj
 import numpy as np
 import geojson
 
@@ -37,13 +36,7 @@ def raster2shapely(r,metadata):
 def select_intersecting_polys(geom,refgeoms,f):
     metalist=f[:-4].split('_')
 
-    project = partial(
-        pyproj.transform,
-        pyproj.Proj(init='epsg:4326'),
-        pyproj.Proj(init='epsg:32724'))
-
-    geom=geom.buffer(0)
-    geom=transform(project,geom)
+    geom=utils.wgs2utm(geom.buffer(0))
 
     refgeom = refgeoms[int(metalist[9])]
 
@@ -82,14 +75,7 @@ def prepareDict(poly,f,thr,intersection_area):
         'threshold':thr,
         'wmXjrc_area':intersection_area,}
 
-    project = partial(
-        pyproj.transform,
-        pyproj.Proj(init='epsg:32724'),
-        pyproj.Proj(init='epsg:4326'))
-
-    poly=poly.buffer(0)
-
-    poly_wgs=transform(project,poly)
+    poly_wgs=utils.utm2wgs(poly.buffer(0))
 
     s=json.dumps(mapping(poly_wgs))
     geom=json.loads(s)
@@ -132,67 +118,3 @@ def json2geojson(ls):
 
 
     return geojson.FeatureCollection(feats)
-
-
-def remove_watermask(f,feat_id):
-    logger = logging.getLogger('root')
-    os.remove(polOut+'/'+f[:-3]+'json')
-    os.remove(polOut + '/' + f)
-    return f
-
-def wgs2utm(geom):
-    project = partial(
-        pyproj.transform,
-        pyproj.Proj(init='epsg:4326'),
-        pyproj.Proj(init='epsg:32724'))
-    geom_utm=transform(project,geom)
-    return(geom_utm)
-
-
-def select_tiffs_year_month(Y,M):
-    logger = logging.getLogger('root')
-
-    if(len(listdir(polOut))<1):
-        logger.info(polOut+" is empty! Nothing to do. Exiting and returning None.")
-        tiffs_in_ym=None
-    else:
-        timestamp=list()
-        tiffs_in_ym=list()
-        for tif in listdir(polOut):
-            if not tif.startswith('S'):
-                continue
-            stamp=datetime.datetime.strptime(tif.split('_')[4],'%Y%m%dT%H%M%S')
-            if re.search('.tif$',tif) and stamp.year==Y and stamp.month==M:
-                tiffs_in_ym.append(tif)
-                timestamp.append(stamp)
-        if(len(timestamp)<1):
-            logger.info(polOut+" has no tiffs for year "+str(Y)+" and month "+str(M)+"Exiting and returning None.")
-            tiffs_in_ym=None
-    return(tiffs_in_ym)
-
-def select_n_last_tiffs(n):
-    logger = logging.getLogger('root')
-
-    if(len(listdir(polOut))<1):
-        logger.info(polOut+" is empty! Nothing to do. Exiting and returning None.")
-        tiffs=None
-    else:
-        timestamp=list()
-        tiffs=list()
-        for tiff in listdir(polOut):
-            if not tiff.startswith('S'):
-                continue
-            stamp=datetime.datetime.strptime(tiff.split('_')[4],'%Y%m%dT%H%M%S')
-            if re.search('.tif$',tiff):
-                tiffs.append(tiff)
-                timestamp.append(stamp)
-
-        if(len(timestamp)<1):
-            logger.info(polOut+"Has not tifs. Exiting and returning None.")
-            tiffs.append(None)
-        if(len(timestamp)<=n):
-            return(tiffs)
-        else:
-            index=np.argsort(timestamp)
-            return([tiffs[i] for i in index[-n:]])
-    return(tiffs)

@@ -4,6 +4,7 @@ import os
 import json
 import buhayra.log as log
 from buhayra.getpaths import *
+import buhayra.utils as utils
 from shapely.geometry import mapping, Polygon, shape
 import fiona
 
@@ -15,7 +16,7 @@ def main():
 
     if sys.argv[1] is None:
 
-        logger.error('an argument is needed, list of arguments:\n- "get scenes"\n- "get past scenes" year month\n- "sar2sigma"\n- "sar2sigma" year month\n- "threshold last" N\n- "threshold year month" year month\n- insert\n- recent polys\n- 1 month old polys\n- 2 months old polys\n- update validation')
+        logger.error('an argument is needed, list of arguments:\n- "get scenes"\n- "get past scenes" [year] [month]\n- "sar2sigma"\n- "sar2sigma" [year] [month]\n- "threshold+insert" [year] [month]\n')
 
     elif sys.argv[1]=="get scenes":
 
@@ -34,7 +35,7 @@ def main():
     elif sys.argv[1]=="sar2sigma":
 
         import sar2watermask.sar as sar
-        f=sar.select_last_scene()
+        f=utils.select_last_scene(sarIn)
         if f is None:
             logger.info("There are no scenes to process in "+sarIn+". Exiting")
             raise SystemExit()
@@ -43,7 +44,7 @@ def main():
     elif sys.argv[1]=="sar orbit correction":
 
         import sar2watermask.sar as sar
-        f=sar.select_last_scene()
+        f=utils.select_last_scene(sarIn)
         if f is None:
             logger.info("There are no scenes to process in "+sarIn+". Exiting")
             raise SystemExit()
@@ -59,7 +60,7 @@ def main():
 
         import sar2watermask.sar as sar
 
-        scenes=sar.select_scenes_year_month(int(sys.argv[2]),int(sys.argv[3]))
+        scenes=utils.select_scenes_year_month(int(sys.argv[2]),int(sys.argv[3]),sarIn)
         if scenes is None:
             logger.info("There are no past scenes for year "+sys.argv[2]+" and month "+sys.argv[3]+" available to process in "+sarIn+". Exiting")
             raise SystemExit()
@@ -68,40 +69,14 @@ def main():
         if len(scenes)>1:
             sar.sar2sigma_subset(scenes)
 
-
-    elif sys.argv[1]=="threshold last":
-
-        logger.info("computing thresholds for last "+sys.argv[2]+" scenes")
-        import buhayra.thresholding as thresh
-        import buhayra.loops as loops
-        scenes=thresh.select_n_last_tiffs(int(sys.argv[2]))
-        loops.threshold_loop(scenes)
-
-
-    elif sys.argv[1]=="threshold year month":
-
-        logger.info("computing thresholds for all tiffs in "+sys.argv[2]+"-"+sys.argv[3])
-        import buhayra.loops as loops
-        folders_in_ym = select_folders_year_month(int(sys.argv[2]),int(sys.argv[3]),sarOut)
-        tiffs=select_tiffs_year_month(int(sys.argv[2]),int(sys.argv[3]),folders_in_ym)
-        loops.threshold_loop(tiffs)
-
-    elif sys.argv[1]=="insert year month":
-
-        logger.info("inserting into mongodb in "+sys.argv[2]+"-"+sys.argv[3])
-        import buhayra.insertPolygons as ipol
-        import buhayra.loops as loops
-        tiffs=ipol.select_tiffs_year_month(int(sys.argv[2]),int(sys.argv[3]))
-        loops.insert_loop(tiffs)
-
     elif sys.argv[1]=="threshold+insert year month":
 
         logger.info("inserting into postgreSQL in "+sys.argv[2]+"-"+sys.argv[3])
         import buhayra.loops as loops
         Y = int(sys.argv[2])
         M = int(sys.argv[3])
-        folders_in_ym = select_folders_year_month(Y,M,sarOut)
-        tiffs=select_tiffs_year_month(Y,M,folders_in_ym)
+        folders_in_ym = utils.select_folders_year_month(Y,M,sarOut)
+        tiffs=utils.select_tiffs_year_month(Y,M,folders_in_ym)
 
         # prepare list of reference geometries
         with fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r') as wm:
@@ -124,58 +99,21 @@ def main():
             loops.thresh_pol_insert(slice,refgeoms)
             COUNT = COUNT + sizeofslice
 
-
-    elif sys.argv[1]=="write polygons":
-
-        logger.info("writing polygons as gpkg")
-        import buhayra.insertPolygons as ipol
-        ipol.write_poly_loop()
-
-    elif sys.argv[1]=="recent polys":
-
-        logger.info("obtain most recent polygons from mongodb")
-        import buhayra.getLatestPolygons as gLP
-        gLP.connect_and_get(int(sys.argv[2]))
-
     elif sys.argv[1]=="make html":
 
         logger.info("creating html")
         import viz.html as viz
         viz.make_html()
 
-    elif sys.argv[1]=="update validation":
-
-        logger.info("obtain validation dataset from funceme api")
-        import buhayra.funceme as fcm
-        fcm.insert_insitu_monitoring()
-
-    elif sys.argv[1]=="test parallel with matrix":
-
-        import tests.test_glcm_parallel as par
-        par.glcm_with_matrix()
-
-    elif sys.argv[1]=="test parallel without matrix":
-
-        import tests.test_glcm_parallel as par
-        par.glcm_plus_props()
-
-    elif sys.argv[1]=="test serial without matrix":
-
-        import tests.test_glcm_parallel as par
-        par.glcm_serial_props()
-
     elif sys.argv[1]=="move stuff around":
 
         import maintenance.move_stuff_around as mnt
         # mnt.move_tifs_to_folders()
         mnt.move_proc(int(sys.argv[2]),int(sys.argv[3]))
-    elif sys.argv[1]=="test 265":
-        import sar2watermask.sar as sar
-        sar.sar2sigma_265()
 
     else:
 
-        logger.error("an argument is needed, for example: get_scenes, sar, threshold, insert, recent polys, 1 month old polys, 2 months old polys, update validation")
+        logger.error('an argument is needed, list of arguments:\n- "get scenes"\n- "get past scenes" [year] [month]\n- "sar2sigma"\n- "sar2sigma" [year] [month]\n- "threshold+insert" [year] [month]\n')
 
 
 if __name__ == "__main__":

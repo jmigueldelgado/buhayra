@@ -10,8 +10,6 @@ import os
 import json
 from shutil import copyfile
 from shapely.geometry import Polygon, shape
-import pyproj
-from functools import partial
 from shapely.ops import transform
 
 
@@ -27,20 +25,9 @@ def load_metadata(f):
         metadata = json.load(fjson)
     return list(metadata)
 
-# def save_originals(f,out_db,metadata,thr):
-#     logger = logging.getLogger('root')
-#     metadata.append(thr)
-#     with rasterio.open(procOut+'/'+f,'w',driver='GTiff',height=out_db.shape[0],width=out_db.shape[1],count=1,dtype=out_db.dtype) as dsout:
-#         dsout.write(out_db,1)
-#     with open(procOut+'/'+f[:-3]+'json', 'w') as fjson:
-#         json.dump(metadata, fjson)
-#     return f
-
 def flag_originals(f):
     logger = logging.getLogger('root')
     open(os.path.join(sarOut,f[:-3]+'finished'),'w').close()
-    # with open(procOut+'/'+f[:-3]+'json', 'w') as fjson:
-    #     json.dump(metadata, fjson)
     return f
 
 def save_watermask(f,openwater,metadata,thr):
@@ -54,19 +41,12 @@ def save_watermask(f,openwater,metadata,thr):
     return f
 
 
-# def remove_sigma_naught(f):
-#     logger = logging.getLogger('root')
-#     os.remove(sarOut+'/'+f)
-#     os.remove(sarOut+'/'+f[:-3]+'json')
-#     return f
-
-
 def determine_threshold_in_tif(splt):
     thr=list()
     for i in range(len(splt)):
         thr_i=list()
         for j in range(len(splt[i])):
-            thr_i.append(get_thr(splt[i][j])) # subres.append(threshold(splt[i][j]))
+            thr_i.append(get_thr(splt[i][j]))
         thr.append(thr_i)
     npthr = np.array(thr)
     thrmedian=np.nanmedian(npthr)
@@ -90,13 +70,6 @@ def threshold(nparray,thr):
 
     if np.isnan(thr):
         band[:]=ma.masked
-    # elif(np.amax(nparray)< -1300): # all cells in raster are open water
-    #     band.data.fill(1)
-    # elif(thr < -1300):          # there is a threshold and it is a valid threshold
-    #     band[band>thr]=ma.masked
-    #     band.data.fill(1)
-    # else: # the threshold is too large to be a valid threshold
-    #     band[:]=ma.masked
     else:          # there is a threshold and it is a valid threshold
         band[band>thr]=ma.masked
         band.data.fill(1)
@@ -180,64 +153,3 @@ def kittler(nparray):
                 threshold = breaksSeq[m]
 
         return threshold
-
-def select_tiffs_year_month(folders_in_ym,Y,M):
-    logger = logging.getLogger('root')
-    timestamp=list()
-    tiffs_in_ym=list()
-    for folder in folders_in_ym:
-        searchDir = os.path.join(sarOut,folder)
-        for tif in listdir(searchDir):
-            if  os.path.isfile(searchDir+'/'+tif[-3]+'finished') or not tif.startswith('S'):
-                continue
-            stamp=datetime.datetime.strptime(tif.split('_')[4],'%Y%m%dT%H%M%S')
-            if re.search('.tif$',tif) and stamp.year==Y and stamp.month==M:
-                tiffs_in_ym.append(os.path.join(folder,tif))
-                timestamp.append(stamp)
-    if(len(timestamp)<1):
-        logger.info(sarOut+" has no tiffs for year "+str(Y)+" and month "+str(M)+"Exiting and returning None.")
-        tiffs_in_ym=None
-    return(tiffs_in_ym)
-
-def select_folders_year_month(Y,M):
-    logger = logging.getLogger('root')
-    timestamp=list()
-    allfolders = [ name for name in os.listdir(sarOut) if os.path.isdir(os.path.join(sarOut, name)) ]
-    folders_in_ym=list()
-
-    for folder in allfolders:
-        stamp=datetime.datetime.strptime(folder.split('_')[4],'%Y%m%dT%H%M%S')
-        if stamp.year==Y and stamp.month==M:
-            folders_in_ym.append(folder)
-    if(len(folders_in_ym)<1):
-        logger.info(sarOut+" has no scenes for year "+str(Y)+" and month "+str(M)+"Exiting and returning None.")
-        folders_in_ym=None
-    return folders_in_ym
-
-
-def select_n_last_tiffs(n):
-    logger = logging.getLogger('root')
-
-    if(len(listdir(sarOut))<1):
-        logger.info(sarOut+" is empty! Nothing to do. Exiting and returning None.")
-        tiffs=None
-    else:
-        timestamp=list()
-        tiffs=list()
-        for tiff in listdir(sarOut):
-            if not tiff.startswith('S'):
-                continue
-            stamp=datetime.datetime.strptime(tiff.split('_')[4],'%Y%m%dT%H%M%S')
-            if re.search('.tif$',tiff):
-                tiffs.append(tiff)
-                timestamp.append(stamp)
-
-        if(len(timestamp)<1):
-            logger.info(sarOut+"Has not tifs. Exiting and returning None.")
-            tiffs.append(None)
-        if(len(timestamp)<=n):
-            return(tiffs)
-        else:
-            index=np.argsort(timestamp)
-            return([tiffs[i] for i in index[-n:]])
-    return(tiffs)

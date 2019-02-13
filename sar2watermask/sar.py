@@ -5,6 +5,7 @@ import datetime
 import sys
 import logging
 from buhayra.getpaths import *
+import buhayra.utils as utils
 import xml.etree.ElementTree
 from snappy import Product
 from snappy import GPF
@@ -23,8 +24,6 @@ import rasterio.mask
 import fiona
 from shutil import copyfile
 from shapely.geometry import Polygon, shape
-import pyproj
-from functools import partial
 from shapely.ops import transform
 import numpy as np
 import time
@@ -225,11 +224,7 @@ def subsetProduct(product,pol):
         # buff=pol.buffer((pol.area)**0.5)
 
     bb=getBoundingBoxWM(buff)
-    project = partial(
-        pyproj.transform,
-        pyproj.Proj(init='epsg:32724'),
-        pyproj.Proj(init='epsg:4326'))
-    bb_ll=transform(project,bb)
+    bb_ll=utils.utm2wgs(bb)
     geom = WKTReader().read(bb_ll.wkt)
 
 
@@ -263,13 +258,7 @@ def getBoundingBoxScene(product):
     p4=gc.getGeoPos(PixelPos(w,0),None)
 
     rect=Polygon([(p1.getLon(),p1.getLat()),(p2.getLon(),p2.getLat()),(p3.getLon(),p3.getLat()),(p4.getLon(),p4.getLat())])
-    # logger.info('Bounding box of the scene:')
-    # logger.info(rect.wkt)
-    project = partial(
-        pyproj.transform,
-        pyproj.Proj(init='epsg:4326'),
-        pyproj.Proj(init='epsg:32724'))
-    rect_utm=transform(project,rect)
+    rect_utm=utils.wgs2utm(rect)
     return(rect_utm)
 
 def getBoundingBoxWM(pol):
@@ -295,63 +284,6 @@ def checknclean(pol):
         return(pol)
 
 
-
-
-
-def select_last_scene():
-    logger = logging.getLogger('root')
-    if(len(listdir(sarIn))<1):
-        logger.info(sarIn+" is empty! Nothing to do. Exiting and returning None.")
-        f=None
-    else:
-        timestamp=list()
-        scenes=list()
-        for scn in listdir(sarIn):
-            if re.search('.zip$',scn):
-                scenes.append(scn)
-                timestamp.append(datetime.datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S'))
-        f=scenes[timestamp.index(max(timestamp))]
-    return(f)
-
-def select_past_scene(Y,M):
-    logger = logging.getLogger('root')
-
-    if(len(listdir(sarIn))<1):
-        logger.info(sarIn+" is empty! Nothing to do. Exiting and returning None.")
-        f=None
-    else:
-        timestamp=list()
-        scenes_in_ym=list()
-        for scn in listdir(sarIn):
-            stamp=datetime.datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S')
-            if re.search('.zip$',scn) and stamp.year==Y and stamp.month==M:
-                scenes_in_ym.append(scn)
-                timestamp.append(stamp)
-        if(len(timestamp)<1):
-            logger.info(sarIn+" has no scene for year "+Y+" and month "+M+"Exiting and returning None.")
-            f=None
-        else:
-            f=scenes_in_ym[timestamp.index(max(timestamp))]
-    return(f)
-
-def select_scenes_year_month(Y,M):
-    logger = logging.getLogger('root')
-
-    if(len(listdir(sarIn))<1):
-        logger.info(sarIn+" is empty! Nothing to do. Exiting and returning None.")
-        scenes_in_ym=None
-    else:
-        timestamp=list()
-        scenes_in_ym=list()
-        for scn in listdir(sarIn):
-            stamp=datetime.datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S')
-            if re.search('.zip$',scn) and stamp.year==Y and stamp.month==M:
-                scenes_in_ym.append(scn)
-                timestamp.append(stamp)
-        if(len(timestamp)<1):
-            logger.info(sarIn+" has no scene for year "+Y+" and month "+M+"Exiting and returning None.")
-            scenes_in_ym=None
-    return(scenes_in_ym)
 
 def compress_tiff(inpath,outpath):
     with rasterio.open(inpath,'r') as ds:

@@ -57,7 +57,7 @@ def get_scenes():
 
 
     # search by polygon, time, and SciHub query keywords
-    footprint = geojson_to_wkt(read_geojson(home['parameters'] + '/extent_ce.geojson'))
+    footprint = geojson_to_wkt(read_geojson(home['parameters'] + '/extent_'+location['region']+'.geojson'))
 
     products_s1a = api.query(footprint,
                          date=(
@@ -88,7 +88,7 @@ def get_past_scenes(Y,M):
 
 
     # search by polygon, time, and SciHub query keywords
-    footprint = geojson_to_wkt(read_geojson(home['parameters'] + '/extent_ce.geojson'))
+    footprint = geojson_to_wkt(read_geojson(home['parameters'] + '/extent_'+location['region']+'.geojson'))
 
     products_s1a = api.query(footprint,
                          date=(

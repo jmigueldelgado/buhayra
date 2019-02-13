@@ -53,7 +53,7 @@ dfd2*
 # Credentials
 
 buhayra/credentials.py*
-
+buhayra/parameters/location.yml
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
