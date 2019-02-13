@@ -3,55 +3,49 @@ import sys
 import socket
 import yaml
 
+### add your hostname and things will run smoothly
+
 if socket.gethostname()=='vouga':
     home = {
         'home' : expanduser("~"),
-        'scratch' : expanduser("~") + '/scratch',
-        'proj' : expanduser("~") + '/proj/buhayra',
-        'parameters' : expanduser("~") + '/proj/buhayra/buhayra/parameters'}
+        'scratch' : expanduser("~") + '/scratch'}
 elif socket.gethostname()=='compute':
     home = {
         'home' : expanduser("~"),
-        'scratch' : expanduser("~") + '/scratch',
-        'proj' : expanduser("~") + '/proj/buhayra',
-        'parameters' : expanduser("~") + '/proj/buhayra/buhayra/parameters'}
+        'scratch' : expanduser("~") + '/scratch'}
 elif socket.gethostname()=='ubuntuserver':
     home = {
         'home' : expanduser("~"),
-        'scratch' : 'None',
-        'proj' : expanduser("~") + '/proj/buhayra',
-        'parameters' : expanduser("~") + '/proj/buhayra/buhayra/parameters'}
+        'scratch' : 'None'}
 elif socket.gethostname()=='MEKONG':
     home = {
         'home' : expanduser("~"),
-        'scratch' : expanduser("~") + '/scratch',
-        'proj' : expanduser("~") + '/proj/buhayra',
-        'parameters' : expanduser("~") + '/proj/buhayra/buhayra/parameters'}
+        'scratch' : expanduser("~") + '/scratch'}
 else:
     home = {
         'home' : expanduser("~"),
-        'scratch' : '/mnt/scratch/martinsd',
-        'proj' : expanduser("~") + '/proj/buhayra',
-        'parameters' : expanduser("~") + '/proj/buhayra/buhayra/parameters'}
+        'scratch' : '/mnt/scratch/martinsd'}
 
+with open(os.path.join(home['parameters'],'location.yml'), 'r') as stream:
+    location=yaml.load(stream)
 
-proj = home['proj']
-scratch= home['scratch']
+home['proj'] =os.path.join(home['home'],'proj','buhayra'+'_'+location['region'])
+home['parameters'] = os.path.join(home['proj'],'buhayra','parameters')
+home['scratch'] =home['scratch']+'_'+location['region'])
 
-sardir=scratch+"/s1a_scenes"
+sardir=os.path.join(home['scratch'],'s1a_scenes')
 
-sarIn=sardir+"/in"
-sarOut=sardir+"/out"
+sarIn=os.path.join(sardir,'in')
+sarOut=os.path.join(sardir,'out')
 
-polOut=scratch + "/watermasks"
-procOut=scratch + "/processed_watermasks"
+polOut = os.path.join(home['scratch'],'watermasks')
+procOut = os.path.join(home['scratch'],'processed_watermasks')
 
 orbits_url = 'http://aux.sentinel1.eo.esa.int/RESORB/'
 
-sys.path.insert(0, home['parameters'])
+# sys.path.insert(0, home['parameters'])
 
-with open(home['parameters']+'/location.yml', 'r') as stream:
-    location=yaml.load(stream)
 
-if exists(home['proj']+'/buhayra/credentials.py'):
+
+if exists(os.path.join(home['proj'],'buhayra','credentials.py')):
     from buhayra.credentials import *

@@ -128,7 +128,7 @@ def getscenes_test_dataset():
     for item in products_s1a:
         logging.info(products_s1a[item]['title'])
 
-    tests1In = scratch + "/test_dataset/s1a_scenes/in"
+    tests1In = home['scratch'] + "/test_dataset/s1a_scenes/in"
 
         # download all results from the search
     api.download_all(products_s1a,directory_path=tests1In)

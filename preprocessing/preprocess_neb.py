@@ -11,14 +11,15 @@ from rasterio.mask import mask
 from rasterio.merge import merge
 import numpy as np
 import geojson
+from buhayra.getpaths import *
 
 
-jrc_paths = ['/home/delgado/proj/buhayra/preprocessing/occurrence_40W_0N.tif',
-    '/home/delgado/proj/buhayra/preprocessing/occurrence_50W_0N.tif',
-    '/home/delgado/proj/buhayra/preprocessing/occurrence_40W_10S.tif',
-    '/home/delgado/proj/buhayra/preprocessing/occurrence_50W_10S.tif']
+jrc_paths = [os.path.join(home['proj'],'preprocessing','occurrence_40W_0N.tif'),
+    os.path.join(home['proj'],'preprocessing','occurrence_50W_0N.tif'),
+    os.path.join(home['proj'],'preprocessing','occurrence_40W_10S.tif'),
+    os.path.join(home['proj'],'preprocessing','occurrence_50W_10S.tif')]
 
-with fiona.open('/home/delgado/proj/buhayra/preprocessing/semiarido.gpkg','r') as fio:
+with fiona.open(os.path.join(home['proj'],'preprocessing','semiarido.gpkg'),'r') as fio:
     semiarido=shape(next(iter(fio))['geometry'])
 
 # open, crop, and sieve
@@ -44,7 +45,7 @@ for i in src:
 
 out_raster = out_rast[0]
 
-with rasterio.open('/home/delgado/proj/buhayra/preprocessing/occurrence_semiarido_bin_sieved.tif','w',driver='GTiff',height=out_raster.shape[0],width=out_raster.shape[1],count=1,dtype=rasterio.ubyte,transform=out_transform) as dsout:
+with rasterio.open(os.path.join(home['proj'],'preprocessing','occurrence_semiarido_bin_sieved.tif'),'w',driver='GTiff',height=out_raster.shape[0],width=out_raster.shape[1],count=1,dtype=rasterio.ubyte,transform=out_transform) as dsout:
     dsout.write(out_raster.astype(rasterio.ubyte),1)
 
 

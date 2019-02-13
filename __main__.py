@@ -79,7 +79,7 @@ def main():
         tiffs=utils.select_tiffs_year_month(Y,M,folders_in_ym)
 
         # prepare list of reference geometries
-        with fiona.open(home['home']+'/proj/buhayra/buhayra/auxdata/wm_utm_simplf.gpkg','r') as wm:
+        with fiona.open(home['proj']+'/buhayra/auxdata/wm_utm_simplf.gpkg','r') as wm:
             refgeoms = dict()
             for wm_feat in wm:
                 refgeom=shape(wm_feat['geometry'])
