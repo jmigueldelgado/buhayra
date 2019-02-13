@@ -52,6 +52,7 @@ buhayra/auxdata
 
 buhayra/credentials.py*
 buhayra/location.py
+location.py
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

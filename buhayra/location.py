@@ -1,3 +1,3 @@
-location = {'utm' : 'epsg:32724',
-    'region' : 'neb',
-    'postgis_db' : 'neb'}
+location = {'utm' : 'epsg:32629',
+    'region' : 'sib',
+    'postgis_db' : 'sib'}
