@@ -17,7 +17,7 @@ for f in os.listdir('/home/delgado/scratch_neb/dem'):
                 if value==1:
                     feat = geojson.Feature(geometry=pol,properties={'file':f})
                     feats.append(feat)
-                    
+
         # pol = shape(pol)
         # s = json.dumps(mapping(pol))
         # geom = json.loads(s)

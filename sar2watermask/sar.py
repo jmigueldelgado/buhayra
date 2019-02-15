@@ -59,7 +59,6 @@ def sar2sigma_subset(scenes):
             product=speckle_filtering(product)
             product=geom_correction(product)
             product=set_no_data_value(product)
-#            product=sigma_naught(product)
 
             logger.info("starting loop on reservoirs")
             targetdir = os.path.join(sarOut,productName)
@@ -82,15 +81,11 @@ def sar2sigma_subset(scenes):
 
             product.dispose()
 
-            ### remove scene from folder
-            # logger.info("REMOVING " + f)
-            # if os.path.isfile(sarIn+"/"+f):
-            #     os.remove(sarIn+"/"+f)
             open(sarIn+"/"+productName + '.finished','w').close()
             finished=finished+1
             logger.info("**** " + f  + " processed in "+str((time.process_time()-time0)/60)+" minutes****")
             logger.info("**** processed " +str(finished)+" of "+ str(len(scenes))+" in loop ****")
-        System.gc()
+    System.gc()
     logger.info("******************** finished loop: "+ str(len(scenes))+" scenes **")
 
 def orbit_correction(product):
