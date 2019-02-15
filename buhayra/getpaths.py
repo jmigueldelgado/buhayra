@@ -1,7 +1,6 @@
 from os.path import expanduser,exists
 import sys
 import socket
-import yaml
 import os
 from buhayra.location import *
 ### add your hostname and things will run smoothly
