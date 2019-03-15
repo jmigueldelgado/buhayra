@@ -74,6 +74,8 @@ def sar2sigma_subset(scenes):
                 product_subset=subsetProduct(product,wm_in_scene[i])
 
                 logger.debug("writing product "+ str(id_in_scene[i]))
+                if os.path.exists(os.path.join(targetdir,fname + "_locked")):
+                    os.remove(os.path.join(targetdir,fname + "_locked"))
                 ProductIO.writeProduct(product_subset,os.path.join(targetdir,fname + "_locked"),outForm)
                 product_subset.dispose()
 
