@@ -16,19 +16,15 @@ In short, the following steps are done sequentially:
 
 - calibrate, speckle-filter, correct geometry with [snappy](http://step.esa.int/main/toolboxes/snap/) (for SAR data)
 
-- subset based on a [global surface water database](https://global-surface-water.appspot.com/faq) from JRC using google's [earth engine code editor](https://code.earthengine.google.com/)
+- subset based on a [global surface water database](https://global-surface-water.appspot.com/faq) from JRC
 
 - apply [minimum error thresholding](https://www.sciencedirect.com/science/article/abs/pii/0031320386900300)
 
-- polygonize and insert into PostGIS
+- polygonize and insert into PostGIS (with the amazing [GDAL](https://gdal.org/))
 
-## Visualization is being provided by a dedicated [website in development](http://141.89.96.184/index.html) and by the drought forecast tool [seca-vista](http://seca-vista.geo.uni-potsdam.de/).
+## Visualization is being provided by a dedicated [dashboard under development](http://seca-vista.geo.uni-potsdam.de:3838/buhayra-semiarido/) and by the drought forecast tool [seca-vista](http://seca-vista.geo.uni-potsdam.de/).
 
 ![example output](https://raw.githubusercontent.com/jmigueldelgado/buhayra/master/documents/screenshot.png)
-
-## Preliminary Results
-
-Preliminary results can be seen [here](http://141.89.96.184/index.html)
 
 An evaluation of the results is given by [valbuhayra](https://github.com/jmigueldelgado/valbuhayra)
 
@@ -36,7 +32,7 @@ An evaluation of the results is given by [valbuhayra](https://github.com/jmiguel
 
 - combine the water extent collection with bathymetric survey from TanDEM-X
 
-## Some references
+## Some of our references
 
 We were at ESAs [_mapping water bodies from space 2nd conference_](http://mwbs2018.esa.int/) in Frascati (Rome), and at the [_World Water Forum_](http://www.worldwaterforum8.org/) in Brasília 2018.
 
