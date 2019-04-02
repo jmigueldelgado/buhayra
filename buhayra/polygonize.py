@@ -69,7 +69,7 @@ def prepareDict(poly,f,thr,intersection_area):
     if np.isnan(thr):
         thr=0
     props={
-        'source_id':sentx[1],
+        'source_id':sentx,
         'ingestion_time':datetime.datetime.strptime(metalist[4],'%Y%m%dT%H%M%S'),
         'id_jrc':int(metalist[9]),
         'threshold':thr,
