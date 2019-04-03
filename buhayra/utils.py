@@ -7,6 +7,15 @@ import datetime
 from buhayra.getpaths import *
 from shapely.ops import transform
 
+def select_scene_ingestion_time(ingestion_time,src_path):
+    logger = logging.getLogger('root')
+
+    subs=datetime.datetime.strftime(ingestion_time,'%Y%m%dT%H%M%S')
+    res = [x for x in os.listdir(src_path) if re.search(subs, x.split('_')[4])]
+
+    return res
+
+
 def select_scenes_year_month(Y,M,src_path):
     logger = logging.getLogger('root')
 

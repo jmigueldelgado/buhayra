@@ -99,12 +99,6 @@ def main():
             loops.thresh_pol_insert(slice,refgeoms)
             COUNT = COUNT + sizeofslice
 
-    elif sys.argv[1]=="make html":
-
-        logger.info("creating html")
-        import viz.html as viz
-        viz.make_html()
-
     elif sys.argv[1]=="move stuff around":
 
         import maintenance.move_stuff_around as mnt
