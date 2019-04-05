@@ -1,13 +1,16 @@
 import psycopg2
 from buhayra.getpaths import *
 from buhayra.credentials import *
+import buhayra.utils as utils
 import os
 import zipfile
 import xmltodict
+import datetime
 
-scene=select_scene_ingestion_time(ingestion_time,src_path)
+ingestion_time = datetime.datetime.strptime('20181007T081706','%Y%m%dT%H%M%S')
+scene=utils.select_scene_ingestion_time(ingestion_time,sarIn)
 
-zip=zipfile.ZipFile(os.path.join(src_path,scene[0]))
+zip=zipfile.ZipFile(os.path.join(sarIn,scene[0]))
 
 contents=zip.namelist()
 subs='vv-'+datetime.datetime.strftime(ingestion_time,'%Y%m%dt%H%M%S')

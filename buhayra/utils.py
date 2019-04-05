@@ -11,7 +11,7 @@ def select_scene_ingestion_time(ingestion_time,src_path):
     logger = logging.getLogger('root')
 
     subs=datetime.datetime.strftime(ingestion_time,'%Y%m%dT%H%M%S')
-    res = [x for x in os.listdir(src_path) if re.search(subs, x.split('_')[4])]
+    res = [x for x in os.listdir(src_path) if re.search(subs, x.split('_')[4]) and x.endswith('.zip')]
 
     return res
 
