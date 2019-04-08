@@ -6,6 +6,7 @@ import sys
 import logging
 from buhayra.getpaths import *
 import buhayra.utils as utils
+import sar2watermask.metadata as metadata
 import xml.etree.ElementTree
 from snappy import Product
 from snappy import GPF
@@ -88,6 +89,9 @@ def sar2sigma_subset(scenes):
             logger.info("**** " + f  + " processed in "+str((time.process_time()-time0)/60)+" minutes****")
             logger.info("**** processed " +str(finished)+" of "+ str(len(scenes))+" in loop ****")
     System.gc()
+
+    metadata.insert_into_postgres(scenes)
+
     logger.info("******************** finished loop: "+ str(len(scenes))+" scenes **")
 
 def orbit_correction(product):
