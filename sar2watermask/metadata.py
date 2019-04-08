@@ -11,7 +11,7 @@ import re
 # ingestion_time = datetime.datetime.strptime('20181007T081706','%Y%m%dT%H%M%S')
 # scene=utils.select_scene_ingestion_time(ingestion_time,sarIn)[0]
 
-def insert_into_postgres(scenes)
+def insert_into_postgres(scenes):
 
     conn = psycopg2.connect(host=postgis_host,dbname='watermasks',user=postgis_user,password=postgis_pass)
     cur = conn.cursor()
