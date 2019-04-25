@@ -53,7 +53,6 @@ def main():
             sar.sar2sigma_subset([scenes])
         if len(scenes)>1:
             sar.sar2sigma_subset(scenes)
-
     elif sys.argv[1]=="threshold+insert year month":
 
         logger.info("inserting into postgreSQL in "+sys.argv[2]+"-"+sys.argv[3])
@@ -83,6 +82,36 @@ def main():
             logger.info('thresholding '+str(sizeofslice) + ' tiffs and inserting. '+str(COUNT)+'of '+str(len(tiffs))+' done.')
             loops.thresh_pol_insert(slice,refgeoms)
             COUNT = COUNT + sizeofslice
+
+    elif sys.argv[1]=="threshold+insert":
+
+        logger.info("inserting recent scenes into postgreSQL")
+        import buhayra.loops as loops
+
+        folders_in_7days = utils.select_folders_7days(sarOut)
+        tiffs=utils.select_tiffs_7days(folders_in_7days)
+
+        # prepare list of reference geometries
+        with fiona.open(home['proj']+'/buhayra/auxdata/wm_utm_'+location['region']+'.gpkg','r') as wm:
+            refgeoms = dict()
+            for wm_feat in wm:
+                refgeom=shape(wm_feat['geometry'])
+                refgeoms[int(wm_feat['id'])] = refgeom.buffer(0)
+
+        # slice list of tiffs
+        sizeofslice=200
+        nslices = len(tiffs)//sizeofslice
+        tiffslices = list()
+        for i in range(nslices):
+            tiffslices.append(tiffs[i*sizeofslice:(i*sizeofslice+sizeofslice)])
+        tiffslices.append(tiffs[(nslices*sizeofslice):len(tiffs)])
+
+        COUNT = 0
+        for slice in tiffslices:
+            logger.info('thresholding '+str(sizeofslice) + ' tiffs and inserting. '+str(COUNT)+'of '+str(len(tiffs))+' done.')
+            loops.thresh_pol_insert(slice,refgeoms)
+            COUNT = COUNT + sizeofslice
+
 
     elif sys.argv[1]=="move stuff around":
 

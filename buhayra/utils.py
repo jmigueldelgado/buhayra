@@ -72,6 +72,7 @@ def select_past_scene(Y,M,src_path):
             f=scenes_in_ym[timestamp.index(max(timestamp))]
     return(f)
 
+###### get tifs by year and month
 
 def select_folders_year_month(Y,M,src_path):
     logger = logging.getLogger('root')
@@ -106,6 +107,39 @@ def select_tiffs_year_month(Y,M,folders_in_ym):
         logger.info("The selected folders have no tiffs for year "+str(Y)+" and month "+str(M)+"Exiting and returning None.")
         tiffs_in_ym=None
     return(tiffs_in_ym)
+
+###### get tifs of the last 7 days
+
+def select_folders_7days(src_path):
+    logger = logging.getLogger('root')
+    timestamp=list()
+    allfolders = [ name for name in os.listdir(src_path) if os.path.isdir(os.path.join(src_path, name)) ]
+    folders_in_7days=list()
+
+    for folder in allfolders:
+        stamp=datetime.strptime(folder.split('_')[4],'%Y%m%dT%H%M%S')
+        if (datetime.now() - stamp) > timedelta(days=7):
+            folders_in_7days.append(os.path.join(src_path,folder))
+    if(len(folders_in_7days)<1):
+        logger.info(src_path+" has no processed scenes in the last 7 days. Exiting and returning empty list. Check if sar2watermask is working properly.")
+    return folders_in_7days
+
+
+def select_tiffs_7days(folders_in_7days):
+    logger = logging.getLogger('root')
+    tiffs_in_7days=list()
+    if len(folders_in_7days)<1:
+        pass
+    else:
+        for searchDir in folders_in_7days:
+            for tif in os.listdir(searchDir):
+                if  os.path.isfile(os.path.join(searchDir,tif[-3]+'finished')) or not tif.startswith('S'):
+                    continue
+                if re.search('.tif$',tif):
+                    tiffs_in_7days.append(os.path.join(searchDir,tif))
+    if(len(tiffs_in_7days)<1):
+        logger.info("The selected folders have no unprocessed tiffs for the last 7 days. Exiting and returning an empty list.")
+    return tiffs_in_7days
 
 def list_scenes_finished(src_path):
     logger = logging.getLogger('root')
