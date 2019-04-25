@@ -3,6 +3,8 @@ from buhayra.getpaths import *
 import datetime
 import re
 from buhayra.getpaths import *
+import buhayra.utils as utils
+import logging
 
 def rename_json():
     while(selectPattern(sarOut,'orrjson$')):
@@ -48,3 +50,10 @@ def move_tifs_to_folders():
                 src = os.path.join(procOut,filename)
                 trg = os.path.join(procOut,scene[:-4],filename)
                 os.rename(src,trg)
+
+def rm_finished(src_path):
+    logger = logging.getLogger('root')
+    for scn in utils.list_scenes_finished(src_path):
+        if os.path.isfile(os.path.join(src_path,scn[:-8]+'zip')):
+            os.remove(os.path.join(src_path,scn[:-8]+'zip'))
+            logger.info('Removing processed scene: ' + scn[:-8] + 'zip')

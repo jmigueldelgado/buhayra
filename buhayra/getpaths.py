@@ -8,11 +8,11 @@ from buhayra.location import *
 if socket.gethostname()=='vouga':
     home = {
         'home' : expanduser("~"),
-        'scratch' : expanduser("~") + '/scratch'}
+        'scratch' : os.path.join(expanduser("~"), 'scratch')}
 elif socket.gethostname()=='compute':
     home = {
         'home' : expanduser("~"),
-        'scratch' : expanduser("~") + '/scratch'}
+        'scratch' : os.path.join(expanduser("~"), 'scratch')}
 elif socket.gethostname()=='ubuntuserver':
     home = {
         'home' : expanduser("~"),
@@ -20,7 +20,7 @@ elif socket.gethostname()=='ubuntuserver':
 elif socket.gethostname()=='MEKONG':
     home = {
         'home' : expanduser("~"),
-        'scratch' : expanduser("~") + '/scratch'}
+        'scratch' : os.path.join(expanduser("~"), 'scratch')}
 else:
     home = {
         'home' : expanduser("~"),
@@ -28,7 +28,7 @@ else:
 
 
 home['proj'] =os.path.join(home['home'],'proj','buhayra'+'_'+location['region'])
-home['scratch'] =home['scratch']+'_'+location['region']
+home['scratch'] = home['scratch']+'_'+location['region']
 home['parameters'] = os.path.join(home['proj'],'buhayra','parameters')
 
 sardir=os.path.join(home['scratch'],'s1a_scenes')

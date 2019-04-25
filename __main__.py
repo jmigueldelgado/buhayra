@@ -41,21 +41,6 @@ def main():
             raise SystemExit()
         sar.sar2sigma_subset([f])
 
-    elif sys.argv[1]=="sar orbit correction":
-
-        import sar2watermask.sar as sar
-        f=utils.select_last_scene(sarIn)
-        if f is None:
-            logger.info("There are no scenes to process in "+sarIn+". Exiting")
-            raise SystemExit()
-        sar.sar_orbit_correction([f])
-
-    elif sys.argv[1]=="sar scene":
-        logger.info(sys.argv[2])
-
-        import sar2watermask.sar as sar
-        sar.sar2sigma_subset([sys.argv[2]])
-
     elif sys.argv[1]=="sar2sigma year month":
 
         import sar2watermask.sar as sar
@@ -101,9 +86,13 @@ def main():
 
     elif sys.argv[1]=="move stuff around":
 
-        import maintenance.move_stuff_around as mnt
+        import maintenance.move_stuff_around as mvstuff
         # mnt.move_tifs_to_folders()
-        mnt.move_proc(int(sys.argv[2]),int(sys.argv[3]))
+        mvstuff.move_proc(int(sys.argv[2]),int(sys.argv[3]))
+
+    elif sys.argv[1]=="remove finished scenes":
+        import maintenance.move_stuff_around as mvstuff
+        mvstuff.rm_finished(sarIn)
 
     else:
 

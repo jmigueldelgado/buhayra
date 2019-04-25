@@ -107,6 +107,23 @@ def select_tiffs_year_month(Y,M,folders_in_ym):
         tiffs_in_ym=None
     return(tiffs_in_ym)
 
+def list_scenes_finished(src_path):
+    logger = logging.getLogger('root')
+
+    scenes_finished=list()
+
+    if(len(os.listdir(src_path))<1):
+        logger.info('No scenes found in '+ src_path +'. Exiting and returning an empty list.')
+    else:
+        for scn in os.listdir(src_path):
+            if re.search('.finished$',scn):
+                scenes_finished.append(scn)
+        if(len(scenes_finished)<1):
+            logger.info("No finished scenes found in " + src_path + ". Exiting and returning an empty list.")
+        else:
+            logger.info(str(len(scenes_finished))+" finished scenes found in " + src_path)
+    return(scenes_finished)
+
 
 def selectPattern(dir,pattern):
     logger = logging.getLogger('root')
