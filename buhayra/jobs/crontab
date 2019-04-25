@@ -1,0 +1,13 @@
+SHELL=/bin/bash
+
+### acquire scenes from ESA
+0 0 * * SAT /home/delgado/proj/buhayra_sib/buhayra/jobs/1_get_scenes_sib.sh  >> /home/delgado/1_getscenes.log 2>&1
+
+### process acquired scenes
+
+0 2 * * * qsub /users/stud09/martinsd/proj/buhayra/buhayra/jobs/2_sar2watermask.job
+
+### threshold and insert
+
+
+### perform maintenance

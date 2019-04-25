@@ -3,14 +3,14 @@ import pyproj
 import os
 import logging
 import re
-import datetime
 from buhayra.getpaths import *
 from shapely.ops import transform
+from datetime import date, datetime, timedelta
 
 def select_scene_ingestion_time(ingestion_time,src_path):
     logger = logging.getLogger('root')
 
-    subs=datetime.datetime.strftime(ingestion_time,'%Y%m%dT%H%M%S')
+    subs=datetime.strftime(ingestion_time,'%Y%m%dT%H%M%S')
     res = [x for x in os.listdir(src_path) if re.search(subs, x.split('_')[4]) and x.endswith('.zip')]
 
     return res
@@ -26,7 +26,7 @@ def select_scenes_year_month(Y,M,src_path):
         timestamp=list()
         scenes_in_ym=list()
         for scn in os.listdir(src_path):
-            stamp=datetime.datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S')
+            stamp=datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S')
             if re.search('.zip$',scn) and stamp.year==Y and stamp.month==M:
                 scenes_in_ym.append(scn)
                 timestamp.append(stamp)
@@ -37,17 +37,17 @@ def select_scenes_year_month(Y,M,src_path):
 
 def select_last_scene(src_path):
     logger = logging.getLogger('root')
-    if(len(os.listdir(src_path))<1):
-        logger.info(src_path+" is empty! Nothing to do. Exiting and returning None.")
-        f=None
-    else:
-        timestamp=list()
-        scenes=list()
-        for scn in os.listdir(src_path):
-            if re.search('.zip$',scn):
+    timestamp=list()
+    scenes=list()
+    for scn in os.listdir(src_path):
+        if re.search('.zip$',scn):
+            if not os.isfile(os.path.join(src_path,scn[:-3]+'finished')):
                 scenes.append(scn)
-                timestamp.append(datetime.datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S'))
+                timestamp.append(datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S'))
+    if len(scenes)>0:
         f=scenes[timestamp.index(max(timestamp))]
+    else:
+        f=[]
     return(f)
 
 
@@ -61,7 +61,7 @@ def select_past_scene(Y,M,src_path):
         timestamp=list()
         scenes_in_ym=list()
         for scn in os.listdir(src_path):
-            stamp=datetime.datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S')
+            stamp=datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S')
             if re.search('.zip$',scn) and stamp.year==Y and stamp.month==M:
                 scenes_in_ym.append(scn)
                 timestamp.append(stamp)
@@ -80,7 +80,7 @@ def select_folders_year_month(Y,M,src_path):
     folders_in_ym=list()
 
     for folder in allfolders:
-        stamp=datetime.datetime.strptime(folder.split('_')[4],'%Y%m%dT%H%M%S')
+        stamp=datetime.strptime(folder.split('_')[4],'%Y%m%dT%H%M%S')
         if stamp.year==Y and stamp.month==M:
             folders_in_ym.append(os.path.join(src_path,folder))
     if(len(folders_in_ym)<1):
@@ -99,7 +99,7 @@ def select_tiffs_year_month(Y,M,folders_in_ym):
             for tif in os.listdir(searchDir):
                 if  os.path.isfile(os.path.join(searchDir,tif[-3]+'finished')) or not tif.startswith('S'):
                     continue
-                stamp=datetime.datetime.strptime(tif.split('_')[4],'%Y%m%dT%H%M%S')
+                stamp=datetime.strptime(tif.split('_')[4],'%Y%m%dT%H%M%S')
                 if re.search('.tif$',tif) and stamp.year==Y and stamp.month==M:
                     tiffs_in_ym.append(os.path.join(searchDir,tif))
     if(len(tiffs_in_ym)<1):
@@ -116,7 +116,8 @@ def list_scenes_finished(src_path):
         logger.info('No scenes found in '+ src_path +'. Exiting and returning an empty list.')
     else:
         for scn in os.listdir(src_path):
-            if re.search('.finished$',scn):
+            stamp=datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S')
+            if re.search('.finished$',scn)  and (datetime.now() - stamp) > timedelta(days=7):
                 scenes_finished.append(scn)
         if(len(scenes_finished)<1):
             logger.info("No finished scenes found in " + src_path + ". Exiting and returning an empty list.")
