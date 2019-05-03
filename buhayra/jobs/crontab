@@ -1,13 +1,13 @@
 SHELL=/bin/bash
 
 ### acquire scenes from ESA
-0 0 * * SAT $HOME/proj/buhayra_sib/buhayra/jobs/1_get_scenes_sib.sh | while IFS= read -r line; do echo "$(date) $line"; done >> $HOME/1_getscenes_sib.log 2>&1
+0 10 * * SAT $HOME/proj/buhayra_sib/buhayra/jobs/1_get_scenes_sib.sh >> $HOME/1_getscenes_sib.log 2>&1
 
 ### process acquired scenes
-0 4,16 * * * $HOME/proj/buhayra_sib/buhayra/jobs/2_sar2watermask.job | while IFS= read -r line; do echo "$(date) $line"; done >> $HOME/2_sar2watermask_sib.log 2>&1
+0 4,16 * * * $HOME/proj/buhayra_sib/buhayra/jobs/2_sar2watermask_sib.sh >> $HOME/2_sar2watermask_sib.log 2>&1
 
 ### threshold and insert
-0 20 * * SUN,TUE,THU $HOME/proj/buhayra_sib/buhayra/jobs/3_thresh+insert_sib.sh | while IFS= read -r line; do echo "$(date) $line"; done >> $HOME/3_thresh+insert_sib.log 2>&1
+0 20 * * SUN,TUE,THU $HOME/proj/buhayra_sib/buhayra/jobs/3_thresh+insert_sib.sh >> $HOME/3_thresh+insert_sib.log 2>&1
 
 ### perform maintenance
-0 10 * * FRI $HOME/proj/buhayra_sib/buhayra/jobs/4_rm_finished.sh | while IFS= read -r line; do echo "$(date) $line"; done >> $HOME/4_rm_finished.log 2>&1
+0 10 * * FRI $HOME/proj/buhayra_sib/buhayra/jobs/4_rm_finished.sh >> $HOME/4_rm_finished.log 2>&1
