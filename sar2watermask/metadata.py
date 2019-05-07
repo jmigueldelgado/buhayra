@@ -5,7 +5,7 @@ import buhayra.utils as utils
 import os
 import zipfile
 import xmltodict
-import datetime
+from datetime import datetime
 import re
 
 # ingestion_time = datetime.datetime.strptime('20181007T081706','%Y%m%dT%H%M%S')
