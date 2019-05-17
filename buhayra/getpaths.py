@@ -26,9 +26,13 @@ else:
         'home' : expanduser("~"),
         'scratch' : '/mnt/scratch/martinsd'}
 
+if location['region']==None:
+    home['proj'] =os.path.join(home['home'],'proj','buhayra')
+else:
+    home['proj'] =os.path.join(home['home'],'proj','buhayra'+'_'+location['region'])
+    home['scratch'] = home['scratch']+'_'+location['region']
 
-home['proj'] =os.path.join(home['home'],'proj','buhayra'+'_'+location['region'])
-home['scratch'] = home['scratch']+'_'+location['region']
+
 home['parameters'] = os.path.join(home['proj'],'buhayra','parameters')
 
 sardir=os.path.join(home['scratch'],'s1a_scenes')

@@ -6,6 +6,7 @@ import sys
 import logging
 from buhayra.getpaths import *
 import buhayra.utils as utils
+from buhayra.utils import getWMinScene, checknclean, geojson2shapely
 import sar2watermask.metadata as metadata
 import xml.etree.ElementTree
 from snappy import Product
@@ -235,16 +236,7 @@ def subsetProduct(product,pol):
     product_subset = GPF.createProduct('Subset', parameters, product)
     return(product_subset)
 
-def getWMinScene(rect,wm):
-    wm_in_scene=list()
-    id=list()
-    for feat in wm:
-        pol=geojson2shapely(feat['geometry'])
-        pol=checknclean(pol)
-        if rect.contains(pol):
-            wm_in_scene.append(pol)
-            id.append(feat['properties']['id'])
-    return(wm_in_scene,id)
+
 
 def getBoundingBoxScene(product):
     logger = logging.getLogger('root')
@@ -272,17 +264,6 @@ def geojson2wkt(jsgeom):
     polygon=shape(jsgeom)
     return(polygon.wkt)
 
-def geojson2shapely(jsgeom):
-    from shapely.geometry import shape,polygon
-    polygon=shape(jsgeom)
-    return(polygon)
-
-def checknclean(pol):
-    if not pol.is_valid:
-        clean=pol.buffer(0)
-        return(clean)
-    else:
-        return(pol)
 
 
 

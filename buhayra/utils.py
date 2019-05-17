@@ -5,7 +5,41 @@ import logging
 import re
 from buhayra.getpaths import *
 from shapely.ops import transform
+from shapely.geometry import Polygon, shape, Point
 from datetime import date, datetime, timedelta
+
+def raster2rect(raster):
+    pointlist=list()
+    pointlist.append(Point(raster.bounds.left,raster.bounds.bottom))
+    pointlist.append(Point(raster.bounds.left,raster.bounds.top))
+    pointlist.append(Point(raster.bounds.right,raster.bounds.top))
+    pointlist.append(Point(raster.bounds.right,raster.bounds.bottom))
+    pointlist.append(Point(raster.bounds.left,raster.bounds.bottom))
+
+    return Polygon([[p.x, p.y] for p in pointlist])
+
+
+def getWMinScene(rect,wm):
+    wm_in_scene=list()
+    id=list()
+    for feat in wm:
+        pol=geojson2shapely(feat['geometry'])
+        pol=checknclean(pol)
+        if rect.contains(pol):
+            wm_in_scene.append(pol)
+            id.append(feat['properties']['id'])
+    return(wm_in_scene,id)
+
+def checknclean(pol):
+    if not pol.is_valid:
+        clean=pol.buffer(0)
+        return(clean)
+    else:
+        return(pol)
+
+def geojson2shapely(jsgeom):
+    polygon=shape(jsgeom)
+    return(polygon)
 
 def select_scene_ingestion_time(ingestion_time,src_path):
     logger = logging.getLogger('root')
