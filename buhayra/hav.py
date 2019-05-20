@@ -19,6 +19,8 @@ for tif in tifs:
 
 rasterF=tifsF[0]
 
+wm=fio.open(home['proj']+'/buhayra/auxdata/wm_utm_'+location['postgis_db']+'.gpkg','r')
+
 with fio.open(home['proj']+'/buhayra/auxdata/wm_utm_'+location['postgis_db']+'.gpkg','r') as wm:
     for rasterF in tifsF:
         raster = rio.open(os.path.join(tifsdir,rasterF))
@@ -41,3 +43,16 @@ with fio.open(home['proj']+'/buhayra/auxdata/wm_utm_'+location['postgis_db']+'.g
                   "w",
                   **out_meta) as dest:
                 dest.write(out_image)
+            break
+
+
+        out_image
+        mask=np.ma.array(out_image[0]==-9999)
+        r=np.ma.array(out_image[0],mask=mask)
+        i=11
+        for i in range(20):
+            lower=np.percentile(r.compressed(),i*5)
+            upper=np.percentile(r.compressed(),(1+i)*5)
+
+            b = np.where((r > lower) & (r <= upper), True, False)
+            np.count_nonzero(b[0])
