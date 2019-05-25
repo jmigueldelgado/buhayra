@@ -40,6 +40,8 @@ sardir=os.path.join(home['scratch'],'s1a_scenes')
 sarIn=os.path.join(sardir,'in')
 sarOut=os.path.join(sardir,'out')
 
+dirDEMs=os.path.join(home['scratch'],'dem')
+
 polOut = os.path.join(home['scratch'],'watermasks')
 procOut = os.path.join(home['scratch'],'processed_watermasks')
 

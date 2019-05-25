@@ -119,6 +119,12 @@ def main():
         # mnt.move_tifs_to_folders()
         mvstuff.move_proc(int(sys.argv[2]),int(sys.argv[3]))
 
+    elif sys.argv[1]=="hav":
+
+        import buhayra.hav as hav
+        # mnt.move_tifs_to_folders()
+        hav.extract_HAV()
+        
     elif sys.argv[1]=="remove finished scenes":
         import maintenance.move_stuff_around as mvstuff
         mvstuff.rm_finished(sarIn)
