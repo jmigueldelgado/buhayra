@@ -7,7 +7,7 @@ from buhayra.credentials import *
 import subprocess
 
 
-def insert_into_postgres_NEB(src_path,o_std,o_err):
+def insert_into_postgres(src_path,o_std,o_err):
     logger = logging.getLogger('root')
 
     pg_login = ('PG:host='+

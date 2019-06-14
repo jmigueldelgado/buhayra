@@ -2,9 +2,9 @@ import os
 from buhayra.getpaths import *
 import datetime
 import re
-from buhayra.getpaths import *
 import buhayra.utils as utils
 import logging
+import psycopg2
 
 def rename_json():
     while(selectPattern(sarOut,'orrjson$')):
@@ -57,3 +57,34 @@ def rm_finished(src_path):
         if os.path.isfile(os.path.join(src_path,scn[:-8]+'zip')):
             os.remove(os.path.join(src_path,scn[:-8]+'zip'))
             logger.info('Removing processed scene: ' + scn[:-8] + 'zip')
+
+def update_db():
+    logger = logging.getLogger('root')
+    request="""INSERT INTO """+location['region']+
+                """ SELECT id, area, threshold, wmxjrc_area, id_jrc, source_id FROM """ + location['postgis_db'] +
+                """ ON CONFLICT DO NOTHING;"""
+
+    logger.info("Connect to postgres with psycopg2")
+    conn = psycopg2.connect(host=postgis_host,dbname='watermasks',user=postgis_user,password=postgis_pass)
+    cur = conn.cursor()
+
+    cur.execute(request)
+    out=conn.commit()
+    cur.close()
+    conn.close()
+    return out
+
+
+def delete_old_geoms():
+    cutoff_time = datetime.datetime.today()- datetime.timedelta(days=60)
+    request = """ DELETE FROM """+location['region']+'_geom'+
+                """WHERE ingestion_time < %(cutoff_time)s;"""
+
+    logger.info("Connect to postgres with psycopg2")
+    conn = psycopg2.connect(host=postgis_host,dbname='watermasks',user=postgis_user,password=postgis_pass)
+    cur = conn.cursor()    cur.execute(request,{'cutoff_time': cutoff_time.strftime('%Y-%m-%d'})
+
+    out=conn.commit()
+    cur.close()
+    conn.close()
+    return out

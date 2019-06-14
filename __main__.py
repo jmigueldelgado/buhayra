@@ -87,6 +87,7 @@ def main():
 
         logger.info("inserting recent scenes into postgreSQL")
         import buhayra.loops as loops
+        from maintenance.move_stuff_around import update_db
 
         folders_in_7days = utils.select_folders_7days(sarOut)
         tiffs=utils.select_tiffs_7days(folders_in_7days)
@@ -108,9 +109,12 @@ def main():
 
         COUNT = 0
         for slice in tiffslices:
-            logger.info('thresholding '+str(sizeofslice) + ' tiffs and inserting. '+str(COUNT)+'of '+str(len(tiffs))+' done.')
+            logger.info('thresholding '+str(sizeofslice) + ' tiffs and inserting geometries and attribute data into database region_geom. '+str(COUNT)+'of '+str(len(tiffs))+' done.')
             loops.thresh_pol_insert(slice,refgeoms)
             COUNT = COUNT + sizeofslice
+
+        logger.info('updating database region with attribute data but no geometries')
+        out=update_db()
 
 
     elif sys.argv[1]=="move stuff around":
@@ -124,7 +128,7 @@ def main():
         import buhayra.hav as hav
         # mnt.move_tifs_to_folders()
         hav.extract_HAV()
-        
+
     elif sys.argv[1]=="remove finished scenes":
         import maintenance.move_stuff_around as mvstuff
         mvstuff.rm_finished(sarIn)

@@ -17,7 +17,7 @@ def insert_into_postgres(scenes):
 
     conn = psycopg2.connect(host=postgis_host,dbname='watermasks',user=postgis_user,password=postgis_pass)
     cur = conn.cursor()
-    INSERT = """INSERT INTO scene_"""+location['postgis_db']+""" (ingestion_time, mission_id, pass) VALUES (%(ingestion_time)s, %(mission_id)s, %(pass)s);"""
+    INSERT = """INSERT INTO scene_"""+location['region']+""" (ingestion_time, mission_id, pass) VALUES (%(ingestion_time)s, %(mission_id)s, %(pass)s);"""
 
     logger.info("Loop scenes")
 
@@ -40,7 +40,7 @@ def insert_into_postgres(scenes):
         logger.info("Insert metadata for "+scene)
 
         cur.execute(INSERT,
-            {'table':'scene_'+location['postgis_db'],
+            {'table':'scene_'+location['region'],
                 'ingestion_time': ingestion_time,
                 'mission_id': xdict['product']['adsHeader']['missionId'],
                 'pass': xdict['product']['generalAnnotation']['productInformation']['pass']})
