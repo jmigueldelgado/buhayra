@@ -60,7 +60,7 @@ def rm_finished(src_path):
 
 def update_db():
     logger = logging.getLogger('root')
-    request="""INSERT INTO """ + location['region'] + """ SELECT id, ingestion_time, area, threshold, wmxjrc_area, id_jrc, source_id FROM """ + location['postgis_db'] + """ ON CONFLICT DO NOTHING;"""
+    request="""INSERT INTO """ + location['region'] + """ SELECT ingestion_time, area, threshold, wmxjrc_area, id_jrc, source_id FROM """ + location['postgis_db'] + """ ON CONFLICT DO NOTHING;"""
 
     # following error occurs for this request:
         # NotNullViolation: null value in column "id" violates not-null constraint
