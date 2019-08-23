@@ -60,15 +60,18 @@ def rm_finished(src_path):
 
 def update_db():
     logger = logging.getLogger('root')
-    request="""INSERT INTO """+location['region']+
-                """ SELECT id, area, threshold, wmxjrc_area, id_jrc, source_id FROM """ + location['postgis_db'] +
-                """ ON CONFLICT DO NOTHING;"""
+    request="""INSERT INTO """ + location['region'] + """ SELECT id, ingestion_time, area, threshold, wmxjrc_area, id_jrc, source_id FROM """ + location['postgis_db'] + """ ON CONFLICT DO NOTHING;"""
+
+    # following error occurs for this request:
+        # NotNullViolation: null value in column "id" violates not-null constraint
+        # DETAIL:  Failing row contains (null, 2019-03-23 18:26:52+01, 0, 0, 0, 644, S1A).
 
     logger.info("Connect to postgres with psycopg2")
     conn = psycopg2.connect(host=postgis_host,dbname='watermasks',user=postgis_user,password=postgis_pass)
     cur = conn.cursor()
 
     cur.execute(request)
+
     out=conn.commit()
     cur.close()
     conn.close()
