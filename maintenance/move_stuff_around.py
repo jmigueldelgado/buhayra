@@ -80,20 +80,11 @@ def update_db():
 
 def delete_old_geoms():
     cutoff_time = datetime.datetime.today()- datetime.timedelta(days=60)
-<<<<<<< HEAD
     request = """ DELETE FROM """+location['postgis_db'] +"""WHERE ingestion_time < %(cutoff_time)s;"""
-=======
-    request = """ DELETE FROM """+postgis_db['region']+"""WHERE ingestion_time < %(cutoff_time)s;"""
->>>>>>> 830628839a0a28a8f04c3c24dbeffec850d836ac
-
     logger.info("Connect to postgres with psycopg2")
     conn = psycopg2.connect(host=postgis_host,dbname='watermasks',user=postgis_user,password=postgis_pass)
     cur = conn.cursor()
-<<<<<<< HEAD
     cur.execute(request,{'cutoff_time': cutoff_time.strftime('%Y-%m-%d')})
-=======
-    cur.execute(request,{'cutoff_time': cutoff_time.strftime('%Y-%m-%d'})
->>>>>>> 830628839a0a28a8f04c3c24dbeffec850d836ac
 
     out=conn.commit()
     cur.close()
