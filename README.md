@@ -22,7 +22,7 @@ In short, the following steps are done sequentially:
 
 - polygonize and insert into PostGIS (with the amazing [GDAL](https://gdal.org/))
 
-## Visualization is being provided by a dedicated [dashboard under development](http://seca-vista.geo.uni-potsdam.de:3838/buhayra-semiarido/) and by the drought forecast tool [seca-vista](http://seca-vista.geo.uni-potsdam.de/).
+## Visualization is being provided by a demo [dashboard under development](http://seca-vista.geo.uni-potsdam.de:3838/buhayra-app/).
 
 ![example output](https://raw.githubusercontent.com/jmigueldelgado/buhayra/master/documents/screenshot.png)
 
