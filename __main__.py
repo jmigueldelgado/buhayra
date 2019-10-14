@@ -87,7 +87,7 @@ def main():
 
         logger.info("inserting recent scenes into postgreSQL")
         import buhayra.loops as loops
-        from maintenance.move_stuff_around import update_db
+        from maintenance.move_stuff_around import update_db, delete_old_geoms
 
         folders_in_7days = utils.select_folders_7days(sarOut)
         tiffs=utils.select_tiffs_7days(folders_in_7days)
