@@ -115,6 +115,7 @@ def main():
 
         logger.info('updating database region with attribute data but no geometries')
         out=update_db()
+        out2=delete_old_geoms()
 
 
     elif sys.argv[1]=="move stuff around":
