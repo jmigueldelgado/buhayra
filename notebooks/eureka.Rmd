@@ -1,0 +1,56 @@
+---
+title: "Balanço hídrico à escala continental: monitoramento em pequenas albufeiras"
+author: JM Delgado
+date: 17 de Outubro de 2019
+output: slidy_presentation
+---
+
+# Pequenas albufeiras
+
+* omnipresentes em regiões semi-áridas/mediterrânicas
+* garantem segurança hídrica a comunidades, explorações agrícolas ou pecuárias
+* de difícil quantificação às escala continental
+
+# Porquê quantificar disponibilidade hídrica?
+
+* é essencial compreender as dimensões espaciais e temporais da disponibilidade hídrica para uma melhor gestão do recurso
+* escassez de água
+* pressuposto de que as crises hídricas podem ser evitadas ou mitigadas ajustando estratégias de gestão de RH [^accounting].
+
+[^accounting]: Batchelor, Charles, Jippe Hoogeveen, Jean-Marc Faurès, and Livia Peiser. Water Accounting and Auditing: A Sourcebook FAO Water Reports, No. 43, 2016.
+
+---
+
+# Proposta
+
+## Acompanhar disponibilidade hídrica em pequenos reservatórios em tempo real com recurso a SAR
+
+Detection of water surface of reservoirs with SAR imagery from the sentinel mission.
+* Derive time series of water availability for each reservoir
+
+---
+
+# Financiamento
+
+* [eureka network](https://www.eurekanetwork.org/propose-project-idea)
+*
+
+# Method
+
+* fetch sentinel-1 scenes
+* correct, calibrate, speckle filter etc.
+* subset scenes based on JRC dataset
+* threshold subsets
+* polygonize
+* store in database
+
+Go to the [buhayra repo](https://github.com/jmigueldelgado/buhayra#buhayra) for more details
+
+---
+
+# Further steps
+* explain reservoirs of area zero
+  - by cleaning threshold module
+  - by implementing an assimilation approach like a Kalman filter
+* integrate with tdx2hav
+* vegetated areas?
