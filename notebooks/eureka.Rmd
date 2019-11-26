@@ -1,8 +1,10 @@
 ---
 title: "Balanço hídrico à escala continental: monitoramento em pequenas albufeiras"
 author: JM Delgado
-date: 17 de Outubro de 2019
-output: slidy_presentation
+date: 22 de Outubro de 2019
+output:
+  slidy_presentation:
+    footer: "University of Potsdam, Hydrology and Climatology, 2019"
 ---
 
 # Pequenas albufeiras
@@ -11,46 +13,116 @@ output: slidy_presentation
 * garantem segurança hídrica a comunidades, explorações agrícolas ou pecuárias
 * de difícil quantificação às escala continental
 
+```{r carro-pipa, echo=FALSE, out.width='60%', fig.align='center', fig.cap="Operação Carro-Pipa recarregando uma cisterna familiar no Ceará. Com autorização de Oliveira/FUNCEME 2016."}
+knitr::include_graphics('/home/delgado/Documents/eureka/2016_juliana_roldao_morada_nova-8283.jpg')
+```
 # Porquê quantificar disponibilidade hídrica?
 
-* é essencial compreender as dimensões espaciais e temporais da disponibilidade hídrica para uma melhor gestão do recurso
-* escassez de água
-* pressuposto de que as crises hídricas podem ser evitadas ou mitigadas ajustando estratégias de gestão de RH [^accounting].
+* melhorar _gestão do recurso_ (dimensões espaciais e temporais)
+* mitigar _escassez de água_ (ajustando estratégias de gestão de RH)
+* facilitar a previsão sazonal
 
-[^accounting]: Batchelor, Charles, Jippe Hoogeveen, Jean-Marc Faurès, and Livia Peiser. Water Accounting and Auditing: A Sourcebook FAO Water Reports, No. 43, 2016.
+
+```{r accounting, echo=FALSE, out.width='100%',fig.align='center', fig.cap=""}
+knitr::include_graphics('/home/delgado/Documents/eureka/accounting.png')
+```
 
 ---
 
 # Proposta
 
-## Acompanhar disponibilidade hídrica em pequenos reservatórios em tempo real com recurso a SAR
+_Acompanhar disponibilidade hídrica em pequenos reservatórios em tempo real com recurso a SAR._
 
-Detection of water surface of reservoirs with SAR imagery from the sentinel mission.
-* Derive time series of water availability for each reservoir
+Determinar: **existente**, **tendência** e **previsão**.
+
+```{r dashboard3, echo=FALSE, out.width='100%',fig.align='center', fig.cap="http://seca-vista.geo.uni-potsdam.de:3838/buhayra-app/"}
+knitr::include_graphics('/home/delgado/Documents/eureka/screenshot.png')
+```
+---
+
+# Metodologia
+
+Duas aplicações de base:
+
+* [buhayra](https://github.com/jmigueldelgado/buhayra)
+* [tdx2cav](https://gitlab.com/jmigueldelgado/tdx2hav/wikis/flowchart)
+
+# tdx2cav[^tdx]
+
+Calcula DEMs de alta resolução através de análise interferométrica de dois satélites "gémeos" SAR.
+
+```{r shuping, echo=FALSE, fig.align='center', fig.cap=""}
+knitr::include_graphics('/home/delgado/Documents/eureka/tdx.png')
+```
+
+
+Zhang, Shuping, Saskia Foerster, Pedro Medeiros, José Carlos de Araújo, Mahdi Motagh, and Bjoern Waske. “Bathymetric Survey of Water Reservoirs in North-Eastern Brazil Based on TanDEM-X Satellite Data.” Science of The Total Environment 571 (November 15, 2016): 575–93. https://doi.org/10.1016/j.scitotenv.2016.07.024
+
+[^tdx]: https://gitlab.com/jmigueldelgado/tdx2hav/wikis/flowchart
 
 ---
+
+# Exemplo 1
+
+```{r tdx2, echo=FALSE, fig.align='center', fig.cap=""}
+knitr::include_graphics('/home/delgado/Documents/eureka/example_bathymetry.png')
+```
+---
+
+# Exemplo 2
+
+```{r shupingpaper, echo=FALSE, fig.align='center', fig.cap=""}
+knitr::include_graphics('/home/delgado/Documents/eureka/shuping_hav.png')
+```
+---
+
+# buhayra[^buhayra]
+
+1. Descarrega as imagens do dia
+2. Conserva os metadados
+3. Determina a extensão e geometria do espelho de água de cada albufeira na imagem
+4. Guarda geometrias e outros atributos em base de dados PostgreSQL
+
+```{r buhayra2, echo=FALSE, fig.align='center', fig.cap=""}
+knitr::include_graphics('/home/delgado/Documents/eureka/diagrama-eureka2.png')
+```
+
+[^buhayra]: https://github.com/jmigueldelgado/buhayra
+
+---
+
+[Exemplo buhayra 1](http://seca-vista.geo.uni-potsdam.de:3838/buhayra-app/)
+
+```{r sar, echo=FALSE, out.width='70%', fig.align='center', fig.cap=""}
+knitr::include_graphics('/home/delgado/Documents/eureka/sar.png')
+```
+
+---
+
+[Exemplo buhayra 2](http://seca-vista.geo.uni-potsdam.de:3838/buhayra-app/)
+
+
+```{r buhayra_actual, echo=FALSE, out.width='100%', fig.align='center', fig.cap=""}
+knitr::include_graphics('/home/delgado/Documents/eureka/actual.png')
+```
+
+
+---
+
+# Desafios
+
+Prioritários:
+
+1. aumentar cobertura TanDEM-X
+2. montar sistema de previsão incluindo filtro Kalman
+3. Definir perfis de utilizadores e _storymaps_
+
+Outros: implementar classificação de macrófitos, migrar para servidor dedicado
+
 
 # Financiamento
 
 * [eureka network](https://www.eurekanetwork.org/propose-project-idea)
-*
-
-# Method
-
-* fetch sentinel-1 scenes
-* correct, calibrate, speckle filter etc.
-* subset scenes based on JRC dataset
-* threshold subsets
-* polygonize
-* store in database
-
-Go to the [buhayra repo](https://github.com/jmigueldelgado/buhayra#buhayra) for more details
-
----
-
-# Further steps
-* explain reservoirs of area zero
-  - by cleaning threshold module
-  - by implementing an assimilation approach like a Kalman filter
-* integrate with tdx2hav
-* vegetated areas?
+* projeto europeu com consórcio alargado
+* estudo para o banco mundial (em preparação)
+* outras ideias de financiamento a inovação e transferência tecnológica?
