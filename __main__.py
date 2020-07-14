@@ -97,7 +97,7 @@ def main():
             refgeoms = dict()
             for wm_feat in wm:
                 refgeom=shape(wm_feat['geometry'])
-                refgeoms[int(wm_feat['id'])] = refgeom.buffer(0)
+                refgeoms[wm_feat['properties']['id_jrc']] = refgeom.buffer(0)
 
         # slice list of tiffs
         sizeofslice=200
