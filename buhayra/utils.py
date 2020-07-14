@@ -27,7 +27,7 @@ def getWMinScene(rect,wm):
         pol=checknclean(pol)
         if rect.contains(pol):
             wm_in_scene.append(pol)
-            id.append(feat['properties']['id'])
+            id.append(feat['properties']['id_jrc'])
     return(wm_in_scene,id)
 
 def checknclean(pol):

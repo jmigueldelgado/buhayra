@@ -1,7 +1,7 @@
 SHELL=/bin/bash
 
 ### acquire scenes from ESA
-0 10 * * SAT $HOME/proj/buhayra_demo/buhayra/jobs/1_get_scenes_demo.sh >> $HOME/1_getscenes_demo.log 2>&1
+0 7 * * SAT $HOME/proj/buhayra_demo/buhayra/jobs/1_get_scenes_demo.sh >> $HOME/1_getscenes_demo.log 2>&1
 
 ### process acquired scenes
 0 4,16 * * * $HOME/proj/buhayra_demo/buhayra/jobs/2_sar2watermask_demo.sh >> $HOME/2_sar2watermask_demo.log 2>&1

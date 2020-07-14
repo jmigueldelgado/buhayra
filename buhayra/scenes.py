@@ -51,7 +51,7 @@ def get_scenes():
     #api.download(<product_id>)
     tf = datetime.now()
     # tf=datetime(2018,1,10)
-    t0 = tf - timedelta(days=5)
+    t0 = tf - timedelta(days=7)
 
     # get_s1_orbits(t0,tf)
 
