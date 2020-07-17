@@ -7,7 +7,7 @@ SHELL=/bin/bash
 0 4,16 * * * $HOME/proj/buhayra_demo/buhayra/jobs/2_sar2watermask_demo.sh >> $HOME/2_sar2watermask_demo.log 2>&1
 
 ### threshold and insert
-46 15 * * SUN,TUE,THU $HOME/proj/buhayra_demo/buhayra/jobs/3_thresh+insert_demo.sh >> $HOME/3_thresh+insert_demo.log 2>&1
+0 0 * * SUN,TUE,THU $HOME/proj/buhayra_demo/buhayra/jobs/3_thresh+insert_demo.sh >> $HOME/3_thresh+insert_demo.log 2>&1
 
 ### perform maintenance
-0 10 * * FRI $HOME/proj/buhayra_demo/buhayra/jobs/4_rm_finished.sh >> $HOME/4_rm_finished.log 2>&1
+0 10 * * FRI $HOME/proj/buhayra_demo/buhayra/jobs/4_rm_finished_demo.sh >> $HOME/4_rm_finished.log 2>&1
