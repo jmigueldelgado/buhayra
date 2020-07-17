@@ -72,10 +72,9 @@ def update_db():
 
     cur.execute(request)
 
-    out=conn.commit()
+    conn.commit()
     cur.close()
     conn.close()
-    return out
 
 
 def delete_old_geoms():
@@ -87,7 +86,6 @@ def delete_old_geoms():
     cur = conn.cursor()
     cur.execute(request,{'cutoff_time': cutoff_time.strftime('%Y-%m-%d')})
 
-    out=conn.commit()
+    conn.commit()
     cur.close()
     conn.close()
-    return out

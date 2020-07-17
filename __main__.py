@@ -92,7 +92,7 @@ def main():
         folders_in_7days = utils.select_folders_7days(sarOut)
         tiffs=utils.select_tiffs_7days(folders_in_7days)
 
-        # prepare list of reference geometries
+        logger.debug("prepare list of reference geometries")
         with fiona.open(home['proj']+'/buhayra/auxdata/wm_utm_'+location['region']+'.gpkg','r') as wm:
             refgeoms = dict()
             for wm_feat in wm:
@@ -114,11 +114,11 @@ def main():
             COUNT = COUNT + sizeofslice
 
         logger.info('updating database region with attribute data but no geometries')
-        out=update_db()
-        logger.info('returned '+out)
+        update_db()
+        logger.info('hoping all went well while commiting to the psql')
         logger.info('now deleting old geoms from table *_geom')
-        out2=delete_old_geoms()
-        logger.info('returned '+out2)
+        delete_old_geoms()
+        logger.info('hoping all went well with deleting old geoms')
 
 
     elif sys.argv[1]=="move stuff around":
