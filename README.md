@@ -2,6 +2,8 @@
 
 Buhayra (from al-buhayra) is a prototype application aiming at obtaining **water extent of small reservoirs** in semi-arid regions from satellite data in **real-time**. It collects, filters and processes weekly reservoir extents from Sentinel-1 for northeast Brazil and stores this geo-referenced information in a structured data model. This work has been funded by the German Research Foundation [DFG](http://gepris.dfg.de/gepris/projekt/266418622) and runs on the compute server for high performance computing of [ZIM - University of Potsdam](http://www.uni-potsdam.de/de/zim/angebote-loesungen/hpc.html)
 
+Preliminary results can be found [on this buhayra-app](http://seca-vista.geo.uni-potsdam.de:3838/buhayra-app/). Click on the lakes to obtain plots and current state.
+
 ## Before you start...
 
 Read about configurations and setup on the [wiki](https://github.com/jmigueldelgado/buhayra/wiki) and create and configure your location file accordingly (in `buhayra/parameters/location.yml`).
