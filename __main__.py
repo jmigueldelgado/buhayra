@@ -36,7 +36,7 @@ def main():
 
         import sar2watermask.sar as sar
         f=utils.select_last_scene(sarIn)
-        if f is None:
+        if not f:
             logger.info("There are no scenes to process in "+sarIn+". Exiting")
             raise SystemExit()
         sar.sar2sigma_subset([f])
@@ -136,7 +136,7 @@ def main():
     elif sys.argv[1]=="imerg":
         # download imerg files
         import buhayra.assim as assim
-        ref_date=date.today()-timedelta(days=2)
+        ref_date=date.today()-3
         ref_strg='{:4d}'.format(ref_date.year)+'{:02d}'.format(ref_date.month)+'{:02d}'.format(ref_date.day)
         imerg_home='https://gpm1.gesdisc.eosdis.nasa.gov/data/GPM_L3/GPM_3IMERGDE.06/' + '{:4d}'.format(ref_date.year) + '/' + '{:02d}'.format(ref_date.month)
         imerg_url=imerg_home + '3B-DAY-E.MS.MRG.3IMERG.'+ ref_strg + '-S000000-E235959.V06.nc4'
