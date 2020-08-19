@@ -133,6 +133,14 @@ def main():
         # mnt.move_tifs_to_folders()
         hav.extract_HAV()
 
+    elif sys.argv[1]=="imerg":
+        # download imerg files
+        import buhayra.assim as assim
+        ref_date=date.today()-timedelta(days=2)
+        ref_strg='{:4d}'.format(ref_date.year)+'{:02d}'.format(ref_date.month)+'{:02d}'.format(ref_date.day)
+        imerg_home='https://gpm1.gesdisc.eosdis.nasa.gov/data/GPM_L3/GPM_3IMERGDE.06/' + '{:4d}'.format(ref_date.year) + '/' + '{:02d}'.format(ref_date.month)
+        imerg_url=imerg_home + '3B-DAY-E.MS.MRG.3IMERG.'+ ref_strg + '-S000000-E235959.V06.nc4'
+        assim.download_from_url(imerg_url,file_path=home['scratch']+'/imerg/'+imerg_url.split('/')[-1])
     elif sys.argv[1]=="remove finished scenes":
         import maintenance.move_stuff_around as mvstuff
         mvstuff.rm_finished(sarIn)

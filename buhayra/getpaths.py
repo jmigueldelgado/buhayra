@@ -34,7 +34,6 @@ else:
 
 
 home['parameters'] = os.path.join(home['proj'],'buhayra','parameters')
-
 sardir=os.path.join(home['scratch'],'s1a_scenes')
 
 sarIn=os.path.join(sardir,'in')
