@@ -75,7 +75,7 @@ def select_last_scene(src_path):
     scenes=list()
     for scn in os.listdir(src_path):
         if re.search('.zip$',scn):
-            if os.path.isfile(os.path.join(src_path,scn[:-3]+'finished') or os.path.isfile(os.path.join(src_path,scn[:-3]+'processing')):
+            if os.path.isfile(os.path.join(src_path,scn[:-3]+'finished')) or os.path.isfile(os.path.join(src_path,scn[:-3]+'processing')):
                 continue
             scenes.append(scn)
             timestamp.append(datetime.strptime(scn.split('_')[4],'%Y%m%dT%H%M%S'))
