@@ -152,7 +152,7 @@ def select_folders_7days(src_path):
 
     for folder in allfolders:
         stamp=datetime.strptime(folder.split('_')[4],'%Y%m%dT%H%M%S')
-        if (datetime.now() - stamp) > timedelta(days=7):
+        if (datetime.now() - stamp) < timedelta(days=7):
             folders_in_7days.append(os.path.join(src_path,folder))
     if(len(folders_in_7days)<1):
         logger.info(src_path+" has no processed scenes in the last 7 days. Exiting and returning empty list. Check if sar2watermask is working properly.")
