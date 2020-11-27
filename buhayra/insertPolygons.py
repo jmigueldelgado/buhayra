@@ -30,6 +30,9 @@ def insert_into_postgres(src_path,o_std,o_err):
         '-append',
         '-skipfailures']
 
+    logger.info('insering into pg:')
+    logger.info(src_path)
+    
     r = subprocess.Popen(call,
         stdout=o_std,
         stderr=o_err,
