@@ -44,6 +44,7 @@ def sar2sigma_subset(scenes):
             logger.info("processing " + f)
             product = ProductIO.readProduct(sarIn+"/"+f)
             productName=product.getName()
+            open(sarIn+"/"+productName + '.processing','w').close()
 
             # if (productName+".finished") in listdir(sarIn):
             #     logger.info("product "+productName+" already processed: skipping")
@@ -86,6 +87,7 @@ def sar2sigma_subset(scenes):
             product.dispose()
 
             open(sarIn+"/"+productName + '.finished','w').close()
+            os.remove(sarIn+"/"+productName + '.processing')
             finished=finished+1
             logger.info("**** " + f  + " processed in "+str((time.process_time()-time0)/60)+" minutes****")
             logger.info("**** processed " +str(finished)+" of "+ str(len(scenes))+" in loop ****")
