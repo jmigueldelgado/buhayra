@@ -82,7 +82,7 @@ def get_past_scenes(Y,M):
     logging.info(api.api_url)
 
     t0 = datetime(Y,M,1,0,0,0)
-    tf = t0 + timedelta(days=30)
+    tf = t0 + timedelta(days=12)
 
     # get_s1_orbits(t0,tf)
 

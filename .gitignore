@@ -1,4 +1,5 @@
 ### buhayra
+
 *~
 buhayra/jobs/7_ogr2ogr.sh
 [#]*[#]
@@ -21,6 +22,8 @@ JRC_neb.geojson
 latest-watermask.geojson
 preprocessing/
 
+documents/2019_pereira_et_al.pdf
+notebooks/manuscript_concept.Rmd
 notebooks/time-series-*.geojson
 # Sentinel data and test data
 
@@ -45,7 +48,9 @@ buhayra/auxdata
 # Credentials
 
 buhayra/credentials.py*
-buhayra/location.py
+buhayra/location.py*
+buhayra/credentials.yaml*
+buhayra/location.yaml*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

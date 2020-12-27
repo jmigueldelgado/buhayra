@@ -32,7 +32,7 @@ theme_set(theme_gray(base_size = 18))
 # Aim
 
 * Detection of water surface of reservoirs with SAR imagery from the sentinel mission.
-* Derive time series of water availability for each reservoir
+* Derive time series of water availability for hydrologic regions and whole state
 
 ---
 

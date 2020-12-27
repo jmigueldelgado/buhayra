@@ -1,0 +1,100 @@
+
+
+## Prepare GSWE database for importing to psql
+
+General approach (from `buhayra/auxdata/GSWE/workflow2.txt`):
+- download max water extent from GSWE (https://global-surface-water.appspot.com/download)
+- merge tiles
+- remove 5 km buffer from coast (too many estuaries and lagoons)
+- remove linear fragments (rivers)
+- merge single polygons which are closer than 200 m to multipart-polygons
+- remove polygons smaller 4000 m² (5 cells): reduces polygons from 51516 to 28682
+- manually split polygon 51070 (roughly at 548246.1,9552130.3), because it contains two validation reservoirs
+
+Then project, rename, plot and save to project:
+
+```{r}
+library(sf)
+library(dplyr)
+library(ggplot2)
+watermasks=st_read('buhayra/auxdata/GSWE/rev_2/extent_with_results.shp') %>%
+  st_transform(32724) %>%
+  rename(id_jrc=ID)
+ggplot(watermasks) +
+  geom_sf()
+
+st_write(watermasks,'buhayra/auxdata/wm_utm_manuscript.gpkg')
+# watermasks=st_read('buhayra/auxdata/wm_utm_manuscript_multi.gpkg')
+# tail(watermasks)
+```
+
+## Prepare psql database schema
+
+Follow instructions on the [wiki](https://github.com/jmigueldelgado/buhayra/wiki/postgis):
+
+```
+CREATE TABLE manuscript_geom (
+    id bigserial PRIMARY KEY,
+    geom geometry (MULTIPOLYGON, 4326),
+    ingestion_time timestamptz,
+    area real,
+    threshold real,
+    wmXjrc_area real,
+    id_jrc integer,
+    source_id VARCHAR
+);
+
+CREATE INDEX geom_gist_manuscript ON manuscript_geom USING GIST (geom);
+
+CREATE TABLE manuscript (
+    id bigserial PRIMARY KEY,
+    ingestion_time timestamptz,
+    area real,
+    threshold real,
+    wmXjrc_area real,
+    id_jrc integer,
+    source_id VARCHAR
+);
+
+CREATE TABLE jrc_manuscript (
+    id bigserial PRIMARY KEY,
+    geom geometry (MULTIPOLYGON, 4326),
+    id_jrc integer
+);
+
+CREATE TABLE scene_manuscript (
+    id bigserial PRIMARY KEY,
+    ingestion_time timestamp with time zone,
+    mission_id character varying,
+    pass character varying
+);
+```
+
+Then make sure all geometries are multipolygons:
+
+```
+ogr2ogr -f "GPKG" buhayra/auxdata/wm_utm_manuscript_multi.gpkg buhayra/auxdata/wm_utm_manuscript.gpkg -nlt PROMOTE_TO_MULTI
+```
+
+Finally insert into the database:
+
+```
+ogr2ogr -f "PostgreSQL" PG:"host=localhost dbname=watermasks user=xxxx password=xxxx" buhayra/auxdata/wm_utm_manuscript_multi.gpkg -nln jrc_manuscript -append -skipfailures
+```
+
+## Fetch scenes
+
+Fetch sentinel-1 scenes for a period of 12 days (minimum for covering domain with at least one scene). Every three months a period of 12 days should be acquired. That is the default period set in `get_past_scenes()` in `scenes.py`. Lowest precipitation is recorded in September, so the first month should be October (October, January, April, July).
+
+Add to crontab something like:
+
+```
+30 21 * * SUN $HOME/proj/buhayra_manuscript/buhayra/jobs/1_get_past_scenes_manuscript.sh 2019 10 >> $HOME/1_get_past_scenes_manuscript.log 2>&1
+
+0 22 * * SUN $HOME/proj/buhayra_manuscript/buhayra/jobs/1_get_past_scenes_manuscript.sh 2020 1 >> $HOME/1_get_past_scenes_manuscript.log 2>&1
+
+30 22 * * SUN $HOME/proj/buhayra_manuscript/buhayra/jobs/1_get_past_scenes_manuscript.sh 2020 4 >> $HOME/1_get_past_scenes_manuscript.log 2>&1
+
+0 23 * * SUN $HOME/proj/buhayra_manuscript/buhayra/jobs/1_get_past_scenes_manuscript.sh 2020 7 >> $HOME/1_get_past_scenes_manuscript.log 2>&1
+
+```

@@ -1,0 +1,37 @@
+---
+title: Concept definition for manuscript
+author: JM Delgado
+date: February 1, 2019
+output:
+  pdf_document:
+    footer: "University of Potsdam, Hydrology and Climatology, 2019"
+
+---
+
+# Aim
+
+* Validate watermasks wherever possible
+* Quantify variation of water availability for CE regions and whole state
+* Compare with meteorological indeces like SPI
+---
+
+# Methods
+
+1. Preprocessing
+        * clean up GSWE dataset from Pekel et al. XXXX. Possibly use Till's filtered dataset.
+        * prepare psql database for storing all watermasks
+        * fetch sentinel-1 scenes for a period of 12 days (minimum for covering domain with at least one scene) every three months starting in October (October, January, April, July)
+2. Watermasks
+        * correct, calibrate, speckle filter etc.
+        * subset scenes based on JRC dataset
+        * threshold subsets
+        * polygonize
+        * store in database
+
+3. Estimate stored volume
+        * select approach for estimating HAV curve: by default 1c from Pereira et al. 2019
+        * apply HAV curve to current watermask
+
+# Preprocessing
+```{r child = 'notebooks/01_manuscript_preprocessing.Rmd'}
+```
