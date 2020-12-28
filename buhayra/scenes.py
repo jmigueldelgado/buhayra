@@ -98,12 +98,37 @@ def get_past_scenes(Y,M):
                          producttype="GRD",
                          platformname='Sentinel-1')
 
-    for item in products_s1a:
-        logging.info(products_s1a[item]['title'])
+    unavailable=[]
+    for uuid in products_s1a:
+        product_info = api.get_product_odata(uuid)
+        logging.info('Is ' + uuid ' online?')
+        logging.info(product_info['Online'])
+        if not product_info['Online']:
+            logging.info('Requesting unavailable uuids')
+            api.download(uuid)
+            unavailable=unavailable + [uuid]
+        else:
+            logging.info('Downloading available uuids')
+            api.download(uuid,directory_path=sarIn)
+        logging.info('Sleeping 30 minutes (the API does not allow intensive requests)')
+        time.sleep(30*60)
+
+
+    while len(unavailable)>0:
+        for uuid in unavailable:
+            product_info = api.get_product_odata(uuid)
+            if product_info['Online']:
+                logging.info(uuid + ' is available! Downloading:')
+                api.download(uuid,directory_path=sarIn)
+                unavailable.remove(uuid)
+        time.sleep(600)
+
+
+
 
     # download all results from the search
     # already downloaded files are skipped
-    api.download_all(products_s1a,directory_path=sarIn)
+    # api.download_all(products_s1a,directory_path=sarIn)
 
 
 def getscenes_test_dataset():
