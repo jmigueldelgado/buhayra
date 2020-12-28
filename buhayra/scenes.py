@@ -101,7 +101,7 @@ def get_past_scenes(Y,M):
     unavailable=[]
     for uuid in products_s1a:
         product_info = api.get_product_odata(uuid)
-        logging.info('Is ' + uuid ' online?')
+        logging.info('Is ' + uuid +' online?')
         logging.info(product_info['Online'])
         if not product_info['Online']:
             logging.info('Requesting unavailable uuids')
