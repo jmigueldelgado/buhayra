@@ -13,9 +13,9 @@ dependencies:
   - boto3=1.9.52=py_0
   - botocore=1.12.53=py_0
   - bzip2=1.0.6=h470a237_2
-  - ca-certificates=2018.10.15=ha4d7672_0
+  - ca-certificates=2020.12.5=ha878542_0
   - cairo=1.14.12=h276e583_5
-  - certifi=2018.10.15=py36_1000
+  - certifi=2020.12.5=py36h5fab9bb_0
   - cffi=1.11.5=py36h5e8e0c9_1
   - click=7.0=py_0
   - click-plugins=1.0.4=py_0
@@ -79,7 +79,7 @@ dependencies:
   - numpy-base=1.15.0=py36h3dfced4_0
   - openjdk=8.0.152=h46b5887_1
   - openjpeg=2.3.0=h0e734dc_3
-  - openssl=1.0.2p=h470a237_1
+  - openssl=1.0.2p=h470a237_2
   - parso=0.3.1=py36_0
   - pcre=8.41=hfc679d8_3
   - pexpect=4.6.0=py36_0
@@ -91,6 +91,7 @@ dependencies:
   - postgresql=10.5=h66035e0_0
   - proj4=4.9.3=h470a237_8
   - prompt_toolkit=2.0.7=py36_0
+  - psycopg2=2.7.6.1=py36hdffb7b8_0
   - pthread-stubs=0.4=h470a237_1
   - ptyprocess=0.6.0=py36_0
   - pycparser=2.19=py_0
@@ -102,20 +103,26 @@ dependencies:
   - pysocks=1.6.8=py36_1002
   - python=3.6.7=h5001a0f_1
   - python-dateutil=2.7.5=py_0
+  - python_abi=3.6=1_cp36m
+  - pyyaml=3.13=py36h470a237_1
   - rasterio=1.0.10=py36h54a03ab_0
   - readline=7.0=haf1bffa_1
   - s3transfer=0.1.13=py36_1001
+  - sentinelsat=0.14=pyh9f0ad1d_0
   - setuptools=40.6.2=py36_0
   - shapely=1.6.4=py36h164cb2d_1
   - six=1.11.0=py36_1001
   - snuggs=1.4.1=py_1
   - sqlite=3.25.3=hb1c47c0_0
+  - tbb=2019.3=h2d50403_0
+  - tbb4py=2019.3=py36h2d50403_0
   - tk=8.6.9=ha92aebf_0
   - traitlets=4.3.2=py36_0
   - urllib3=1.24.1=py36_1000
   - wcwidth=0.1.7=py36_0
   - wheel=0.32.3=py36_0
   - xerces-c=3.2.0=h5d6a6da_2
+  - xmltodict=0.12.0=py_0
   - xorg-kbproto=1.0.7=h470a237_2
   - xorg-libice=1.0.9=h470a237_4
   - xorg-libsm=1.2.3=h8c8a85c_0
@@ -128,6 +135,7 @@ dependencies:
   - xorg-xextproto=7.3.0=h470a237_2
   - xorg-xproto=7.0.31=h470a237_7
   - xz=5.2.4=h470a237_1
+  - yaml=0.1.7=h470a237_1
   - zlib=1.2.11=h470a237_3
   - pip:
     - chardet==3.0.4
@@ -135,7 +143,6 @@ dependencies:
     - geomet==0.2.0.post2
     - html2text==2018.1.9
     - requests==2.20.1
-    - sentinelsat==0.12.2
     - snappy==6.0.0
     - tqdm==4.28.1
 prefix: /home/delgado/local/miniconda3/envs/buhayra
