@@ -77,7 +77,6 @@ def get_scenes():
 
 def get_past_scenes(Y,M):
     logger = logging.getLogger('root')
-
     api = SentinelAPI(username, password, 'https://scihub.copernicus.eu/dhus')
 
     logging.info(api.api_url)
@@ -102,6 +101,8 @@ def get_past_scenes(Y,M):
     unavailable=[]
     for uuid in products_s1a:
         product_info = api.get_product_odata(uuid)
+        if any(product_info['title'] in s for s in os.listdir(sarIn)):
+            continue
         logging.info('Is ' + uuid +' online?')
         logging.info(product_info['Online'])
         if not product_info['Online']:
