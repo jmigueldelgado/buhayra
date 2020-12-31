@@ -22,7 +22,7 @@ def main():
 
     logging.info(api.api_url)
 
-    t0 = datetime(sys.argv[1],sys.argv[2],1,0,0,0)
+    t0 = datetime(int(sys.argv[1]),int(sys.argv[2]),1,0,0,0)
     tf = t0 + timedelta(days=12)
 
     # search by polygon, time, and SciHub query keywords
