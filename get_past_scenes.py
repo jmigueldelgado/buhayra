@@ -40,6 +40,7 @@ def main():
     for uuid in products_s1a:
         product_info = api.get_product_odata(uuid)
         if any(product_info['title'] in s for s in os.listdir(sarIn)):
+            logging.info('Skipping ',uuid,'. Already exists in ',sarIn)
             continue
         logging.info('Is ' + uuid +' online?')
         logging.info(product_info['Online'])
