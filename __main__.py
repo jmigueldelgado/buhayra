@@ -25,13 +25,6 @@ def main():
         scenes.get_scenes()
         logger.info("finished downloading scenes. Check info.log in home folder and inside package folder")
 
-    elif sys.argv[1]=="get past scenes":
-
-        import buhayra.scenes as scenes
-        logger.info("starting scenes.getscenes(): downloading scenes from sentinel API: "+sys.argv[2]+"-"+sys.argv[3])
-        scenes.get_past_scenes(int(sys.argv[2]),int(sys.argv[3]))
-        logger.info("finished downloading scenes for "+sys.argv[2] + "-"+sys.argv[3])
-
     elif sys.argv[1]=="sar2sigma":
 
         import sar2watermask.sar as sar
