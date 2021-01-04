@@ -14,7 +14,7 @@ pid=os.getpid()
 
 def main():
 
-    logger.info("Message from __main__.py. Starting process " + pid+".")
+    logger.info("Message from __main__.py. Starting process " + str(pid)+".")
 
     if sys.argv[1] is None:
 

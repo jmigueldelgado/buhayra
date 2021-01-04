@@ -43,7 +43,7 @@ def sar2sigma_subset(scenes):
     with fiona.open(home['proj']+'/buhayra/auxdata/wm_utm_'+location['region']+'.gpkg','r') as wm:
         for f in scenes:
             logger.info("processing " + f)
-            logger.info("process ID: "+ pid)
+            logger.info("process ID: "+ str(pid))
             product = ProductIO.readProduct(sarIn+"/"+f)
             productName=product.getName()
             open(sarIn+"/"+productName + '.processing','w').close()
