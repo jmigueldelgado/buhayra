@@ -35,3 +35,8 @@ output:
 # Preprocessing
 ```{r child = 'notebooks/01_manuscript_preprocessing.Rmd'}
 ```
+
+
+# Estimate stored volume
+```{r child = 'notebooks/03_manuscript_HAV.Rmd'}
+```

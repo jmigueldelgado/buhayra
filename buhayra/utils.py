@@ -133,7 +133,7 @@ def select_tiffs_year_month(Y,M,folders_in_ym):
     else:
         for searchDir in folders_in_ym:
             for tif in os.listdir(searchDir):
-                if  os.path.isfile(os.path.join(searchDir,tif[-3]+'finished')) or not tif.startswith('S'):
+                if  os.path.isfile(os.path.join(searchDir,tif[:-3]+'finished')) or not tif.startswith('S'):
                     continue
                 stamp=datetime.strptime(tif.split('_')[4],'%Y%m%dT%H%M%S')
                 if re.search('.tif$',tif) and stamp.year==Y and stamp.month==M:
@@ -168,7 +168,7 @@ def select_tiffs_7days(folders_in_7days):
     else:
         for searchDir in folders_in_7days:
             for tif in os.listdir(searchDir):
-                if  os.path.isfile(os.path.join(searchDir,tif[-3]+'finished')) or not tif.startswith('S'):
+                if  os.path.isfile(os.path.join(searchDir,tif[:-3]+'finished')) or not tif.startswith('S'):
                     continue
                 if re.search('.tif$',tif):
                     tiffs_in_7days.append(os.path.join(searchDir,tif))

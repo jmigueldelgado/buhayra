@@ -1,0 +1,61 @@
+
+## HAV relationships
+
+Here we use the approach proposed in Pereira et al. 2019 which derives the HAV relationship from a modifying the original reservoir bathymetry equation by Molle 1994:
+
+```
+V = V0 + A0*((A-A0)/(alpha_mod*K_mod))^(1/alpha_mod^-1) + K_mod*((A-A0)/(alpha_mod*K_mod))^(alpha_mod/alpha_mod^-1)
+```
+where A0 and V0 are the initial reference area a volume respectively. `A0` is arbitrarily set at 5000 m2, as most water height-area-volume curves in this study are way above this value. V0 is obtained by the original formulation of Molle and amounts to 2096 m3.
+
+ reservoir shape attributes.
+ ```
+alpha_mod = 2.08 + (1.46*10^1)*(lambda/Pmax) - (7.41*10^-2)*(lambda^2/Pmax) - (1.36*10-8)*(Amax*D/lambda) + 4.07*10^-4*D
+
+K_mod = 2.55 * 10^3 + (6.45 * 10^1)*lambda - 5.38*10^1*(D/lambda)
+```
+
+where `Amax` is the maximum flooded area, `Pmax` is the perimeter of the maximum flooded surface, `D=Pmax/pi` and `lambda=Amax/Pmax`
+
+
+```{r}
+
+library(sf)
+library(dplyr)
+library(ggplot2)
+library(lwgeom)
+
+
+modified_molle = function(A,alpha_mod,K_mod) {
+  A0=5000
+  V0=2096
+  V = V0 + A0*((A-A0)/(alpha_mod*K_mod))^(1/alpha_mod^-1) + K_mod*((A-A0)/(alpha_mod*K_mod))^(alpha_mod/alpha_mod^-1)
+  return(V)
+  }
+
+modified_alpha =  function(Pmax,Amax) {
+  lambda=Amax/Pmax
+  D=Pmax/pi
+  return(2.08 + (1.46*10^1)*(lambda/Pmax) - (7.41*10^-2)*(lambda^2/Pmax) - (1.36*10^-8)*(Amax*D/lambda) + 4.07*10^-4*D)
+}
+
+modified_K = function(Pmax,Amax) {
+  lambda=Amax/Pmax
+  D=Pmax/pi
+  return(2.55 * 10^3 + (6.45 * 10^1)*lambda - 5.38*10^1*(D/lambda))
+}
+
+watermasks=st_read('buhayra/auxdata/wm_utm_manuscript.gpkg')
+ colnames(watermasks)
+
+hav_params=watermasks %>%  
+  mutate(Amax=area,
+    Pmax=unclass(st_perimeter(geom)),
+    alpha_mod=modified_alpha(Pmax,Amax),
+    K_mod = modified_K(Pmax,Amax),
+    Vmax=modified_molle(Amax,alpha_mod,K_mod)) %>%
+  st_set_geometry(NULL) %>%
+  select(id_jrc,Amax,Pmax,Vmax,alpha_mod,K_mod)
+
+head(hav_params)
+```
