@@ -34,12 +34,13 @@ def raster2shapely(r,metadata):
 
 
 def select_intersecting_polys(geom,refgeoms,f):
-    metalist=f[:-4].split('_')
+    id_jrc=int(f[:-4].split('_')[9])
 
     geom=utils.wgs2utm(geom.buffer(0))
 
-    refgeom = refgeoms[int(metalist[9])]
-
+    refgeom = refgeoms[id_jrc]
+    # import IPython
+    # IPython.embed()
     inters=list()
     if geom.geom_type == 'MultiPolygon':
         for poly in geom:
@@ -60,8 +61,8 @@ def select_intersecting_polys(geom,refgeoms,f):
             geom_out=Polygon().buffer(0)
 
     xgeom = refgeom.intersection(geom_out)
-
-    return geom_out, xgeom.area
+    
+    return geom_out.intersection(refgeom), xgeom.area
 
 def prepareDict(poly,f,thr,intersection_area):
     metalist=f[:-4].split('_')

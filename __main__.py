@@ -61,8 +61,10 @@ def main():
         with fiona.open(home['proj']+'/buhayra/auxdata/wm_utm_'+location['region']+'.gpkg','r') as wm:
             refgeoms = dict()
             for wm_feat in wm:
+                # import IPython
+                # IPython.embed()
                 refgeom=shape(wm_feat['geometry'])
-                refgeoms[int(wm_feat['id'])] = refgeom.buffer(0)
+                refgeoms[int(wm_feat['properties']['id_jrc'])] = refgeom.buffer(0)
 
         # slice list of tiffs
         sizeofslice=200
@@ -75,7 +77,7 @@ def main():
         COUNT = 0
         for slice in tiffslices:
             logger.info('thresholding '+str(sizeofslice) + ' tiffs and inserting. '+str(COUNT)+'of '+str(len(tiffs))+' done.')
-            loops.thresh_pol_insert(slice,refgeoms)
+            loops.thresh_data_insert(slice,refgeoms)
             COUNT = COUNT + sizeofslice
 
     elif sys.argv[1]=="threshold+insert":

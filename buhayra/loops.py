@@ -10,6 +10,7 @@ import fiona
 import os
 import subprocess
 import datetime
+import IPython
 
 def thresh_pol_insert(tiffs,refgeoms):
     logger = logging.getLogger('root')
@@ -70,14 +71,13 @@ def thresh_data_insert(tiffs,refgeoms):
         thr = thresh.determine_threshold_in_tif(splt)
         openwater = thresh.threshold(sigma_naught,thr)
         pol = poly.raster2shapely(openwater.astype(rasterio.int32),metadata)
+        # IPython.embed()
         pol_in_jrc, intersection_area = poly.select_intersecting_polys(pol,refgeoms,filename)
         dict = poly.prepareDict(pol_in_jrc,filename,thr,intersection_area)
         ls.append(dict['properties'])
         open(os.path.join(abs_path[:-3]+'finished'),'w').close()
 
-    cursor = conn.cursor()
-
-    insert.insert_into_postgres_no_geom(ls)
+    insert_statement=insert.insert_into_postgres_no_geom(ls)
 
 
     logger.info('finished classifying and inserting batch of tiffs')
