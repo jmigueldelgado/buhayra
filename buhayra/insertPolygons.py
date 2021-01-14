@@ -5,7 +5,7 @@ import logging
 from buhayra.getpaths import *
 from buhayra.credentials import *
 import subprocess
-
+import psycopg2
 
 def insert_into_postgres(src_path,o_std,o_err):
     logger = logging.getLogger('root')
@@ -32,8 +32,21 @@ def insert_into_postgres(src_path,o_std,o_err):
 
     logger.info('insering into pg:')
     logger.info(src_path)
-    
+
     r = subprocess.Popen(call,
         stdout=o_std,
         stderr=o_err,
         preexec_fn=os.setpgrp)
+
+def insert_into_postgres_no_geom(ls)
+    conn = psycopg2.connect(host=postgis_host,
+        user=postgis_user,
+        password=postgis_pass,
+        database='watermasks')
+
+    for d in ls:
+        keys = d.keys()
+        columns = ','.join(keys)
+        values = ','.join(['%({})s'.format(k) for k in keys])
+        insert = 'insert into '+ location['region'] +' ({0}) values ({1})'.format(columns, values)
+        print cursor.mogrify(insert, d)

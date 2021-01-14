@@ -11,7 +11,6 @@ import os
 import subprocess
 import datetime
 
-
 def thresh_pol_insert(tiffs,refgeoms):
     logger = logging.getLogger('root')
 
@@ -51,3 +50,34 @@ def thresh_pol_insert(tiffs,refgeoms):
 
         insert.insert_into_postgres(gj_path,o_std,o_err)
         logger.info('finished inserting '+gj_path)
+
+def thresh_data_insert(tiffs,refgeoms):
+    logger = logging.getLogger('root')
+
+    ls = list()
+
+    for abs_path in tiffs:
+        filename = abs_path.split('/')[-1]
+        foldername = abs_path.split('/')[-2]
+        try:
+            sigma_naught=thresh.load_sigma_naught(abs_path)
+            metadata=thresh.load_metadata(abs_path)
+        except:
+            logger.info("Unexpected error: "+ sys.exc_info()[0]+" when opening "+abs_path)
+            continue
+
+        splt = thresh.subset_500x500(sigma_naught)
+        thr = thresh.determine_threshold_in_tif(splt)
+        openwater = thresh.threshold(sigma_naught,thr)
+        pol = poly.raster2shapely(openwater.astype(rasterio.int32),metadata)
+        pol_in_jrc, intersection_area = poly.select_intersecting_polys(pol,refgeoms,filename)
+        dict = poly.prepareDict(pol_in_jrc,filename,thr,intersection_area)
+        ls.append(dict['properties'])
+        open(os.path.join(abs_path[:-3]+'finished'),'w').close()
+
+    cursor = conn.cursor()
+
+    insert.insert_into_postgres_no_geom(ls)
+
+
+    logger.info('finished classifying and inserting batch of tiffs')
