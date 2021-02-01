@@ -101,12 +101,15 @@ def save_edge_coordinates(skeleton,tif_filename,out_transform):
 
     df = pd.DataFrame({'id':[line[0] for line in pts],'x':[line[1] for line in pts],'y':[line[2] for line in pts]})
 
+    if len(df.index)<=10:
+        open(os.path.join(edgeOut,productName,tif_filename[:-4]+'_empty_geometry.geojson'),'w').close()
+        return -1
     gdf = gpd.GeoDataFrame(
         df, geometry=gpd.points_from_xy(df.x,df.y))
-
+    
     # Export as geojson
     gdf.to_file(os.path.join(edgeOut,productName,tif_filename[:-3]+'geojson'),driver='GeoJSON')
-
+    return os.path.join(edgeOut,productName,tif_filename[:-3]+'geojson')
 
 def load_metadata(f):
     with open(polOut+'/'+f[:-3]+'json', 'r') as fjson:
