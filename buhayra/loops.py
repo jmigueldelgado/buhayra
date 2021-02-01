@@ -11,6 +11,7 @@ import os
 import subprocess
 import datetime
 import IPython
+import pyproj
 
 def thresh_pol_insert(tiffs,refgeoms):
     logger = logging.getLogger('root')
@@ -81,3 +82,18 @@ def thresh_data_insert(tiffs,refgeoms):
 
 
     logger.info('finished classifying and inserting batch of tiffs')
+
+def edge_detection(tiffs,refgeoms):
+    logger = logging.getLogger('root')
+    wgs84 = pyproj.CRS('EPSG:4326')
+    utm = pyproj.CRS('EPSG:32724')
+    utm2wgs84 = pyproj.Transformer.from_crs(utm,wgs84, always_xy=True).transform
+    for abs_path in tiffs:
+        tif_filename = os.path.split(abs_path)[-1]
+        productName='_'.join(tif_filename[:-4].split('_')[:9])
+        if os.path.exists(os.path.join(edgeOut,productName,tif_filename[:-4]+'_projected_edges.finished')):
+            continue
+        id = edge_classification(tif_filename)
+        skeleton , out_transform = morphological_transformations(tif_filename,refgeoms[int(id)],utm2wgs84)
+        save_edge_coordinates(skeleton,tif_filename,out_transform)
+        open(tif_filename[:-4]+'_projected_edges.finished','w').close()
