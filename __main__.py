@@ -8,9 +8,9 @@ import buhayra.utils as utils
 from shapely.geometry import mapping, Polygon, shape
 import fiona
 import IPython
-from IPython.core import ultratb
-sys.excepthook = ultratb.FormattedTB(mode='Verbose',
-                                     color_scheme='Linux', call_pdb=1)
+#from IPython.core import ultratb
+#sys.excepthook = ultratb.FormattedTB(mode='Verbose',
+#                                     color_scheme='Linux', call_pdb=1)
 
 logger = log.setup_custom_logger('root','INFO')
 
