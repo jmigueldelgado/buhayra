@@ -92,7 +92,7 @@ def edge_detection(tiffs,refgeoms):
     for abs_path in tiffs:
         tif_filename = os.path.split(abs_path)[-1]
         productName='_'.join(tif_filename[:-4].split('_')[:9])
-        if os.path.exists(os.path.join(edgeOut,productName,tif_filename[:-4]+'_projected_edges.finished') | os.path.exists(os.path.join(edgeOut,productName,tif_filename[:-4]+'_NA_SAR.finished')):
+        if os.path.exists(os.path.join(edgeOut,productName,tif_filename[:-4]+'_projected_edges.finished')) | os.path.exists(os.path.join(edgeOut,productName,tif_filename[:-4]+'_NA_SAR.finished')):
             continue
 #        IPython.embed()
         id = poly.edge_classification(tif_filename)
