@@ -27,6 +27,9 @@ def edge_classification(tif_filename):
     with rasterio.open(os.path.join(sarOut,productName,tif_filename),'r') as ds:
         im=ds.read(1)
 
+    if im.max()<-1000000:
+        return -1
+
     # standardize data ("feature scaling", "z-score normalization")
     im=(im-np.mean(im))/np.std(im)
 
@@ -37,7 +40,7 @@ def edge_classification(tif_filename):
     # plt.imshow(edges1)
 
     # Open metadata (affine parameters) and save projected edges
-    with open(od.path.join(sarOut,productName,tif_filename[:-3]+'json'), 'r') as fjson:
+    with open(os.path.join(sarOut,productName,tif_filename[:-3]+'json'), 'r') as fjson:
         metadata = json.load(fjson)
 
     affParam=rasterio.Affine.from_gdal(metadata[0],metadata[1],metadata[2],metadata[3],metadata[4],metadata[5])
@@ -83,16 +86,10 @@ def save_edge_coordinates(skeleton,tif_filename,out_transform):
     productName='_'.join(tif_filename[:-4].split('_')[:9])
 
     pts=list()
-    polys=list()
     snake_i=0
     for pol, value in rasterio.features.shapes(skeleton, connectivity=8, transform=out_transform):
         if value == 1:
-            polys.append(rasterio.features.rasterize((pol,1),
-                fill=0,
-                all_touched=True,
-                out=np.zeros(skeleton.shape),
-                transform=out_transform))
-            ij=np.where(1 == rasterio.features.rasterize((pol,1),fill=0,out=np.zeros(skeleton.shape),transform=out_transform,all_touched=True))
+            ij=np.where(1 == rasterio.features.rasterize((pol,1),fill=0,out=np.zeros(skeleton.shape),transform=out_transform,all_touched=False))
             if len([ii for ii,jj in zip(*ij)])>=10: # we need at least 4 points to draw a polygon so it is better to have much more points to draw a concave hull around the feature
                 for ii,jj in zip(*ij):
                     pts.append([snake_i] + list(rasterio.transform.xy(out_transform,ii,jj)))

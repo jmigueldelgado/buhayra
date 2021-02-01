@@ -119,6 +119,8 @@ def select_folders_year_month(Y,M,src_path):
         stamp=datetime.strptime(folder.split('_')[4],'%Y%m%dT%H%M%S')
         if stamp.year==Y and stamp.month==M:
             folders_in_ym.append(os.path.join(src_path,folder))
+            if not os.path.exists(os.path.join(edgeOut,folder)):
+                os.mkdir(os.path.join(edgeOut,folder))
     if(len(folders_in_ym)<1):
         logger.info(src_path+" has no scenes for year "+str(Y)+" and month "+str(M)+"Exiting and returning None.")
         folders_in_ym=None
@@ -133,8 +135,6 @@ def select_tiffs_year_month(Y,M,folders_in_ym):
     else:
         for searchDir in folders_in_ym:
             for tif in os.listdir(searchDir):
-                if  os.path.isfile(os.path.join(searchDir,tif[:-3]+'finished')) or not tif.startswith('S'):
-                    continue
                 stamp=datetime.strptime(tif.split('_')[4],'%Y%m%dT%H%M%S')
                 if re.search('.tif$',tif) and stamp.year==Y and stamp.month==M:
                     tiffs_in_ym.append(os.path.join(searchDir,tif))

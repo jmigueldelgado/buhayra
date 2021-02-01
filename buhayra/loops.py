@@ -1,7 +1,6 @@
 from buhayra.getpaths import *
 import buhayra.thresholding as thresh
 import buhayra.polygonize as poly
-import buhayra.insertPolygons as insert
 import numpy as np
 import logging
 import rasterio
@@ -14,6 +13,7 @@ import IPython
 import pyproj
 
 def thresh_pol_insert(tiffs,refgeoms):
+    import buhayra.insertPolygons as insert
     logger = logging.getLogger('root')
 
     with open(os.path.join(home['home'],'ogr2ogr.log'), 'a') as o_std, open(os.path.join(home['home'], 'ogr2ogr.err'), 'a') as o_err:
@@ -54,6 +54,7 @@ def thresh_pol_insert(tiffs,refgeoms):
         logger.info('finished inserting '+gj_path)
 
 def thresh_data_insert(tiffs,refgeoms):
+    import buhayra.insertPolygons as insert
     logger = logging.getLogger('root')
 
     ls = list()
@@ -91,9 +92,13 @@ def edge_detection(tiffs,refgeoms):
     for abs_path in tiffs:
         tif_filename = os.path.split(abs_path)[-1]
         productName='_'.join(tif_filename[:-4].split('_')[:9])
-        if os.path.exists(os.path.join(edgeOut,productName,tif_filename[:-4]+'_projected_edges.finished')):
+        if os.path.exists(os.path.join(edgeOut,productName,tif_filename[:-4]+'_projected_edges.finished') | os.path.exists(os.path.join(edgeOut,productName,tif_filename[:-4]+'_NA_SAR.finished')):
             continue
-        id = edge_classification(tif_filename)
-        skeleton , out_transform = morphological_transformations(tif_filename,refgeoms[int(id)],utm2wgs84)
-        save_edge_coordinates(skeleton,tif_filename,out_transform)
-        open(tif_filename[:-4]+'_projected_edges.finished','w').close()
+        IPython.embed()
+        id = poly.edge_classification(tif_filename)
+        if id == -1:
+            open(os.path.join(edgeOut,tif_filename[:-4]+'_NA_SAR.finished'),'w').close()
+            continue
+        skeleton , out_transform = poly.morphological_transformations(tif_filename,refgeoms[int(id)],utm2wgs84)
+        poly.save_edge_coordinates(skeleton,tif_filename,out_transform)
+        open(os.path.join(edgeOut,productName,tif_filename[:-4]+'_projected_edges.finished'),'w').close()
