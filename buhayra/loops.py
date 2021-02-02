@@ -1,18 +1,18 @@
 from buhayra.getpaths import *
-import buhayra.thresholding as thresh
-import buhayra.polygonize as poly
-import numpy as np
-import logging
-import rasterio
-import geojson
-import fiona
 import os
 import subprocess
 import datetime
 import IPython
-import pyproj
+import logging
 
 def thresh_pol_insert(tiffs,refgeoms):
+    import buhayra.thresholding as thresh
+    import buhayra.polygonize as poly
+    import numpy as np
+    import rasterio
+    import geojson
+    import fiona
+    import pyproj
     import buhayra.insertPolygons as insert
     logger = logging.getLogger('root')
 
@@ -54,6 +54,14 @@ def thresh_pol_insert(tiffs,refgeoms):
         logger.info('finished inserting '+gj_path)
 
 def thresh_data_insert(tiffs,refgeoms):
+    import buhayra.thresholding as thresh
+    import buhayra.polygonize as poly
+    import numpy as np
+    import rasterio
+    import geojson
+    import fiona
+    import pyproj
+
     import buhayra.insertPolygons as insert
     logger = logging.getLogger('root')
 
@@ -85,6 +93,12 @@ def thresh_data_insert(tiffs,refgeoms):
     logger.info('finished classifying and inserting batch of tiffs')
 
 def edge_detection(tiffs,refgeoms):
+    import buhayra.polygonize as poly
+    import numpy as np
+    import rasterio
+    import geojson
+    import fiona
+    import pyproj
     logger = logging.getLogger('root')
     wgs84 = pyproj.CRS('EPSG:4326')
     utm = pyproj.CRS('EPSG:32724')
@@ -102,3 +116,16 @@ def edge_detection(tiffs,refgeoms):
         skeleton , out_transform = poly.morphological_transformations(tif_filename,refgeoms[int(id)],utm2wgs84)
         geojson_file_name=poly.save_edge_coordinates(skeleton,tif_filename,out_transform)
         open(os.path.join(edgeOut,productName,tif_filename[:-4]+'_projected_edges.finished'),'w').close()
+
+
+def call_concaveman(tiffs):
+    logger = logging.getLogger('root')
+    for abs_path in tiffs:
+        geojson_filename = os.path.split(abs_path)[-1][:-3] + 'geojson'
+        productName='_'.join(geojson_filename[:-8].split('_')[:9])
+        if os.path.exists(os.path.join(edgeOut,productName,geojson_filename[:-8]+'_concave_hull.geojson')) | os.path.exists(os.path.join(edgeOut,productName,geojson_filename[:-8]+'_NA_SAR.finished')):
+            continue
+        subprocess.call([os.path.join(home['proj'],'buhayra','concave_hull.R'),
+                        os.path.join(edgeOut,productName),
+                         geojson_filename])
+    
