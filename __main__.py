@@ -85,7 +85,7 @@ def main():
             loops.edge_detection(slice,refgeoms)
             COUNT = COUNT + sizeofslice
 
-    elif sys.argv[1]=="call concaveman year month":
+    elif sys.argv[1]=="concave hull and insert year month":
 
         logger.info("calling concaveman for "+sys.argv[2]+"-"+sys.argv[3])
         import buhayra.loops as loops
@@ -105,7 +105,7 @@ def main():
         COUNT = 0
         for slice in tiffslices:
             logger.info('call concaveman in R for '+str(sizeofslice) + ' geojsons. '+str(COUNT)+'of '+str(len(tiffs))+' done.')
-            loops.call_concaveman(slice)
+            loops.concaveman_insert(slice)
             COUNT = COUNT + sizeofslice
 
 

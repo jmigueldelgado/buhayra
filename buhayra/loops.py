@@ -150,11 +150,11 @@ def concaveman_insert(tiffs):
             dict = poly.prepareDict(pol_in_jrc,filename,999,intersection_area)
             ls.append(dict['properties'])
             open(os.path.join(abs_path[:-3]+'finished'),'w').close()
-            # IPython.embed()
+            IPython.embed()
         featcoll = poly.json2geojson(ls)
 
         with open(gj_path,'w') as f:
             geojson.dump(featcoll,f)
 
-    insert.insert_into_postgres(gj_path,o_std,o_err)
-    logger.info('finished inserting '+gj_path)
+#    insert.insert_into_postgres(gj_path,o_std,o_err)
+#    logger.info('finished inserting '+gj_path)
