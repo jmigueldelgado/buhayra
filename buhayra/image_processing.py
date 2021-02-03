@@ -9,6 +9,10 @@ from skimage.morphology import skeletonize
 import cv2
 import os
 import numpy as np
+import buhayra.polygonize as poly
+import geojson
+import fiona
+import pyproj
 
 
 def load_watermask(f):
@@ -115,3 +119,22 @@ def save_edge_coordinates(skeleton,tif_filename,out_transform):
     # Export as geojson
     gdf.to_file(os.path.join(edgeOut,productName,tif_filename[:-3]+'geojson'),driver='GeoJSON')
     return os.path.join(edgeOut,productName,tif_filename[:-3]+'geojson')
+
+def edge_detection(tiffs,refgeoms):
+    logger = logging.getLogger('root')
+    wgs84 = pyproj.CRS('EPSG:4326')
+    utm = pyproj.CRS('EPSG:32724')
+    utm2wgs84 = pyproj.Transformer.from_crs(utm,wgs84, always_xy=True).transform
+    for abs_path in tiffs:
+        tif_filename = os.path.split(abs_path)[-1]
+        productName='_'.join(tif_filename[:-4].split('_')[:9])
+        if os.path.exists(os.path.join(edgeOut,productName,tif_filename[:-4]+'_projected_edges.finished')) | os.path.exists(os.path.join(edgeOut,productName,tif_filename[:-4]+'_NA_SAR.finished')):
+            continue
+#        IPython.embed()
+        id = edge_classification(tif_filename)
+        if id == -1:
+            open(os.path.join(edgeOut,productName,tif_filename[:-4]+'_NA_SAR.finished'),'w').close()
+            continue
+        skeleton , out_transform = morphological_transformations(tif_filename,refgeoms[int(id)],utm2wgs84)
+        geojson_file_name=save_edge_coordinates(skeleton,tif_filename,out_transform)
+        open(os.path.join(edgeOut,productName,tif_filename[:-4]+'_projected_edges.finished'),'w').close()
