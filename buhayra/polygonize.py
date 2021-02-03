@@ -18,7 +18,8 @@ def load_metadata(f):
 
 
 def select_intersecting_polys(geom,refgeoms,f):
-    metalist=f[:-4].split('_')
+    # split extension and get parts of filename containing metadata
+    metalist=os.path.splitext(f)[0].split('_')
 
     geom=utils.wgs2utm(geom.buffer(0))
 
@@ -48,7 +49,7 @@ def select_intersecting_polys(geom,refgeoms,f):
     return geom_out, xgeom.area
 
 def prepareDict(poly,f,thr,intersection_area):
-    metalist=f[:-4].split('_')
+    metalist=os.path.splitext(f)[0].split('_')
     sentx=metalist[0]
     if np.isnan(thr):
         thr=0

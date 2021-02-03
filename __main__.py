@@ -102,10 +102,18 @@ def main():
             tiffslices.append(tiffs[i*sizeofslice:(i*sizeofslice+sizeofslice)])
         tiffslices.append(tiffs[(nslices*sizeofslice):len(tiffs)])
 
+        # prepare list of reference geometries
+        with fiona.open(home['proj']+'/buhayra/auxdata/wm_utm_'+location['region']+'.gpkg','r') as wm:
+            refgeoms = dict()
+            for wm_feat in wm:
+                # import IPython
+                refgeom=shape(wm_feat['geometry'])
+                refgeoms[int(wm_feat['properties']['id_jrc'])] = refgeom.buffer(0)
+
         COUNT = 0
         for slice in tiffslices:
             logger.info('call concaveman in R for '+str(sizeofslice) + ' geojsons. '+str(COUNT)+'of '+str(len(tiffs))+' done.')
-            concave.concaveman_insert(slice)
+            concave.concaveman_insert(slice,refgeoms)
             COUNT = COUNT + sizeofslice
 
 

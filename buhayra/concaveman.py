@@ -9,6 +9,8 @@ import buhayra.polygonize as poly
 import logging
 import sys
 import geojson
+import datetime
+import IPython
 
 def concave_hull(geom_file,path):
     # import R packages
@@ -22,7 +24,7 @@ def concave_hull(geom_file,path):
         {
         edges_pts = sf_df %>% st_transform(32724)
         selected_pts = edges_pts %>% group_by(id) %>% tally %>% filter(n==max(n))
-        polygon = selected_pts %>% concaveman(.,concavity=1.5) %>% st_zm %>% rename(geometry=polygons)
+        polygon = selected_pts %>% concaveman(.,concavity=1.5) %>% st_zm %>% rename(geometry=polygons) %>% st_transform(4326)
         return(polygon)
         }''')
 
@@ -39,7 +41,7 @@ def concave_hull(geom_file,path):
 
 
 
-def concaveman_insert(tiffs):
+def concaveman_insert(tiffs,refgeoms):
 
     logger = logging.getLogger('root')
 
