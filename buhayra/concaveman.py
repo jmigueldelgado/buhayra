@@ -70,8 +70,9 @@ def concaveman_insert(tiffs,refgeoms):
             open(os.path.join(edgeOut,productName,filename[:-8]+'_concave_hull.geojson'),'w').close()
         featcoll = poly.json2geojson(ls)
 
-        with open(gj_path,'w') as f:
-            geojson.dump(featcoll,f)
+        if len(ls)>0:
+            with open(gj_path,'w') as f:
+                geojson.dump(featcoll,f)
 
 #    insert.insert_into_postgres(gj_path,o_std,o_err)
 #    logger.info('finished inserting '+gj_path)
