@@ -29,7 +29,7 @@ def concave_hull(geom_file,path):
         }''')
 
     # read geometry object from file
-    gdf=sf.st_read(os.path.join(path,geom_file))
+    gdf=sf.st_read(os.path.join(path,geom_file),quiet=True)
     # define function
     r_pts2concave = robjects.r['pts2concave']
     # draw concave hull around points
@@ -55,19 +55,19 @@ def concaveman_insert(tiffs,refgeoms):
         for abs_path in tiffs:
             filename = os.path.split(abs_path)[-1][:-3] + 'geojson'
             productName='_'.join(filename[:-8].split('_')[:9])
-            if os.path.exists(os.path.join(edgeOut,productName,filename[:-8]+'_concave_hull.geojson')) | os.path.exists(os.path.join(edgeOut,productName,filename[:-8]+'_NA_SAR.finished')):
+            if os.path.exists(os.path.join(edgeOut,productName,filename[:-8]+'_concave_hull.geojson')) | os.path.exists(os.path.join(edgeOut,productName,filename[:-8]+'_NA_SAR.finished')) | os.path.exists(os.path.join(edgeOut,productName,filename[:-8]+'_empty_geometry.geojson')):
                 continue
-
+#            IPython.embed()
             try:
                 pol = concave_hull(filename,os.path.join(edgeOut,productName))
             except:
                 logger.info("Unexpected error: "+ sys.exc_info()[0]+" when opening "+abs_path)
                 continue
             pol_in_jrc, intersection_area = poly.select_intersecting_polys(pol,refgeoms,filename)
+            #IPython.embed()
             dict = poly.prepareDict(pol_in_jrc,filename,999,intersection_area)
-            ls.append(dict['properties'])
+            ls.append(dict)
             open(os.path.join(edgeOut,productName,filename[:-8]+'_concave_hull.geojson'),'w').close()
-            IPython.embed()
         featcoll = poly.json2geojson(ls)
 
         with open(gj_path,'w') as f:

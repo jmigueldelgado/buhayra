@@ -9,6 +9,7 @@ import datetime
 import json
 import numpy as np
 import geojson
+import IPython
 
 def load_metadata(f):
     with open(polOut+'/'+f[:-3]+'json', 'r') as fjson:
@@ -43,8 +44,7 @@ def select_intersecting_polys(geom,refgeoms,f):
             # feat['geometry']=json.loads(s)
         else:
             geom_out=Polygon().buffer(0)
-
-    xgeom = refgeom.intersection(geom_out)
+    xgeom = refgeom.intersection(geom_out.buffer(0))
 
     return geom_out, xgeom.area
 
@@ -80,6 +80,7 @@ def json2geojson(ls):
     logger = logging.getLogger('root')
     feats=[]
     for dict in ls:
+        #IPython.embed()
         if type(dict['properties']['ingestion_time']) == datetime.datetime:
             dttm=dict['properties']['ingestion_time']
             dttmstr=dttm.strftime("%Y-%m-%d %H:%M:%S")
