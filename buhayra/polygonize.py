@@ -33,19 +33,19 @@ def select_intersecting_polys(geom,refgeoms,f):
                 inters.append(poly)
         if len(inters)>0:
             geom_out = cascaded_union(inters)
-            # s=json.dumps(mapping(inters))
-            # feat['geometry']=json.loads(s)
         else:
-            geom_out=Polygon().buffer(0)
+            geom_out=Polygon()
     elif geom.geom_type == 'Polygon':
         if geom.intersects(refgeom):
             geom_out=geom
-            # s=json.dumps(mapping(geom))
-            # feat['geometry']=json.loads(s)
         else:
-            geom_out=Polygon().buffer(0)
-    xgeom = refgeom.intersection(geom_out.buffer(0))
+            geom_out=Polygon()
 
+    if geom_out.is_valid:
+        xgeom = refgeom.intersection(geom_out.buffer(0))
+    else:
+        xgeom=Polygon()
+        
     return geom_out, xgeom.area
 
 def prepareDict(poly,f,thr,intersection_area):
