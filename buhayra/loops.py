@@ -138,9 +138,8 @@ def concaveman_insert(tiffs):
         for abs_path in tiffs:
             filename = os.path.split(abs_path)[-1][:-3] + 'geojson'
             productName='_'.join(filename[:-8].split('_')[:9])
-            if os.path.exists(os.path.join(edgeOut,productName,filename[:-8]+'_concave_hull.geojson')) | os.path.exists(os.path.join(edgeOut,productName,geojson_filename[:-8]+'_NA_SAR.finished')):
+            if os.path.exists(os.path.join(edgeOut,productName,filename[:-8]+'_concave_hull.finished')) | os.path.exists(os.path.join(edgeOut,productName,geojson_filename[:-8]+'_NA_SAR.finished')):
                 continue
-
             try:
                 pol = concave.concave_hull(filename,os.path.join(edgeOut,productName))
             except:
@@ -149,7 +148,7 @@ def concaveman_insert(tiffs):
             pol_in_jrc, intersection_area = poly.select_intersecting_polys(pol,refgeoms,filename)
             dict = poly.prepareDict(pol_in_jrc,filename,999,intersection_area)
             ls.append(dict['properties'])
-            open(os.path.join(abs_path[:-3]+'finished'),'w').close()
+            open(os.path.join(edgeOut,productName,filename[:-8]+'_concave_hull.finished'),'w').close()
             # IPython.embed()
         featcoll = poly.json2geojson(ls)
 
