@@ -9,6 +9,7 @@ import datetime
 import json
 import numpy as np
 import geojson
+import IPython
 
 def load_metadata(f):
     with open(polOut+'/'+f[:-3]+'json', 'r') as fjson:
@@ -18,7 +19,8 @@ def load_metadata(f):
 
 
 def select_intersecting_polys(geom,refgeoms,f):
-    metalist=f[:-4].split('_')
+    # split extension and get parts of filename containing metadata
+    metalist=os.path.splitext(f)[0].split('_')
 
     geom=utils.wgs2utm(geom.buffer(0))
 
@@ -31,24 +33,23 @@ def select_intersecting_polys(geom,refgeoms,f):
                 inters.append(poly)
         if len(inters)>0:
             geom_out = cascaded_union(inters)
-            # s=json.dumps(mapping(inters))
-            # feat['geometry']=json.loads(s)
         else:
-            geom_out=Polygon().buffer(0)
+            geom_out=Polygon()
     elif geom.geom_type == 'Polygon':
         if geom.intersects(refgeom):
             geom_out=geom
-            # s=json.dumps(mapping(geom))
-            # feat['geometry']=json.loads(s)
         else:
-            geom_out=Polygon().buffer(0)
+            geom_out=Polygon()
 
-    xgeom = refgeom.intersection(geom_out)
-
+    if geom_out.is_valid:
+        xgeom = refgeom.intersection(geom_out.buffer(0))
+    else:
+        xgeom=Polygon()
+        
     return geom_out, xgeom.area
 
 def prepareDict(poly,f,thr,intersection_area):
-    metalist=f[:-4].split('_')
+    metalist=os.path.splitext(f)[0].split('_')
     sentx=metalist[0]
     if np.isnan(thr):
         thr=0
@@ -79,6 +80,7 @@ def json2geojson(ls):
     logger = logging.getLogger('root')
     feats=[]
     for dict in ls:
+        #IPython.embed()
         if type(dict['properties']['ingestion_time']) == datetime.datetime:
             dttm=dict['properties']['ingestion_time']
             dttmstr=dttm.strftime("%Y-%m-%d %H:%M:%S")
