@@ -148,7 +148,7 @@ def select_tiffs_year_month(Y,M,folders_in_ym):
 def select_folders_7days(src_path):
     logger = logging.getLogger('root')
     timestamp=list()
-    allfolders = [ name for name in os.listdir(src_path) if os.path.isdir(os.path.join(src_path, name)) ]
+    allfolders = [ scene for scene in os.listdir(src_path) if os.path.isdir(os.path.join(src_path, scene)) ]
     folders_in_7days=list()
 
     for folder in allfolders:
