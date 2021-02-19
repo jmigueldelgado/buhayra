@@ -7,7 +7,7 @@ from buhayra.getpaths import *
 import buhayra.utils as utils
 from shapely.geometry import mapping, Polygon, shape
 import fiona
-
+import IPython
 logger = log.setup_custom_logger('root','INFO')
 
 pid=os.getpid()
@@ -83,7 +83,7 @@ def main():
         logger.info("inserting recent scenes into postgreSQL")
         import buhayra.loops as loops
         from maintenance.move_stuff_around import update_db, delete_old_geoms
-
+        #IPython.embed()
         folders_in_7days = utils.select_folders_7days(sarOut)
         tiffs=utils.select_tiffs_7days(folders_in_7days)
 
