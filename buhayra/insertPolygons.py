@@ -34,7 +34,7 @@ def insert_into_postgres(src_path,o_std,o_err):
     logger.info('insering into pg:')
     logger.info(src_path)
 
-    IPython.embed()
+#    IPython.embed()
 
     r = subprocess.Popen(call,
         stdout=o_std,
