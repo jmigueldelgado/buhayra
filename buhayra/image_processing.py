@@ -1,5 +1,6 @@
 
 # for edge detection
+from buhayra.getpaths import *
 import logging
 import rasterio
 import rasterio.mask
@@ -13,7 +14,8 @@ import buhayra.polygonize as poly
 import geojson
 import fiona
 import pyproj
-
+import json
+from shapely.ops import transform
 
 def load_watermask(f):
     with rasterio.open(polOut+'/'+f,'r') as ds:
@@ -130,7 +132,6 @@ def edge_detection(tiffs,refgeoms):
         productName='_'.join(tif_filename[:-4].split('_')[:9])
         if os.path.exists(os.path.join(edgeOut,productName,tif_filename[:-4]+'_projected_edges.finished')) | os.path.exists(os.path.join(edgeOut,productName,tif_filename[:-4]+'_NA_SAR.finished')):
             continue
-#        IPython.embed()
         id = edge_classification(tif_filename)
         if id == -1:
             open(os.path.join(edgeOut,productName,tif_filename[:-4]+'_NA_SAR.finished'),'w').close()
