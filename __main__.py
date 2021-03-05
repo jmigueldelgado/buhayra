@@ -113,7 +113,7 @@ def main():
         COUNT = 0
         for slice in tiffslices:
             logger.info('call concaveman in R for '+str(sizeofslice) + ' geojsons. '+str(COUNT)+'of '+str(len(tiffs))+' done.')
-            concave.concaveman_insert(slice,refgeoms)
+            loops.concaveman_insert(slice,refgeoms)
             COUNT = COUNT + sizeofslice
 
 
