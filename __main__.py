@@ -8,6 +8,10 @@ import buhayra.utils as utils
 from shapely.geometry import mapping, Polygon, shape
 import fiona
 import IPython
+#from IPython.core import ultratb
+#sys.excepthook = ultratb.FormattedTB(mode='Verbose',
+#                                     color_scheme='Linux', call_pdb=1)
+
 logger = log.setup_custom_logger('root','INFO')
 
 pid=os.getpid()
@@ -48,6 +52,71 @@ def main():
             sar.sar2sigma_subset([scenes])
         if len(scenes)>1:
             sar.sar2sigma_subset(scenes)
+
+
+    elif sys.argv[1]=="edge detection year month":
+
+        logger.info("inserting into postgreSQL in "+sys.argv[2]+"-"+sys.argv[3])
+        import buhayra.image_processing as image
+        Y = int(sys.argv[2])
+        M = int(sys.argv[3])
+        folders_in_ym = utils.select_folders_year_month(Y,M,sarOut)
+        tiffs=utils.select_tiffs_year_month(Y,M,folders_in_ym)
+
+        # prepare list of reference geometries
+        with fiona.open(home['proj']+'/buhayra/auxdata/wm_utm_'+location['region']+'.gpkg','r') as wm:
+            refgeoms = dict()
+            for wm_feat in wm:
+                # import IPython
+                refgeom=shape(wm_feat['geometry'])
+                refgeoms[int(wm_feat['properties']['id_jrc'])] = refgeom.buffer(0)
+
+        # slice list of tiffs
+        sizeofslice=200
+        nslices = len(tiffs)//sizeofslice
+        tiffslices = list()
+        for i in range(nslices):
+            tiffslices.append(tiffs[i*sizeofslice:(i*sizeofslice+sizeofslice)])
+        tiffslices.append(tiffs[(nslices*sizeofslice):len(tiffs)])
+
+        COUNT = 0
+        for slice in tiffslices:
+            logger.info('edge detection of '+str(sizeofslice) + ' tiffs. '+str(COUNT)+'of '+str(len(tiffs))+' done.')
+            image.edge_detection(slice,refgeoms)
+            COUNT = COUNT + sizeofslice
+
+    elif sys.argv[1]=="concave hull and insert year month":
+
+        logger.info("calling concaveman for "+sys.argv[2]+"-"+sys.argv[3])
+        import buhayra.concaveman as concave
+        Y = int(sys.argv[2])
+        M = int(sys.argv[3])
+        folders_in_ym = utils.select_folders_year_month(Y,M,sarOut)
+        tiffs=utils.select_tiffs_year_month(Y,M,folders_in_ym)
+
+        # slice list of tiffs
+        sizeofslice=200
+        nslices = len(tiffs)//sizeofslice
+        tiffslices = list()
+        for i in range(nslices):
+            tiffslices.append(tiffs[i*sizeofslice:(i*sizeofslice+sizeofslice)])
+        tiffslices.append(tiffs[(nslices*sizeofslice):len(tiffs)])
+
+        # prepare list of reference geometries
+        with fiona.open(home['proj']+'/buhayra/auxdata/wm_utm_'+location['region']+'.gpkg','r') as wm:
+            refgeoms = dict()
+            for wm_feat in wm:
+                # import IPython
+                refgeom=shape(wm_feat['geometry'])
+                refgeoms[int(wm_feat['properties']['id_jrc'])] = refgeom.buffer(0)
+
+        COUNT = 0
+        for slice in tiffslices:
+            logger.info('call concaveman in R for '+str(sizeofslice) + ' geojsons. '+str(COUNT)+'of '+str(len(tiffs))+' done.')
+            loops.concaveman_insert(slice,refgeoms)
+            COUNT = COUNT + sizeofslice
+
+
     elif sys.argv[1]=="threshold+insert year month":
 
         logger.info("inserting into postgreSQL in "+sys.argv[2]+"-"+sys.argv[3])

@@ -41,6 +41,8 @@ sarOut=os.path.join(sardir,'out')
 
 dirDEMs=os.path.join(home['scratch'],'dem')
 
+edgeOut = os.path.join(home['scratch'],'edges')
+
 polOut = os.path.join(home['scratch'],'watermasks')
 procOut = os.path.join(home['scratch'],'processed_watermasks')
 

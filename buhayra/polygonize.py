@@ -2,45 +2,30 @@ import os
 from buhayra.getpaths import *
 import buhayra.utils as utils
 import logging
-import rasterio
-from rasterio import features
 import shapely
 from shapely.geometry import mapping, Polygon, shape
 from shapely.ops import cascaded_union, transform
-import fiona
 import datetime
 import json
 import numpy as np
 import geojson
+import IPython
 
 def load_metadata(f):
     with open(polOut+'/'+f[:-3]+'json', 'r') as fjson:
         metadata = json.load(fjson)
     return metadata
 
-def load_watermask(f):
-    with rasterio.open(polOut+'/'+f,'r') as ds:
-        ds.profile.update(dtype=rasterio.int32)
-        r=ds.read(1)
-    return r
-
-def raster2shapely(r,metadata):
-    affParam=rasterio.Affine.from_gdal(metadata[0],metadata[1],metadata[2],metadata[3],metadata[4],metadata[5])
-    polys=list()
-    for pol, value in features.shapes(r, transform=affParam):
-        if value==1:
-            polys.append(shape(pol))
-    return cascaded_union(polys)
 
 
 def select_intersecting_polys(geom,refgeoms,f):
-    id_jrc=int(f[:-4].split('_')[9])
+    # split extension and get parts of filename containing metadata
+    metalist=os.path.splitext(f)[0].split('_')
 
     geom=utils.wgs2utm(geom.buffer(0))
 
-    refgeom = refgeoms[id_jrc]
-    # import IPython
-    # IPython.embed()
+    refgeom = refgeoms[int(metalist[9])]
+
     inters=list()
     if geom.geom_type == 'MultiPolygon':
         for poly in geom:
@@ -48,24 +33,23 @@ def select_intersecting_polys(geom,refgeoms,f):
                 inters.append(poly)
         if len(inters)>0:
             geom_out = cascaded_union(inters)
-            # s=json.dumps(mapping(inters))
-            # feat['geometry']=json.loads(s)
         else:
-            geom_out=Polygon().buffer(0)
+            geom_out=Polygon()
     elif geom.geom_type == 'Polygon':
         if geom.intersects(refgeom):
             geom_out=geom
-            # s=json.dumps(mapping(geom))
-            # feat['geometry']=json.loads(s)
         else:
-            geom_out=Polygon().buffer(0)
+            geom_out=Polygon()
 
-    xgeom = refgeom.intersection(geom_out)
-    
-    return geom_out.intersection(refgeom), xgeom.area
+    if geom_out.is_valid:
+        xgeom = refgeom.intersection(geom_out.buffer(0))
+    else:
+        xgeom=Polygon()
+        
+    return geom_out, xgeom.area
 
 def prepareDict(poly,f,thr,intersection_area):
-    metalist=f[:-4].split('_')
+    metalist=os.path.splitext(f)[0].split('_')
     sentx=metalist[0]
     if np.isnan(thr):
         thr=0
@@ -96,6 +80,7 @@ def json2geojson(ls):
     logger = logging.getLogger('root')
     feats=[]
     for dict in ls:
+        #IPython.embed()
         if type(dict['properties']['ingestion_time']) == datetime.datetime:
             dttm=dict['properties']['ingestion_time']
             dttmstr=dttm.strftime("%Y-%m-%d %H:%M:%S")
