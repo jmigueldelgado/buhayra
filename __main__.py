@@ -88,7 +88,7 @@ def main():
     elif sys.argv[1]=="concave hull and insert year month":
 
         logger.info("calling concaveman for "+sys.argv[2]+"-"+sys.argv[3])
-        import buhayra.concaveman as concave
+        import buhayra.loops as loops
         Y = int(sys.argv[2])
         M = int(sys.argv[3])
         folders_in_ym = utils.select_folders_year_month(Y,M,sarOut)
