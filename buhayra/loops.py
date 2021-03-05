@@ -121,7 +121,7 @@ def edge_detection(tiffs,refgeoms):
         open(os.path.join(edgeOut,productName,tif_filename[:-4]+'_projected_edges.finished'),'w').close()
 
 
-def concaveman_insert(tiffs):
+def concaveman_insert(tiffs,refgeoms):
     import buhayra.concaveman as concave
     import buhayra.insertPolygons as insert
     import buhayra.polygonize as poly
