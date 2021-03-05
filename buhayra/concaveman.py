@@ -55,7 +55,8 @@ def concaveman_insert(tiffs,refgeoms):
         for abs_path in tiffs:
             filename = os.path.split(abs_path)[-1][:-3] + 'geojson'
             productName='_'.join(filename[:-8].split('_')[:9])
-            if os.path.exists(os.path.join(edgeOut,productName,filename[:-8]+'_concave_hull.geojson')) | os.path.exists(os.path.join(edgeOut,productName,filename[:-8]+'_NA_SAR.finished')) | os.path.exists(os.path.join(edgeOut,productName,filename[:-8]+'_empty_geometry.geojson')):
+            #            if os.path.exists(os.path.join(edgeOut,productName,filename[:-8]+'_concave_hull.geojson')) | os.path.exists(os.path.join(edgeOut,productName,filename[:-8]+'_NA_SAR.finished')) | os.path.exists(os.path.join(edgeOut,productName,filename[:-8]+'_empty_geometry.geojson')):
+            if os.path.exists(os.path.join(edgeOut,productName,filename[:-8]+'_NA_SAR.finished')) | os.path.exists(os.path.join(edgeOut,productName,filename[:-8]+'_empty_geometry.geojson')):
                 continue
 #            IPython.embed()
             try:

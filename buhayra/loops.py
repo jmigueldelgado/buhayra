@@ -121,39 +121,40 @@ def edge_detection(tiffs,refgeoms):
         open(os.path.join(edgeOut,productName,tif_filename[:-4]+'_projected_edges.finished'),'w').close()
 
 
-def concaveman_insert(tiffs):
-    import buhayra.concaveman as concave
-    from buhayra.getpaths import *
-    import buhayra.insertPolygons as insert
-    import buhayra.polygonize as poly
-    logger = logging.getLogger('root')
+# def concaveman_insert(tiffs):
+#     import buhayra.concaveman as concave
+#     from buhayra.getpaths import *
+#     import buhayra.insertPolygons as insert
+#     import buhayra.polygonize as poly
+#     logger = logging.getLogger('root')
 
-    with open(os.path.join(home['home'],'ogr2ogr.log'), 'a') as o_std, open(os.path.join(home['home'], 'ogr2ogr.err'), 'a') as o_err:
-        ls = list()
-        gj_path = os.path.join(polOut,'watermask-tmp-'+datetime.datetime.today().strftime('%Y-%m-%d_%H%M%S%f')+'.geojson')
-        logger.info('drawing concave hull and saving to '+gj_path)
+#     with open(os.path.join(home['home'],'ogr2ogr.log'), 'a') as o_std, open(os.path.join(home['home'], 'ogr2ogr.err'), 'a') as o_err:
+#         ls = list()
+#         gj_path = os.path.join(polOut,'watermask-tmp-'+datetime.datetime.today().strftime('%Y-%m-%d_%H%M%S%f')+'.geojson')
+#         logger.info('drawing concave hull and saving to '+gj_path)
 
-        ls = list()
+#         ls = list()
 
-        for abs_path in tiffs:
-            filename = os.path.split(abs_path)[-1][:-3] + 'geojson'
-            productName='_'.join(filename[:-8].split('_')[:9])
-            if os.path.exists(os.path.join(edgeOut,productName,filename[:-8]+'_concave_hull.finished')) | os.path.exists(os.path.join(edgeOut,productName,geojson_filename[:-8]+'_NA_SAR.finished')):
-                continue
-            try:
-                pol = concave.concave_hull(filename,os.path.join(edgeOut,productName))
-            except:
-                logger.info("Unexpected error: "+ sys.exc_info()[0]+" when opening "+abs_path)
-                continue
-            pol_in_jrc, intersection_area = poly.select_intersecting_polys(pol,refgeoms,filename)
-            dict = poly.prepareDict(pol_in_jrc,filename,999,intersection_area)
-            ls.append(dict['properties'])
-            open(os.path.join(edgeOut,productName,filename[:-8]+'_concave_hull.finished'),'w').close()
-            # IPython.embed()
-        featcoll = poly.json2geojson(ls)
+#         for abs_path in tiffs:
+#             filename = os.path.split(abs_path)[-1][:-3] + 'geojson'
+#             productName='_'.join(filename[:-8].split('_')[:9])
+#             #            if os.path.exists(os.path.join(edgeOut,productName,filename[:-8]+'_concave_hull.finished')) | os.path.exists(os.path.join(edgeOut,productName,geojson_filename[:-8]+'_NA_SAR.finished')):
+#             if os.path.exists(os.path.join(edgeOut,productName,geojson_filename[:-8]+'_NA_SAR.finished')):
+#                 continue
+#             try:
+#                 pol = concave.concave_hull(filename,os.path.join(edgeOut,productName))
+#             except:
+#                 logger.info("Unexpected error: "+ sys.exc_info()[0]+" when opening "+abs_path)
+#                 continue
+#             pol_in_jrc, intersection_area = poly.select_intersecting_polys(pol,refgeoms,filename)
+#             dict = poly.prepareDict(pol_in_jrc,filename,999,intersection_area)
+#             ls.append(dict['properties'])
+#             open(os.path.join(edgeOut,productName,filename[:-8]+'_concave_hull.finished'),'w').close()
+#             # IPython.embed()
+#         featcoll = poly.json2geojson(ls)
 
-        with open(gj_path,'w') as f:
-            geojson.dump(featcoll,f)
+#         with open(gj_path,'w') as f:
+#             geojson.dump(featcoll,f)
 
-    insert.insert_into_postgres(gj_path,o_std,o_err)
-    logger.info('finished inserting '+gj_path)
+#         insert.insert_into_postgres(gj_path,o_std,o_err)
+#         logger.info('finished inserting '+gj_path)
