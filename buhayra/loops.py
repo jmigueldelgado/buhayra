@@ -123,7 +123,6 @@ def edge_detection(tiffs,refgeoms):
 
 def concaveman_insert(tiffs):
     import buhayra.concaveman as concave
-    from buhayra.getpaths import *
     import buhayra.insertPolygons as insert
     import buhayra.polygonize as poly
     logger = logging.getLogger('root')
