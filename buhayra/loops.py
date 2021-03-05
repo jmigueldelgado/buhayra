@@ -146,7 +146,7 @@ def concaveman_insert(tiffs,refgeoms):
                 continue
             pol_in_jrc, intersection_area = poly.select_intersecting_polys(pol,refgeoms,filename)
             dict = poly.prepareDict(pol_in_jrc,filename,999,intersection_area)
-            ls.append(dict['properties'])
+            ls.append(dict)
             open(os.path.join(edgeOut,productName,filename[:-8]+'_concave_hull.finished'),'w').close()
             # IPython.embed()
         featcoll = poly.json2geojson(ls)
