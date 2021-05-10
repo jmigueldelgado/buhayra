@@ -143,7 +143,7 @@ def concaveman_insert(tiffs,refgeoms):
             try:
                 pol = concave.concave_hull(filename,os.path.join(edgeOut,productName))
             except:
-                logger.info("Unexpected error: "+ sys.exc_info()[0]+" when opening "+abs_path)
+                logger.info("Unexpected error: "+ str(sys.exc_info()[0])+" when opening "+abs_path)
                 continue
             pol_in_jrc, intersection_area = poly.select_intersecting_polys(pol,refgeoms,filename)
             dict = poly.prepareDict(pol_in_jrc,filename,999,intersection_area)
