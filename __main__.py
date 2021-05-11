@@ -146,7 +146,7 @@ def main():
         COUNT = 0
         for slice in tiffslices:
             logger.info('thresholding '+str(sizeofslice) + ' tiffs and inserting. '+str(COUNT)+'of '+str(len(tiffs))+' done.')
-            loops.thresh_data_insert(slice,refgeoms)
+            loops.thresh_pol_insert(slice,refgeoms)
             COUNT = COUNT + sizeofslice
 
     elif sys.argv[1]=="threshold+insert":
