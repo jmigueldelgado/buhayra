@@ -5,9 +5,6 @@ import logging
 import rasterio
 import rasterio.mask
 from rasterio import features
-from skimage import feature
-from skimage.morphology import skeletonize
-import cv2
 import os
 import numpy as np
 import buhayra.polygonize as poly
@@ -32,6 +29,7 @@ def raster2shapely(r,metadata):
     return cascaded_union(polys)
 
 def edge_classification(tif_filename):
+    from skimage import feature
     productName='_'.join(tif_filename[:-4].split('_')[:9])
 
     # open radar data after speckle filtering and geometric correction etc (see buhayra)
@@ -69,6 +67,8 @@ def edge_classification(tif_filename):
 
 # refgeom is a shapely polygon. crs_transform is of class pyproj.Transformer.from_crs
 def morphological_transformations(tif_filename,refgeom,crs_transform):
+    from skimage.morphology import skeletonize
+    import cv2
     id=tif_filename[:-4].split('_')[9]
     productName='_'.join(tif_filename[:-4].split('_')[:9])
 
