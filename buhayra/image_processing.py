@@ -12,7 +12,7 @@ import geojson
 import fiona
 import pyproj
 import json
-from shapely.ops import transform
+from shapely.ops import transform, cascaded_union
 
 def load_watermask(f):
     with rasterio.open(polOut+'/'+f,'r') as ds:
