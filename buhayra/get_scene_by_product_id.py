@@ -1,7 +1,7 @@
 from sentinelsat import SentinelAPI
 from buhayra.getpaths import *
 
-product_id='S1A_IW_GRDH_1SDV_20190815T081736_20190815T081801_028577_033B6C_8DFC'
+product_id='12c35311-1184-4147-86fa-5fc5404cc102'
 
 api = SentinelAPI(username, password, 'https://scihub.copernicus.eu/dhus')
 
